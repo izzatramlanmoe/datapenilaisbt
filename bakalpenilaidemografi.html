@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
+    <!-- ========================================== -->
+    <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <!-- ========================================== -->
+    <script>
+        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
+            // Jika tiada kunci login, tendang balik ke halaman utama
+            alert("Sila log masuk terlebih dahulu!");
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        }
+    </script>
+    <!-- ========================================== -->
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Demografi 3D Keseluruhan Bakal Penilai 2024-2025</title>
