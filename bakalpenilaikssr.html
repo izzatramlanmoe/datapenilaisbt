@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="ms" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEM DATA BAKAL PENILAI KSSR</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        darkbg: '#090d16',
+                        glass: 'rgba(17, 24, 39, 0.7)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #070a12;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        /* Liquid glow blur backgrounds */
+        .liquid-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+            animation: float 12s infinite alternate ease-in-out;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, #3b82f6, #6366f1); }
+        .blob-2 { top: 40%; right: -10%; width: 450px; height: 450px; background: radial-gradient(circle, #06b6d4, #10b981); }
+        .blob-3 { bottom: -10%; left: 20%; width: 550px; height: 550px; background: radial-gradient(circle, #8b5cf6, #ec4899); }
+
+        @keyframes float {
+            0% { transform: translate(0px, 0px) scale(1); }
+            50% { transform: translate(30px, 20px) scale(1.08); }
+            100% { transform: translate(-20px, 40px) scale(0.95); }
+        }
+
+        /* Glassmorphism panel styling */
+        .liquid-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-radius: 1.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .liquid-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* KSSR Custom Loading Screen */
+        #kssr-loader {
+            position: fixed;
+            inset: 0;
+            background: #05070e;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .kssr-logo-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .kssr-letter {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #ffffff 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
+            animation: pulseLetter 1.8s infinite ease-in-out alternate;
+        }
+
+        .kssr-letter:nth-child(1) { animation-delay: 0.1s; }
+        .kssr-letter:nth-child(2) { animation-delay: 0.3s; }
+        .kssr-letter:nth-child(3) { animation-delay: 0.5s; }
+        .kssr-letter:nth-child(4) { animation-delay: 0.7s; }
+
+        @keyframes pulseLetter {
+            0% { transform: translateY(0) scale(1); opacity: 0.6; filter: drop-shadow(0 0 5px rgba(56,189,248,0.2)); }
+            100% { transform: translateY(-8px) scale(1.1); opacity: 1; filter: drop-shadow(0 0 20px rgba(56,189,248,0.8)); }
+        }
+
+        .liquid-wave-bar {
+            width: 240px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .liquid-wave-progress {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6);
+            border-radius: 999px;
+            animation: loadingProgress 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        }
+
+        @keyframes loadingProgress {
+            0% { left: -100%; }
+            50% { left: 0%; }
+            100% { left: 100%; }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Input Glass styling */
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f3f4f6;
+            border-radius: 1rem;
+            transition: all 0.2s ease;
+        }
+        .glass-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+            background: linear-gradient(135deg, #0369a1 0%, #1d4ed8 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 relative selection:bg-cyan-500 selection:text-white">
+
+    <div id="kssr-loader">
+        <div class="kssr-logo-container">
+            <span class="kssr-letter">K</span>
+            <span class="kssr-letter">S</span>
+            <span class="kssr-letter">S</span>
+            <span class="kssr-letter">R</span>
+        </div>
+        <div class="text-slate-400 text-sm font-medium tracking-widest uppercase mb-4 animate-pulse">
+            Sistem Data Bakal Penilai KSSR
+        </div>
+        <div class="liquid-wave-bar">
+            <div class="liquid-wave-progress"></div>
+        </div>
+        <p class="text-xs text-slate-500 mt-3 font-mono" id="loader-status">Memuat turun data dari Google Sheet database...</p>
+    </div>
+
+    <!-- Liquid Background Blobs -->
+    <div class="liquid-blob blob-1"></div>
+    <div class="liquid-blob blob-2"></div>
+    <div class="liquid-blob blob-3"></div>
+
+    <div class="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        
+        <!-- Header -->
+        <header class="liquid-card p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 backdrop-blur-md flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                        KEMENTERIAN PENDIDIKAN MALAYSIA
+                    </span>
+                    <span id="data-status-badge" class="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        Live Sync
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-slate-400">
+                    SISTEM DATA BAKAL PENILAI KSSR
+                </h1>
+                <p class="text-slate-400 text-xs sm:text-sm">
+                    Dashboard Pengurusan, Analisis Taburan & Modul Dokumen Muat Turun
+                </p>
+            </div>
+
+            <!-- Quick Action / Status Bar -->
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <button id="refresh-btn" onclick="fetchDataFromCSV()" class="liquid-card px-4 py-2.5 text-xs font-semibold hover:bg-white/10 text-slate-200 flex items-center gap-2 rounded-2xl active:scale-95 transition-all">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 text-cyan-400"></i>
+                    <span>Kemaskini Data</span>
+                </button>
+                <div class="px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-400 flex items-center gap-2">
+                    <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Rekod: <strong id="stat-total-badge" class="text-white">0</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Card 1 -->
+            <div class="liquid-card p-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Jumlah Bakal Penilai</p>
+                        <h2 id="kpi-total" class="text-3xl font-extrabold text-white">0</h2>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    Terdaftar dalam pengkalan data KSSR
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="liquid-card p-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Mata Pelajaran</p>
+                        <h2 id="kpi-subjects" class="text-3xl font-extrabold text-cyan-300">0</h2>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-400"></i>
+                    Pelbagai subjek kurikulum
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="liquid-card p-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Tempat Bengkel</p>
+                        <h2 id="kpi-venues" class="text-3xl font-extrabold text-purple-300">0</h2>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1">
+                    <i data-lucide="building-2" class="w-3.5 h-3.5 text-purple-400"></i>
+                    Pusat & Lokasi Bengkel Kerja
+                </p>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="liquid-card p-6 relative overflow-hidden group hover:scale-[1.02] transition-transform">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Penyelaras Projek</p>
+                        <h2 id="kpi-coordinators" class="text-3xl font-extrabold text-emerald-300">0</h2>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <i data-lucide="user-check" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-4 flex items-center gap-1">
+                    <i data-lucide="award" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    Pegawai & Penyelaras Pengendalian
+                </p>
+            </div>
+        </div>
+
+        <section class="liquid-card p-6 space-y-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-white/5">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-cyan-500/10 text-cyan-400">
+                        <i data-lucide="sliders" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Saringan Data (Filter Bar)</h3>
+                        <p class="text-xs text-slate-400">Tapis data mengikut keperluan spesifik anda</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-80">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
+                        <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Cari Nama, Subjek, Tempat..." class="w-full glass-input pl-10 pr-4 py-2 text-xs">
+                    </div>
+                    <button onclick="resetFilters()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 flex items-center gap-1.5 transition-all">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Inputs Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
+                <!-- Filter 1: MATA PELAJARAN -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Mata Pelajaran</label>
+                    <select id="filter-subject" onchange="applyFilters()" class="w-full glass-input px-3 py-2 text-xs cursor-pointer">
+                        <option value="">Semua Mata Pelajaran</option>
+                    </select>
+                </div>
+
+                <!-- Filter 2: TEMPAT BENGKEL -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Tempat Bengkel</label>
+                    <select id="filter-venue" onchange="applyFilters()" class="w-full glass-input px-3 py-2 text-xs cursor-pointer">
+                        <option value="">Semua Tempat</option>
+                    </select>
+                </div>
+
+                <!-- Filter 3: KATEGORI -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Kategori</label>
+                    <select id="filter-category" onchange="applyFilters()" class="w-full glass-input px-3 py-2 text-xs cursor-pointer">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+
+                <!-- Filter 4: NAMA PENYELARAS PROJEK -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Penyelaras Projek</label>
+                    <select id="filter-coordinator" onchange="applyFilters()" class="w-full glass-input px-3 py-2 text-xs cursor-pointer">
+                        <option value="">Semua Penyelaras</option>
+                    </select>
+                </div>
+
+                <!-- Filter 5: JAWATAN DALAM BENGKEL KERJA/MESYUARAT -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Jawatan Bengkel</label>
+                    <select id="filter-role" onchange="applyFilters()" class="w-full glass-input px-3 py-2 text-xs cursor-pointer">
+                        <option value="">Semua Jawatan</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 rounded-xl bg-purple-500/10 text-purple-400">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Analisis Visual (4 Pie Charts Utama)</h3>
+                        <p class="text-xs text-slate-400">Taburan mengikut Jantina, Gelaran, Kelayakan & Tempat Bengkel</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <!-- Chart 1: JANTINA -->
+                <div class="liquid-card p-5 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                            Taburan Jantina
+                        </h4>
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">Pie 1</span>
+                    </div>
+                    <div class="relative w-full h-56 flex items-center justify-center">
+                        <canvas id="chart-jantina"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: GELARAN -->
+                <div class="liquid-card p-5 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+                            Taburan Gelaran
+                        </h4>
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">Pie 2</span>
+                    </div>
+                    <div class="relative w-full h-56 flex items-center justify-center">
+                        <canvas id="chart-gelaran"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: KELAYAKAN -->
+                <div class="liquid-card p-5 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                            Tahap Kelayakan
+                        </h4>
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">Pie 3</span>
+                    </div>
+                    <div class="relative w-full h-56 flex items-center justify-center">
+                        <canvas id="chart-kelayakan"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 4: TEMPAT BENGKEL -->
+                <div class="liquid-card p-5 flex flex-col justify-between space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                            Tempat Bengkel
+                        </h4>
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">Pie 4</span>
+                    </div>
+                    <div class="relative w-full h-56 flex items-center justify-center">
+                        <canvas id="chart-tempat"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="liquid-card p-6 space-y-5">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-500/30">
+                        <i data-lucide="table" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Senarai Data Penilai KSSR</h3>
+                        <p class="text-xs text-slate-400">
+                            Memaparkan maklumat lengkap bersama pautan muat turun dokumen
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Table Controls -->
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                    <span id="filtered-count-text" class="text-xs font-mono text-slate-400">
+                        Menunjukkan 0 rekod
+                    </span>
+                    <button onclick="exportFilteredCSV()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 flex items-center gap-2 transition-all">
+                        <i data-lucide="download-cloud" class="w-4 h-4 text-cyan-400"></i>
+                        <span>Eksport CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto rounded-2xl border border-white/5">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900/90 text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
+                            <th class="p-4 w-12 text-center">#</th>
+                            <th class="p-4 min-w-[200px]">Nama & Gelaran</th>
+                            <th class="p-4 min-w-[180px]">Mata Pelajaran</th>
+                            <th class="p-4 min-w-[160px]">Kategori / Jawatan</th>
+                            <th class="p-4 min-w-[180px]">Tempat Bengkel</th>
+                            <th class="p-4 min-w-[180px]">Penyelaras Projek</th>
+                            <th class="p-4 min-w-[140px] text-center">URL Muat Turun</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-white/5 text-slate-300">
+                        <!-- Dynamic rows injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                <div class="text-xs text-slate-400">
+                    Halaman <span id="page-current" class="font-bold text-white">1</span> dari <span id="page-total" class="font-bold text-white">1</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-prev" onclick="changePage(-1)" class="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                        <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Sebelum
+                    </button>
+                    <button id="btn-next" onclick="changePage(1)" class="px-3 py-1.5 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                        Seterusnya <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-xs text-slate-500 py-6 border-t border-white/5">
+            <p>© 2026 Dashboard Sistem Data Bakal Penilai KSSR • Rekabentuk Liquid Rounded Dark UI</p>
+        </footer>
+    </div>
+
+    <script>
+        // Database CSV URL provided by user
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXlBOxhdgtcwjLkk7sqAu7XrBof7ecFqXBGpVhOT_AR9Gn6KjSx2zYjWNM6UXgPz5L9CIb4C250wWa/pub?output=csv';
+
+        // Global State Variables
+        let rawData = [];
+        let filteredData = [];
+        let chartInstances = {};
+        
+        // Pagination state
+        let currentPage = 1;
+        const rowsPerPage = 12;
+
+        // Fallback Mock Data in case of network restrictions
+        const sampleFallbackData = [
+            {
+                "TEMPAT BENGKEL": "Hotel Bangi Resort, Selangor",
+                "NAMA PENYELARAS PROJEK": "Dr. Ahmad Zaki bin Mohamad",
+                "KATEGORI": "Penilai Luar",
+                "MATA PELAJARAN": "Bahasa Melayu",
+                "NAMA": "Dr. Siti Aminah binti Kassim",
+                "GELARAN": "Dr.",
+                "JANTINA": "Perempuan",
+                "KELAYAKAN": "Ijazah Doktor Falsafah (PhD)",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Ketua Penilai",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample1"
+            },
+            {
+                "TEMPAT BENGKEL": "Hotel Zenith, Putrajaya",
+                "NAMA PENYELARAS PROJEK": "En. Hairul Nizam bin Ramli",
+                "KATEGORI": "Guru Cemerlang",
+                "MATA PELAJARAN": "Sains",
+                "NAMA": "En. Muhammad Ridzuan bin Omar",
+                "GELARAN": "En.",
+                "JANTINA": "Lelaki",
+                "KELAYAKAN": "Ijazah Sarjana (Master)",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Penilai Mata Pelajaran",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample2"
+            },
+            {
+                "TEMPAT BENGKEL": "Bahagian Pembangunan Kurikulum (BPK)",
+                "NAMA PENYELARAS PROJEK": "Pn. Faridah binti Hassan",
+                "KATEGORI": "Pegawai BPK",
+                "MATA PELAJARAN": "Matematik",
+                "NAMA": "Pn. Noraini binti Sulaiman",
+                "GELARAN": "Pn.",
+                "JANTINA": "Perempuan",
+                "KELAYAKAN": "Ijazah Sarjana Muda",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Fasilitator",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample3"
+            },
+            {
+                "TEMPAT BENGKEL": "Hotel Grand BlueWave, Shah Alam",
+                "NAMA PENYELARAS PROJEK": "Dr. Ahmad Zaki bin Mohamad",
+                "KATEGORI": "Pensyarah IPG",
+                "MATA PELAJARAN": "Bahasa Inggeris",
+                "NAMA": "En. Jason Tan Wei Sheng",
+                "GELARAN": "En.",
+                "JANTINA": "Lelaki",
+                "KELAYAKAN": "Ijazah Sarjana (Master)",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Penilai Luar",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample4"
+            },
+            {
+                "TEMPAT BENGKEL": "Hotel Zenith, Putrajaya",
+                "NAMA PENYELARAS PROJEK": "Pn. Faridah binti Hassan",
+                "KATEGORI": "Guru Cemerlang",
+                "MATA PELAJARAN": "Pendidikan Islam",
+                "NAMA": "Ustaz Mohd Hafiz bin Ismail",
+                "GELARAN": "Ustaz",
+                "JANTINA": "Lelaki",
+                "KELAYAKAN": "Ijazah Sarjana Muda",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Penilai Mata Pelajaran",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample5"
+            },
+            {
+                "TEMPAT BENGKEL": "Hotel Bangi Resort, Selangor",
+                "NAMA PENYELARAS PROJEK": "En. Hairul Nizam bin Ramli",
+                "KATEGORI": "Pegawai JPN",
+                "MATA PELAJARAN": "Sejarah",
+                "NAMA": "Pn. Latifah binti Yusof",
+                "GELARAN": "Pn.",
+                "JANTINA": "Perempuan",
+                "KELAYAKAN": "Ijazah Sarjana Muda",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Urus Setia",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample6"
+            },
+            {
+                "TEMPAT BENGKEL": "Hotel Royale Chulan, Seremban",
+                "NAMA PENYELARAS PROJEK": "Dr. Ahmad Zaki bin Mohamad",
+                "KATEGORI": "Pensyarah Universiti",
+                "MATA PELAJARAN": "Reka Bentuk & Teknologi",
+                "NAMA": "Prof. Madya Dr. Azman bin Razak",
+                "GELARAN": "Dr.",
+                "JANTINA": "Lelaki",
+                "KELAYAKAN": "Ijazah Doktor Falsafah (PhD)",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Ketua Penilai",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample7"
+            },
+            {
+                "TEMPAT BENGKEL": "Bahagian Pembangunan Kurikulum (BPK)",
+                "NAMA PENYELARAS PROJEK": "En. Hairul Nizam bin Ramli",
+                "KATEGORI": "Guru Cemerlang",
+                "MATA PELAJARAN": "Pendidikan Seni Visual",
+                "NAMA": "Cik Nurul Huda binti Ahmad",
+                "GELARAN": "Cik",
+                "JANTINA": "Perempuan",
+                "KELAYAKAN": "Ijazah Sarjana Muda",
+                "JAWATAN DALAM BENGKEL KERJA/MESYUARAT": "Penilai Mata Pelajaran",
+                "URL MUAT TURUN": "https://docs.google.com/document/d/sample8"
+            }
+        ];
+
+        async function fetchDataFromCSV() {
+            showLoader(true, "Memuat turun pengkalan data Google Sheet...");
+            
+            try {
+                // Fetch directly using PapaParse
+                Papa.parse(CSV_URL, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        if (results.data && results.data.length > 0) {
+                            rawData = cleanAndNormalizeData(results.data);
+                            console.log("Parsed CSV records:", rawData.length);
+                            document.getElementById('data-status-badge').innerHTML = 'Live Sync';
+                            document.getElementById('data-status-badge').className = 'px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                        } else {
+                            console.warn("CSV empty, loading fallback data...");
+                            rawData = sampleFallbackData;
+                            setDemoBadge();
+                        }
+                        initDashboard();
+                    },
+                    error: function(err) {
+                        console.error("PapaParse fetch error:", err);
+                        rawData = sampleFallbackData;
+                        setDemoBadge();
+                        initDashboard();
+                    }
+                });
+            } catch (e) {
+                console.error("Fetch exception:", e);
+                rawData = sampleFallbackData;
+                setDemoBadge();
+                initDashboard();
+            }
+        }
+
+        function setDemoBadge() {
+            const badge = document.getElementById('data-status-badge');
+            badge.innerHTML = 'Data Sampel';
+            badge.className = 'px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20';
+        }
+
+        // Clean keys & missing attributes
+        function cleanAndNormalizeData(data) {
+            return data.map(item => {
+                const cleaned = {};
+                for (let key in item) {
+                    if (!key) continue;
+                    const cleanKey = key.trim().toUpperCase();
+                    cleaned[cleanKey] = item[key] ? item[key].trim() : '';
+                }
+
+                // Field mappings & defaults
+                const venue = cleaned['TEMPAT BENGKEL'] || cleaned['LOKASI'] || cleaned['TEMPAT'] || 'Tidak Nyata';
+                const coordinator = cleaned['NAMA PENYELARAS PROJEK'] || cleaned['PENYELARAS'] || cleaned['PENYELARAS PROJEK'] || 'Lain-lain';
+                const category = cleaned['KATEGORI'] || 'Lain-lain';
+                const subject = cleaned['MATA PELAJARAN'] || cleaned['SUBJEK'] || 'Umum';
+                const name = cleaned['NAMA'] || cleaned['NAMA PENILAI'] || 'Tanpa Nama';
+                const gender = cleaned['JANTINA'] || inferGender(name);
+                const salutation = cleaned['GELARAN'] || inferSalutation(name);
+                const qualification = cleaned['KELAYAKAN'] || cleaned['KELAYAKAN AKADEMIK'] || 'Ijazah Sarjana Muda';
+                const role = cleaned['JAWATAN DALAM BENGKEL KERJA/MESYUARAT'] || cleaned['JAWATAN'] || 'Ahli Bengkel';
+                let downloadUrl = cleaned['URL MUAT TURUN'] || cleaned['LINK'] || cleaned['URL'] || cleaned['MUAT TURUN'] || '#';
+
+                return {
+                    'TEMPAT BENGKEL': venue,
+                    'NAMA PENYELARAS PROJEK': coordinator,
+                    'KATEGORI': category,
+                    'MATA PELAJARAN': subject,
+                    'NAMA': name,
+                    'JANTINA': gender,
+                    'GELARAN': salutation,
+                    'KELAYAKAN': qualification,
+                    'JAWATAN DALAM BENGKEL KERJA/MESYUARAT': role,
+                    'URL MUAT TURUN': downloadUrl
+                };
+            }).filter(row => row['NAMA'] !== 'Tanpa Nama' || row['MATA PELAJARAN'] !== 'Umum');
+        }
+
+        // Helper infer gender if missing
+        function inferGender(name) {
+            const n = name.toLowerCase();
+            if (n.includes('binti') || n.includes('bt') || n.includes('puan') || n.includes('pn') || n.includes('cik')) return 'Perempuan';
+            if (n.includes('bin') || n.includes('encik') || n.includes('en.')) return 'Lelaki';
+            return 'Lelaki';
+        }
+
+        // Helper infer salutation if missing
+        function inferSalutation(name) {
+            const n = name.toLowerCase();
+            if (n.startsWith('dr') || n.includes('dr.')) return 'Dr.';
+            if (n.startsWith('prof')) return 'Prof.';
+            if (n.includes('binti') || n.includes('bt')) return 'Pn.';
+            if (n.includes('ustaz')) return 'Ustaz';
+            if (n.includes('ustazah')) return 'Ustazah';
+            return 'En.';
+        }
+
+        function initDashboard() {
+            filteredData = [...rawData];
+            populateFilterDropdowns();
+            updateKPIs();
+            renderCharts();
+            renderTable();
+            showLoader(false);
+            lucide.createIcons();
+        }
+
+        function populateFilterDropdowns() {
+            populateSelect('filter-subject', 'MATA PELAJARAN');
+            populateSelect('filter-venue', 'TEMPAT BENGKEL');
+            populateSelect('filter-category', 'KATEGORI');
+            populateSelect('filter-coordinator', 'NAMA PENYELARAS PROJEK');
+            populateSelect('filter-role', 'JAWATAN DALAM BENGKEL KERJA/MESYUARAT');
+        }
+
+        function populateSelect(elementId, fieldKey) {
+            const select = document.getElementById(elementId);
+            const currentValue = select.value;
+            const values = [...new Set(rawData.map(d => d[fieldKey]).filter(Boolean))].sort();
+            
+            select.innerHTML = `<option value="">Semua (${values.length})</option>` + 
+                values.map(val => `<option value="${escapeHtml(val)}">${escapeHtml(val)}</option>`).join('');
+            
+            select.value = currentValue;
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function applyFilters() {
+            const searchVal = document.getElementById('filter-search').value.toLowerCase().trim();
+            const subjectVal = document.getElementById('filter-subject').value;
+            const venueVal = document.getElementById('filter-venue').value;
+            const categoryVal = document.getElementById('filter-category').value;
+            const coordinatorVal = document.getElementById('filter-coordinator').value;
+            const roleVal = document.getElementById('filter-role').value;
+
+            filteredData = rawData.filter(item => {
+                const matchSearch = !searchVal || 
+                    (item['NAMA'] && item['NAMA'].toLowerCase().includes(searchVal)) ||
+                    (item['MATA PELAJARAN'] && item['MATA PELAJARAN'].toLowerCase().includes(searchVal)) ||
+                    (item['TEMPAT BENGKEL'] && item['TEMPAT BENGKEL'].toLowerCase().includes(searchVal));
+
+                const matchSubject = !subjectVal || item['MATA PELAJARAN'] === subjectVal;
+                const matchVenue = !venueVal || item['TEMPAT BENGKEL'] === venueVal;
+                const matchCategory = !categoryVal || item['KATEGORI'] === categoryVal;
+                const matchCoordinator = !coordinatorVal || item['NAMA PENYELARAS PROJEK'] === coordinatorVal;
+                const matchRole = !roleVal || item['JAWATAN DALAM BENGKEL KERJA/MESYUARAT'] === roleVal;
+
+                return matchSearch && matchSubject && matchVenue && matchCategory && matchCoordinator && matchRole;
+            });
+
+            currentPage = 1;
+            updateKPIs();
+            renderCharts();
+            renderTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-search').value = '';
+            document.getElementById('filter-subject').value = '';
+            document.getElementById('filter-venue').value = '';
+            document.getElementById('filter-category').value = '';
+            document.getElementById('filter-coordinator').value = '';
+            document.getElementById('filter-role').value = '';
+            applyFilters();
+        }
+
+        function updateKPIs() {
+            document.getElementById('kpi-total').innerText = filteredData.length;
+            document.getElementById('stat-total-badge').innerText = filteredData.length;
+
+            const subjects = new Set(filteredData.map(d => d['MATA PELAJARAN']).filter(Boolean));
+            document.getElementById('kpi-subjects').innerText = subjects.size;
+
+            const venues = new Set(filteredData.map(d => d['TEMPAT BENGKEL']).filter(Boolean));
+            document.getElementById('kpi-venues').innerText = venues.size;
+
+            const coordinators = new Set(filteredData.map(d => d['NAMA PENYELARAS PROJEK']).filter(Boolean));
+            document.getElementById('kpi-coordinators').innerText = coordinators.size;
+        }
+
+        function getFrequencyMap(key) {
+            const map = {};
+            filteredData.forEach(item => {
+                let val = item[key] || 'Lain-lain';
+                map[val] = (map[val] || 0) + 1;
+            });
+            return map;
+        }
+
+        function renderCharts() {
+            // Chart 1: Jantina
+            createPieChart('chart-jantina', getFrequencyMap('JANTINA'), [
+                '#38bdf8', '#f472b6', '#a78bfa', '#34d399'
+            ]);
+
+            // Chart 2: Gelaran
+            createPieChart('chart-gelaran', getFrequencyMap('GELARAN'), [
+                '#c084fc', '#818cf8', '#60a5fa', '#38bdf8', '#2dd4bf', '#f59e0b'
+            ]);
+
+            // Chart 3: Kelayakan
+            createPieChart('chart-kelayakan', getFrequencyMap('KELAYAKAN'), [
+                '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#38bdf8'
+            ]);
+
+            // Chart 4: Tempat Bengkel
+            createPieChart('chart-tempat', getFrequencyMap('TEMPAT BENGKEL'), [
+                '#fbbf24', '#f472b6', '#60a5fa', '#34d399', '#c084fc', '#818cf8'
+            ]);
+        }
+
+        function createPieChart(canvasId, freqMap, colorPalette) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            // Destroy existing chart instance
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+
+            const labels = Object.keys(freqMap);
+            const data = Object.values(freqMap);
+
+            if (labels.length === 0) {
+                labels.push('Tiada Data');
+                data.push(1);
+            }
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colorPalette.slice(0, labels.length),
+                        borderColor: '#0f172a',
+                        borderWidth: 3,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                padding: 12,
+                                usePointStyle: true,
+                                pointStyleWidth: 8
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 11 },
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            displayColors: true
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            document.getElementById('filtered-count-text').innerText = `Menunjukkan ${filteredData.length} daripada ${rawData.length} rekod`;
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-12 text-slate-500">
+                            <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+                            <p class="text-sm font-medium">Tiada rekod dijumpai padan dengan kriteria carian.</p>
+                        </td>
+                    </tr>
+                `;
+                lucide.createIcons();
+                updatePaginationControls(0);
+                return;
+            }
+
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+            const pageItems = filteredData.slice(startIndex, endIndex);
+
+            pageItems.forEach((item, index) => {
+                const globalIdx = startIndex + index + 1;
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-white/[0.03] transition-colors group';
+
+                // Format URL button logic
+                let url = item['URL MUAT TURUN'] || '#';
+                let hasValidUrl = url && url !== '#' && url !== 'TIADA' && url.length > 5;
+                let urlButtonHtml = '';
+
+                if (hasValidUrl) {
+                    urlButtonHtml = `
+                        <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" 
+                           class="download-btn px-3 py-1.5 rounded-xl text-[11px] font-semibold text-white flex items-center justify-center gap-1.5 inline-flex">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                            <span>Muat Turun</span>
+                        </a>
+                    `;
+                } else {
+                    urlButtonHtml = `
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-white/5 text-slate-500 border border-white/5 inline-block">
+                            Tiada Fail
+                        </span>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td class="p-4 text-center font-mono text-slate-500 text-[11px]">${globalIdx}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-slate-100">${escapeHtml(item['NAMA'])}</div>
+                        <div class="text-[10px] text-cyan-400 font-medium">${escapeHtml(item['GELARAN'])} • ${escapeHtml(item['JANTINA'])}</div>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-lg text-[11px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-medium">
+                            ${escapeHtml(item['MATA PELAJARAN'])}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <div class="text-slate-200">${escapeHtml(item['KATEGORI'])}</div>
+                        <div class="text-[10px] text-purple-400 font-medium">${escapeHtml(item['JAWATAN DALAM BENGKEL KERJA/MESYUARAT'])}</div>
+                    </td>
+                    <td class="p-4 text-slate-300">
+                        <div class="flex items-start gap-1.5">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0"></i>
+                            <span>${escapeHtml(item['TEMPAT BENGKEL'])}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-slate-300">
+                        <div class="flex items-center gap-1.5">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                            <span>${escapeHtml(item['NAMA PENYELARAS PROJEK'])}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        ${urlButtonHtml}
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+            updatePaginationControls(totalPages);
+        }
+
+        function updatePaginationControls(totalPages) {
+            document.getElementById('page-current').innerText = currentPage;
+            document.getElementById('page-total').innerText = Math.max(totalPages, 1);
+
+            document.getElementById('btn-prev').disabled = (currentPage <= 1);
+            document.getElementById('btn-next').disabled = (currentPage >= totalPages || totalPages === 0);
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            renderTable();
+        }
+
+        // Export Filtered data to CSV download
+        function exportFilteredCSV() {
+            if (!filteredData || filteredData.length === 0) {
+                alert("Tiada data untuk dieksport.");
+                return;
+            }
+            const csv = Papa.unparse(filteredData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Sistem_Data_Penilai_KSSR_Filtered_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        function showLoader(show, text = "") {
+            const loader = document.getElementById('kssr-loader');
+            if (text) {
+                document.getElementById('loader-status').innerText = text;
+            }
+            if (show) {
+                loader.style.opacity = '1';
+                loader.style.visibility = 'visible';
+            } else {
+                loader.style.opacity = '0';
+                loader.style.visibility = 'hidden';
+            }
+        }
+
+        // Initialize on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchDataFromCSV();
+        });
+    </script>
+</body>
+</html>
