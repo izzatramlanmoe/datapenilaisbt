@@ -6,9 +6,9 @@
     <!-- ========================================== -->
     <script>
         if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama (index.html)
+            // Jika tiada kunci login, tendang balik ke halaman utama
             alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "index.html";
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
     </script>
     <!-- ========================================== -->
@@ -118,10 +118,6 @@
                 </div>
 
                 <div class="hidden xl:flex items-center space-x-1 lg:space-x-4">
-                    <a href="https://izzatramlanmoe.github.io/datapenilaisbt/homepage.html" class="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-xl text-[11px] lg:text-[13px] font-bold uppercase transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                        Home
-                    </a>
                     
                     <a href="https://izzatramlanmoe.github.io/datapenilaisbt/borangpanelpenilai.html" class="nav-link text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase px-2 py-2">Borang Maklumat Panel</a>
                     
@@ -188,10 +184,6 @@
 
         <div id="mobile-menu" class="xl:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-lg absolute w-full left-0 z-40">
             <div class="px-4 pt-2 pb-6 space-y-1 max-h-[80vh] overflow-y-auto">
-                <a href="https://izzatramlanmoe.github.io/datapenilaisbt/homepage.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-sm font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 mb-2 border border-blue-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-                    Home / Utama
-                </a>
                 <a href="https://izzatramlanmoe.github.io/datapenilaisbt/borangpanelpenilai.html" class="block px-3 py-3 rounded-md text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-700">Borang Maklumat Panel Penilai</a>
                 <a href="https://izzatramlanmoe.github.io/datapenilaisbt/2026panelpenilai.html" class="block px-3 py-3 rounded-md text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-700">2026 Panel Penilai</a>
                 
@@ -311,8 +303,8 @@
         function logKeluar() {
             // Padam status login
             sessionStorage.removeItem("statusLogin");
-            // Kembali ke halaman index.html (Halaman Login)
-            window.location.href = "index.html";
+            // Kembali ke URL halaman yang telah ditetapkan
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
 
         // ==========================================
