@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borang Maklumat Bakal Panel Penilai Buku Teks Tahun 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* Latar belakang gelap (Dark Mode) - Midnight Blue ke Deep Purple */
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #020617, #312e81);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        /* Glassmorphism Panel Utama (Dark Mode) */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Kotak Bahagian Dalaman (Dark Mode) */
+        .glass-box {
+            background: rgba(30, 41, 59, 0.5); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-box:hover {
+            background: rgba(30, 41, 59, 0.7);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Ruangan Menaip & Dropdown (Dark Mode) */
+        .glass-input {
+            width: 100%;
+            padding: 0.875rem 1.25rem;
+            border-radius: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.2); 
+            color: #f8fafc;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-input:focus {
+            outline: none;
+            background: rgba(15, 23, 42, 0.9);
+            border-color: #818cf8; /* Indigo cerah */
+            box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.2), inset 0 2px 4px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        /* Warnakan pilihan dropdown supaya sesuai dengan dark mode */
+        select option, select optgroup {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #cbd5e1; /* Warna teks pudar terang */
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.025em;
+        }
+        .required-asterisk { color: #f87171; margin-left: 0.25rem; font-weight: bold; }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideUpFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+
+        /* Checkbox styling (Dark Mode) */
+        .glass-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.375rem;
+            border: 2px solid rgba(129, 140, 248, 0.5);
+            background-color: rgba(15, 23, 42, 0.5);
+            transition: all 0.2s;
+        }
+        .glass-checkbox:checked {
+            background-color: #818cf8;
+            border-color: #818cf8;
+        }
+        
+        /* Kelas Ralat - Ditambah Untuk Auto Highlight Merah */
+        .input-error {
+            border-color: #f87171 !important; 
+            box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.2), inset 0 2px 4px rgba(0,0,0,0.2) !important;
+            background-color: rgba(127, 29, 29, 0.4) !important;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Kelas untuk kotak box ralat (khusus untuk checkbox Pengiktirafan) */
+        .box-error {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 20px rgba(248, 113, 113, 0.4) !important;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+
+<body class="antialiased flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+
+    <!-- Menggunakan mix-blend-screen untuk dark mode -->
+    <div class="fixed top-20 left-20 w-72 h-72 bg-indigo-600 rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob"></div>
+    <div class="fixed top-40 right-20 w-72 h-72 bg-purple-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-2000"></div>
+    <div class="fixed -bottom-8 left-40 w-72 h-72 bg-blue-600 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-4000"></div>
+
+    <main class="w-full max-w-4xl glass-panel rounded-[2rem] overflow-hidden fade-up relative z-10">
+        
+        <!-- Header Borang -->
+        <div class="relative bg-gradient-to-br from-slate-900/90 via-indigo-950/90 to-slate-900/90 px-8 py-12 text-white text-center backdrop-blur-md overflow-hidden rounded-t-[2rem] border-b border-white/5">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+            <h1 class="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight relative z-10 drop-shadow-lg text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 to-purple-200">Borang Maklumat Panel Bakal Penilai Buku Teks KPM</h1>
+            <p class="text-indigo-200 text-sm md:text-base font-medium relative z-10">Sila lengkapkan semua maklumat di bawah. Pastikan ejaan tepat dan mengikut kad pengenalan.</p>
+        </div>
+
+        <form id="mainForm" class="px-6 md:px-10 py-10 space-y-10" novalidate>
+            
+            <!-- BAHAGIAN A -->
+            <div class="fade-up delay-100 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)]"></div>
+                    <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian A: Maklumat Asas</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <!-- NAMA PENYELARAS PROJEK -->
+                    <div class="md:col-span-2">
+                        <label class="form-label">Nama Penyelaras Projek <span class="required-asterisk">*</span></label>
+                        <select name="penyelaras" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="PN. FAIZAH BINTI MANSOR">PN. FAIZAH BINTI MANSOR</option>
+                            <option value="TN. HJ. YUSRI AMIR BIN BAHASA">TN. HJ. YUSRI AMIR BIN BAHASA</option>
+                            <option value="CIK FATHIMAH BINTI HABIB RAHMAN">CIK FATHIMAH BINTI HABIB RAHMAN</option>
+                            <option value="CIK FARASIDA BINTI ABDUL MALEK">CIK FARASIDA BINTI ABDUL MALEK</option>
+                            <option value="EN. ZAHILAL BIN ZAHARI">EN. ZAHILAL BIN ZAHARI</option>
+                            <option value="PN. NORLIDA BINTI MOHD. YAACOB">PN. NORLIDA BINTI MOHD. YAACOB</option>
+                            <option value="DR. ANNATHURAI A/L KASINADAN (SJKT)">DR. ANNATHURAI A/L KASINADAN (SJKT)</option>
+                            <option value="PN. AZLIN BINTI ISMAIL">PN. AZLIN BINTI ISMAIL</option>
+                            <option value="PN. SEOW HOOI SIEW (SJKC)">PN. SEOW HOOI SIEW (SJKC)</option>
+                            <option value="PN. NUR SYARIZA BINTI ZAINAL ABIDIN">PN. NUR SYARIZA BINTI ZAINAL ABIDIN</option>
+                            <option value="PN. NORHAFLINDA BINTI MOHD SAHABUDDIN">PN. NORHAFLINDA BINTI MOHD SAHABUDDIN</option>
+                            <option value="PN. SITI ALLEYANIE BINTI SA’ADUN">PN. SITI ALLEYANIE BINTI SA’ADUN</option>
+                            <option value="EN. AHMAD FAIZ BIN CHE JUHA">EN. AHMAD FAIZ BIN CHE JUHA</option>
+                            <option value="CIK NOR AZURA BINTI AHMAD">CIK NOR AZURA BINTI AHMAD</option>
+                            <option value="EN. ZAKARIA BIN ISA">EN. ZAKARIA BIN ISA</option>
+                            <option value="PN. SITI KHASNOR BINTI JAJULI">PN. SITI KHASNOR BINTI JAJULI</option>
+                            <option value="PN. ZARINA BINTI MAMAT">PN. ZARINA BINTI MAMAT</option>
+                            <option value="TN. SYED HAFIZUL HILMI BIN SYED OTHMAN">TN. SYED HAFIZUL HILMI BIN SYED OTHMAN</option>
+                            <option value="EN. SUHAMI BIN AHMAD">EN. SUHAMI BIN AHMAD</option>
+                            <option value="PN. NICOLA SIGAT">PN. NICOLA SIGAT</option>
+                            <option value="EN. WAN MOHD SHAIFULLAH BIN WAN AB RAHMAN">EN. WAN MOHD SHAIFULLAH BIN WAN AB RAHMAN</option>
+                            <option value="PN. HASNI YUSOP">PN. HASNI YUSOP</option>
+                            <option value="EN. ADI PUTRA BIN SAMSURI">EN. ADI PUTRA BIN SAMSURI</option>
+                            <option value="PN. NURHASBARIAH BINTI HASROM">PN. NURHASBARIAH BINTI HASROM</option>
+                            <option value="PN. EMIZA BINTI ALIAS">PN. EMIZA BINTI ALIAS</option>
+                            <option value="CIK HUSZIATINI BINTI HUSIN">CIK HUSZIATINI BINTI HUSIN</option>
+                            <option value="PN. YAP YEONG SEAN">PN. YAP YEONG SEAN</option>
+                            <option value="EN. AGILAN A/L SUBRAMANIAM">EN. AGILAN A/L SUBRAMANIAM</option>
+                            <option value="EN. LEE KUM SOON">EN. LEE KUM SOON</option>
+                            <option value="CIK ANUSIA A/P KANAN">CIK ANUSIA A/P KANAN</option>
+                            <option value="CIK ZURINA AZURA BINTI AMINUDDIN">CIK ZURINA AZURA BINTI AMINUDDIN</option>
+                            <option value="EN. PETANI BIN MOHD NOOR">EN. PETANI BIN MOHD NOOR</option>
+                            <option value="DR. SIM SIAW WEI">DR. SIM SIAW WEI</option>
+                            <option value="CIK ZETI AFNAZ BINTI ALWIE">CIK ZETI AFNAZ BINTI ALWIE</option>
+                            <option value="PN. NOOR HAZWANI BINTI CHE ALIM">PN. NOOR HAZWANI BINTI CHE ALIM</option>
+                            <option value="PN. NOOR IZYAN BINTI SALLEH">PN. NOOR IZYAN BINTI SALLEH</option>
+                            <option value="EN. SHAHARUDDIN BIN MOHD ZIN">EN. SHAHARUDDIN BIN MOHD ZIN</option>
+                            <option value="TN. HJ. MOHAMAD SHAHRIN BIN TUKIMAN">TN. HJ. MOHAMAD SHAHRIN BIN TUKIMAN</option>
+                            <option value="EN. MOHAMAD FAIZAL BIN SAHARI">EN. MOHAMAD FAIZAL BIN SAHARI</option>
+                            <option value="PN. NOOR AZURA BINTI IBRAHIM">PN. NOOR AZURA BINTI IBRAHIM</option>
+                            <option value="PN. ZAINAWATI BINTI ZAINAL">PN. ZAINAWATI BINTI ZAINAL</option>
+                            <option value="CIK NI'MAZAKIRAH BINTI AB RAHMAN">CIK NI'MAZAKIRAH BINTI AB RAHMAN</option>
+                            <option value="EN. ZAID ARAFAT BIN MOHD NOOR">EN. ZAID ARAFAT BIN MOHD NOOR</option>
+                            <option value="PN. SALMI BINTI ISHAK">PN. SALMI BINTI ISHAK</option>
+                            <option value="DATIN SITI SARAH INSYIRAH BINTI ABD RASHID">DATIN SITI SARAH INSYIRAH BINTI ABD RASHID</option>
+                            <option value="PN. MARLI MASTURA BINTI ABDUL MANAP">PN. MARLI MASTURA BINTI ABDUL MANAP</option>
+                            <option value="EN. AHMAD SOLEHIN REZHA BIN MUSTAFA KAMAL">EN. AHMAD SOLEHIN REZHA BIN MUSTAFA KAMAL</option>
+                            <option value="EN. MOHD FADZLI BIN ABU BAKAR">EN. MOHD FADZLI BIN ABU BAKAR</option>
+                            <option value="EN. KHAIRIL ANUAR BIN MOHD NOR">EN. KHAIRIL ANUAR BIN MOHD NOR</option>
+                            <option value="CIK NOORHAYATI BINTI ALI">CIK NOORHAYATI BINTI ALI</option>
+                            <option value="EN. DZULKARNAIN BIN MOHAMAD MOKHTAR">EN. DZULKARNAIN BIN MOHAMAD MOKHTAR</option>
+                            <option value="PN. HANISAH BINTI MOHAMAD HADZIR">PN. HANISAH BINTI MOHAMAD HADZIR</option>
+                            <option value="EN. KHAIRIL BIN MUHAMAD SHAFAR">EN. KHAIRIL BIN MUHAMAD SHAFAR</option>
+                            <option value="PN. SAMHANIN BINTI MANSHOR">PN. SAMHANIN BINTI MANSHOR</option>
+                            <option value="EN. MUHAMMAD FAHMY BIN ABDUL RAZAK">EN. MUHAMMAD FAHMY BIN ABDUL RAZAK</option>
+                            <option value="PN. HANITA BINTI ABDUL HAMID">PN. HANITA BINTI ABDUL HAMID</option>
+                            <option value="TN. SYED FAHMY AFFENDY BIN SYED MUSA">TN. SYED FAHMY AFFENDY BIN SYED MUSA</option>
+                            <option value="TS. NOOR ASHIQAH BINTI ABD GHANI">TS. NOOR ASHIQAH BINTI ABD GHANI</option>
+                            <option value="PN. NORMA HAZURA BINTI MOHD ZULKAFLI">PN. NORMA HAZURA BINTI MOHD ZULKAFLI</option>
+                            <option value="EN. MOHD FARIDZUL AKMAM BIN ZULKIFLI">EN. MOHD FARIDZUL AKMAM BIN ZULKIFLI</option>
+                            <option value="EN. MOHD OSMAN BIN KASSAN">EN. MOHD OSMAN BIN KASSAN</option>
+                            <option value="PN. MAISARAH BINTI MOHAMMAD YUSAP">PN. MAISARAH BINTI MOHAMMAD YUSAP</option>
+                            <option value="CIK NORAZIZAH BINTI KAMARUDDIN">CIK NORAZIZAH BINTI KAMARUDDIN</option>
+                            <option value="PN. ZALINA BINTI ZAINAL ABIDIN">PN. ZALINA BINTI ZAINAL ABIDIN</option>
+                            <option value="PN. MISLIHA BINTI TARMUN">PN. MISLIHA BINTI TARMUN</option>
+                            <option value="PN. HARYANTI BINTI ABU SEMAN">PN. HARYANTI BINTI ABU SEMAN</option>
+                            <option value="PN. ADLINA BINTI AWANG">PN. ADLINA BINTI AWANG</option>
+                            <option value="PN. NOR'ASHIKIN BINTI RAMLI">PN. NOR'ASHIKIN BINTI RAMLI</option>
+                            <option value="PN. INTAN NATASHA BT. ABU BAKAR">PN. INTAN NATASHA BT. ABU BAKAR</option>
+                            <option value="DR. MOHD. IZZAT SYAFIQ BIN RAMLAN">DR. MOHD. IZZAT SYAFIQ BIN RAMLAN</option>
+                            <option value="EN. SYADID HABIBULLAH BIN SAMSUDIN">EN. SYADID HABIBULLAH BIN SAMSUDIN</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Mata Pelajaran <span class="required-asterisk">*</span></label>
+                        <select name="matapelajaran" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="SENI TARI">SENI TARI</option>
+                            <option value="SEJARAH">SEJARAH</option>
+                            <option value="SENI TEATER">SENI TEATER</option>
+                            <option value="PEND. MUZIK/ SENI MUZIK">PEND. MUZIK/ SENI MUZIK</option>
+                            <option value="GEOGRAFI">GEOGRAFI</option>
+                            <option value="PENDIDIKAN JASMANI">PENDIDIKAN JASMANI</option>
+                            <option value="PENDIDIKAN MORAL">PENDIDIKAN MORAL</option>
+                            <option value="SENI VISUAL SSEM">SENI VISUAL SSEM</option>
+                            <option value="PSV">PSV</option>
+                            <option value="B. SEMAI">B. SEMAI</option>
+                            <option value="B. IBAN">B. IBAN</option>
+                            <option value="B. MELAYU">B. MELAYU</option>
+                            <option value="B. KADAZANDUSUN">B. KADAZANDUSUN</option>
+                            <option value="B. INGGERIS">B. INGGERIS</option>
+                            <option value="B. CINA, B. CINA KOMUNIKASI">B. CINA, B. CINA KOMUNIKASI</option>
+                            <option value="B. TAMIL">B. TAMIL</option>
+                            <option value="B. CINA SJKC">B. CINA SJKC</option>
+                            <option value="MATEMATIK SJKC">MATEMATIK SJKC</option>
+                            <option value="B. CINA SK">B. CINA SK</option>
+                            <option value="B. TAMIL SJKT">B. TAMIL SJKT</option>
+                            <option value="MATEMATIK SJKT">MATEMATIK SJKT</option>
+                            <option value="B. TAMIL SK">B. TAMIL SK</option>
+                            <option value="B. JERMAN">B. JERMAN</option>
+                            <option value="B. JEPUN">B. JEPUN</option>
+                            <option value="SAINS">SAINS</option>
+                            <option value="SAINS DLP">SAINS DLP</option>
+                            <option value="PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA">PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA</option>
+                            <option value="MATEMATIK">MATEMATIK</option>
+                            <option value="MATHEMATIC DLP">MATHEMATIC DLP</option>
+                            <option value="B. ARAB MENENGAH (BAM)">B. ARAB MENENGAH (BAM)</option>
+                            <option value="B. ARAB KOMUNIKASI (BAK)">B. ARAB KOMUNIKASI (BAK)</option>
+                            <option value="PENDIDIKAN ISLAM MEN. (PIM)">PENDIDIKAN ISLAM MEN. (PIM)</option>
+                            <option value="PENDIDIKAN ISLAM RENDAH (PIR)">PENDIDIKAN ISLAM RENDAH (PIR)</option>
+                            <option value="ASAS BACAAN AL-QURAN (ABQ)">ASAS BACAAN AL-QURAN (ABQ)</option>
+                            <option value="B. ARAB RENDAH (BAR)">B. ARAB RENDAH (BAR)</option>
+                            <option value="AL-SYARIAH">AL-SYARIAH</option>
+                            <option value="AL-LUGHAH AL-ARABIYAH AL-MUASIRAH">AL-LUGHAH AL-ARABIYAH AL-MUASIRAH</option>
+                            <option value="USUL AL-DIN">USUL AL-DIN</option>
+                            <option value="AL-QURAN WA AL-TAFSIR">AL-QURAN WA AL-TAFSIR</option>
+                            <option value="HIFZ AL-QURAN">HIFZ AL-QURAN</option>
+                            <option value="ULUM AL-QURAN">ULUM AL-QURAN</option>
+                            <option value="B. PERANCIS">B. PERANCIS</option>
+                            <option value="TEKNOLOGI DAN DIGITAL">TEKNOLOGI DAN DIGITAL</option>
+
+                            <optgroup label="──────── PENDIDIKAN KHAS ────────" disabled class="bg-slate-800 text-indigo-300 font-bold"></optgroup>
+                            <option value="PENDIDIKAN JASMANI DAN KESIHATAN (PENDIDIKAN KHAS)">PENDIDIKAN JASMANI DAN KESIHATAN (PENDIDIKAN KHAS)</option>
+                            <option value="PENDIDIKAN SENI VISUAL (PENDIDIKAN KHAS)">PENDIDIKAN SENI VISUAL (PENDIDIKAN KHAS)</option>
+                            <option value="B. MELAYU (PENDIDIKAN KHAS)">B. MELAYU (PENDIDIKAN KHAS)</option>
+                            <option value="B. INGGERIS (PENDIDIKAN KHAS)">B. INGGERIS (PENDIDIKAN KHAS)</option>
+                            <option value="B. TAMIL (PENDIDIKAN KHAS)">B. TAMIL (PENDIDIKAN KHAS)</option>
+                            <option value="B. CINA (PENDIDIKAN KHAS)">B. CINA (PENDIDIKAN KHAS)</option>
+                            <option value="MATEMATIK (PENDIDIKAN KHAS)">MATEMATIK (PENDIDIKAN KHAS)</option>
+                            <option value="PENDIDIKAN MUZIK (PENDIDIKAN KHAS)">PENDIDIKAN MUZIK (PENDIDIKAN KHAS)</option>
+                            <option value="ALAM DAN MANUSIA (PENDIDIKAN KHAS)">ALAM DAN MANUSIA (PENDIDIKAN KHAS)</option>
+                            <option value="SEJARAH (PENDIDIKAN KHAS)">SEJARAH (PENDIDIKAN KHAS)</option>
+                            <option value="PAIKUP">PAIKUP</option>
+                            <option value="PENGURUSAN KEHIDUPAN">PENGURUSAN KEHIDUPAN</option>
+                            <option value="PEND. MORAL (PENDIDIKAN KHAS)">PEND. MORAL (PENDIDIKAN KHAS)</option>
+                            <option value="PEND. ISLAM (PENDIDIKAN KHAS)">PEND. ISLAM (PENDIDIKAN KHAS)</option>
+
+                            <optgroup label="──────── BRAILLE ────────" disabled class="bg-slate-800 text-indigo-300 font-bold"></optgroup>
+                            <option value="SEJARAH (BRAILLE)">SEJARAH (BRAILLE)</option>
+                            <option value="PENDIDIKAN MORAL (BRAILLE)">PENDIDIKAN MORAL (BRAILLE)</option>
+                            <option value="PENDIDIKAN MUZIK (BRAILLE)">PENDIDIKAN MUZIK (BRAILLE)</option>
+                            <option value="GEOGRAFI (BRAILLE)">GEOGRAFI (BRAILLE)</option>
+                            <option value="PENDIDIKAN JASMANI (BRAILLE)">PENDIDIKAN JASMANI (BRAILLE)</option>
+                            <option value="PENDIDIKAN SENI VISUAL (BRAILLE)">PENDIDIKAN SENI VISUAL (BRAILLE)</option>
+                            <option value="B. MELAYU (BRAILLE)">B. MELAYU (BRAILLE)</option>
+                            <option value="B. INGGERIS (BRAILLE)">B. INGGERIS (BRAILLE)</option>
+                            <option value="SAINS (BRAILLE)">SAINS (BRAILLE)</option>
+                            <option value="PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA (BRAILLE)">PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA (BRAILLE)</option>
+                            <option value="MATEMATIK (BRAILLE)">MATEMATIK (BRAILLE)</option>
+                            <option value="B. ARAB MENENGAH (BAM) (BRAILLE)">B. ARAB MENENGAH (BAM) (BRAILLE)</option>
+                            <option value="PENDIDIKAN ISLAM MEN. (PIM) (BRAILLE)">PENDIDIKAN ISLAM MEN. (PIM) (BRAILLE)</option>
+                            <option value="PENDIDIKAN ISLAM RENDAH (PIR) (BRAILLE)">PENDIDIKAN ISLAM RENDAH (PIR) (BRAILLE)</option>
+                            <option value="ASAS BACAAN AL-QURAN TAHUN 1 (BRAILLE)">ASAS BACAAN AL-QURAN TAHUN 1 (BRAILLE)</option>
+                            <option value="B. ARAB RENDAH (BAR) (BRAILLE)">B. ARAB RENDAH (BAR) (BRAILLE)</option>
+                            <option value="PENDIDIKAN JASMANI KESIHATAN (BRAILLE)">PENDIDIKAN JASMANI KESIHATAN (BRAILLE)</option>
+                            <option value="TEKNOLOGI DAN DIGITAL (BRAILLE)">TEKNOLOGI DAN DIGITAL (BRAILLE)</option>
+                            <option value="PAIKUP (BRAILLE)">PAIKUP (BRAILLE)</option>
+                            <option value="MUSHAF AL-QURAN (BRAILLE)">MUSHAF AL-QURAN (BRAILLE)</option>
+                        </select>
+                    </div>
+
+                    <!-- JAWATAN DALAM BENGKEL -->
+                    <div>
+                        <label class="form-label">Jawatan Dalam Bengkel <span class="required-asterisk">*</span></label>
+                        <select name="jawatan_bengkel" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="PENGERUSI">PENGERUSI</option>
+                            <option value="AHLI JAWATANKUASA KANDUNGAN">AHLI JAWATANKUASA KANDUNGAN</option>
+                            <option value="AHLI JAWATANKUASA TEKNIKAL">AHLI JAWATANKUASA TEKNIKAL</option>
+                            <option value="AHLI JAWATANKUASA BAHASA">AHLI JAWATANKUASA BAHASA</option>
+                        </select>
+                    </div>
+
+                    <!-- TEMPAT BENGKEL -->
+                    <div class="md:col-span-2 pt-2">
+                        <label class="form-label">Tempat Bengkel <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Nama hotel / lokasi bengkel diadakan</p>
+                        <input type="text" name="tempat_bengkel" class="glass-input auto-uppercase" placeholder="CTH: HOTEL SERI MALAYSIA, KUALA LUMPUR" required>
+                    </div>
+                </div>
+
+                <div class="glass-box p-6 border-l-4 border-indigo-500">
+                    <label class="form-label text-indigo-300 text-lg">Gambar Terkini (Muat Naik) <span class="required-asterisk">*</span></label>
+                    <p class="text-sm text-slate-400 mb-4 font-medium">Sila muat naik GAMBAR BERUKURAN PASSPORT (PARAS BAHU) terkini anda. Pastikan dalam format <strong>PNG atau JPEG SAHAJA</strong>. Saiz <strong>TIDAK MELEBIHI 250KB</strong>.</p>
+                    
+                    <div class="relative group">
+                        <input type="file" id="gambar" name="gambar" accept=".jpg,.jpeg,.png" class="block w-full text-sm text-slate-300 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 hover:file:shadow-[0_0_15px_rgba(79,70,229,0.5)] file:transition-all cursor-pointer bg-slate-800/50 rounded-xl p-2 border border-white/10" required>
+                    </div>
+                    <div id="fileError" class="text-red-400 text-sm mt-3 hidden font-bold bg-red-900/30 p-2 rounded-lg border border-red-500/30"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div>
+                        <label class="form-label">Gelaran <span class="required-asterisk">*</span></label>
+                        <select name="gelaran" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="PROF.">PROF.</option>
+                            <option value="PROF. MADYA">PROF. MADYA</option>
+                            <option value="DR.">DR.</option>
+                            <option value="DATUK">DATUK</option>
+                            <option value="DATIN">DATIN</option>
+                            <option value="HAJI">HAJI</option>
+                            <option value="HAJAH">HAJAH</option>
+                            <option value="ENCIK">ENCIK</option>
+                            <option value="PUAN">PUAN</option>
+                            <option value="CIK">CIK</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Nama <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Seperti pada kad pengenalan (HURUF BESAR)</p>
+                        <input type="text" name="nama" class="glass-input auto-uppercase" placeholder="CONTOH: ALI BIN ABU" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">No. Kad Pengenalan <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Sila isi dengan tanda sempang</p>
+                        <input type="text" name="ic" class="glass-input auto-uppercase" placeholder="CTH: 800101-12-3456" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">No. Gaji / No. Staf (Bagi Pensyarah) <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-transparent mb-2 select-none">.</p>
+                        <input type="text" name="no_gaji" class="glass-input auto-uppercase" placeholder="CTH: 20251343" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Jantina <span class="required-asterisk">*</span></label>
+                        <select name="jantina" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="LELAKI">LELAKI</option>
+                            <option value="PEREMPUAN">PEREMPUAN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div>
+                        <label class="form-label">Telefon Pejabat <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Format 03-23456789</p>
+                        <input type="text" name="tel_pej" class="glass-input auto-uppercase" placeholder="03-23456789" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Telefon Bimbit <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Format 012-3456789</p>
+                        <input type="text" name="tel_bimbit" class="glass-input auto-uppercase" placeholder="012-3456789" required>
+                    </div>
+                    <div>
+                        <label class="form-label">E-mel Tempat Bertugas <span class="required-asterisk">*</span></label>
+                        <input type="email" name="emel_pejabat" class="glass-input auto-uppercase" placeholder="ali@moe.gov.my" required>
+                    </div>
+                    <div>
+                        <label class="form-label">E-mel Peribadi <span class="required-asterisk">*</span></label>
+                        <input type="email" name="emel_peribadi" class="glass-input auto-uppercase" placeholder="ali@gmail.com" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div>
+                        <label class="form-label">Jawatan <span class="required-asterisk">*</span></label>
+                        <select name="jawatan" id="jawatanSelect" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="PEGAWAI PERKHIDMATAN PENDIDIKAN (PPP)">PEGAWAI PERKHIDMATAN PENDIDIKAN (PPP)</option>
+                            <option value="PENSYARAH">PENSYARAH</option>
+                            <option value="LAIN-LAIN">LAIN-LAIN</option>
+                        </select>
+                    </div>
+                    
+                    <div id="lainLainJawatanContainer" class="hidden transform transition-all">
+                        <label class="form-label">Sekiranya lain-lain sila nyatakan <span class="required-asterisk">*</span></label>
+                        <input type="text" name="jawatan_lain" id="jawatanLainInput" class="glass-input auto-uppercase" placeholder="NYATAKAN JAWATAN">
+                    </div>
+
+                    <div>
+                        <label class="form-label">Skim Jawatan <span class="required-asterisk">*</span></label>
+                        <select name="skim_jawatan" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="DG">DG</option>
+                            <option value="DH">DH</option>
+                            <option value="DM">DM</option>
+                            <option value="DS">DS</option>
+                            <option value="LAIN-LAIN">LAIN-LAIN</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Gred Jawatan <span class="required-asterisk">*</span></label>
+                        <select name="gred_jawatan" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="JUSA C">JUSA C</option>
+                            <option value="LAIN-LAIN">LAIN-LAIN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="glass-box p-6 space-y-5">
+                    <h3 class="font-extrabold text-indigo-300 mb-2 border-b border-indigo-500/30 pb-2">Alamat Rumah</h3>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div>
+                            <label class="form-label">Baris 1 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="alamat1" class="glass-input auto-uppercase" placeholder="NO. RUMAH, JALAN..." required>
+                        </div>
+                        <div>
+                            <label class="form-label">Baris 2</label>
+                            <input type="text" name="alamat2" class="glass-input auto-uppercase" placeholder="KAMPUNG / TAMAN">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div>
+                            <label class="form-label">Poskod <span class="required-asterisk">*</span></label>
+                            <input type="text" name="poskod" class="glass-input auto-uppercase" placeholder="43000" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Daerah <span class="required-asterisk">*</span></label>
+                            <input type="text" name="daerah" class="glass-input auto-uppercase" placeholder="KAJANG" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Negeri <span class="required-asterisk">*</span></label>
+                            <select name="negeri" class="glass-input auto-uppercase cursor-pointer" required>
+                                <option value="">-- SILA PILIH --</option>
+                                <option value="JOHOR">JOHOR</option>
+                                <option value="KEDAH">KEDAH</option>
+                                <option value="KELANTAN">KELANTAN</option>
+                                <option value="MELAKA">MELAKA</option>
+                                <option value="NEGERI SEMBILAN">NEGERI SEMBILAN</option>
+                                <option value="PAHANG">PAHANG</option>
+                                <option value="PERAK">PERAK</option>
+                                <option value="PERLIS">PERLIS</option>
+                                <option value="PULAU PINANG">PULAU PINANG</option>
+                                <option value="SABAH">SABAH</option>
+                                <option value="SARAWAK">SARAWAK</option>
+                                <option value="SELANGOR">SELANGOR</option>
+                                <option value="TERENGGANU">TERENGGANU</option>
+                                <option value="W.P. KUALA LUMPUR">W.P. KUALA LUMPUR</option>
+                                <option value="W.P. LABUAN">W.P. LABUAN</option>
+                                <option value="W.P. PUTRAJAYA">W.P. PUTRAJAYA</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-200 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.6)]"></div>
+                    <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian B: Maklumat Waris</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div class="md:col-span-2">
+                        <label class="form-label">Nama <span class="required-asterisk">*</span></label>
+                        <input type="text" name="nama_waris" class="glass-input auto-uppercase" placeholder="NAMA WARIS" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Hubungan Dengan Waris <span class="required-asterisk">*</span></label>
+                        <select name="hubungan_waris" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="SUAMI">SUAMI</option>
+                            <option value="ISTERI">ISTERI</option>
+                            <option value="BAPA">BAPA</option>
+                            <option value="IBU">IBU</option>
+                            <option value="ANAK">ANAK</option>
+                            <option value="ADIK BERADIK">ADIK BERADIK</option>
+                            <option value="LAIN-LAIN">LAIN-LAIN</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Telefon Bimbit Waris <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Format 012-3456789</p>
+                        <input type="text" name="tel_bimbit_waris" class="glass-input auto-uppercase" placeholder="012-3456789" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-300 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.6)]"></div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian C: Kelulusan Akademik/ Ikhtisas</h2>
+                        <p class="text-sm text-slate-400 mt-1 font-medium">Semua maklumat di bahagian ini adalah TIDAK WAJIB diisi.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div class="md:col-span-2">
+                        <label class="form-label">Sijil Ikhtisas</label>
+                        <p class="text-xs text-slate-400 mb-2">Cth: DIPLOMA PENDIDIKAN KPLI/DPLI</p>
+                        <input type="text" name="sijil_ikhtisas" class="glass-input auto-uppercase" placeholder="NYATAKAN SIJIL IKHTISAS">
+                    </div>
+                    <div>
+                        <label class="form-label">Opsyen Major</label>
+                        <p class="text-xs text-slate-400 mb-2">Cth: BAHASA MELAYU</p>
+                        <input type="text" name="opsyen_major_1" class="glass-input auto-uppercase" placeholder="NYATAKAN MAJOR">
+                    </div>
+                    <div>
+                        <label class="form-label">Opsyen Minor</label>
+                        <p class="text-xs text-slate-400 mb-2">Cth: MATEMATIK</p>
+                        <input type="text" name="opsyen_minor_1" class="glass-input auto-uppercase" placeholder="NYATAKAN MINOR">
+                    </div>
+
+                    <div class="md:col-span-2 mt-4">
+                        <label class="form-label border-t border-white/10 pt-4">Diploma</label>
+                        <input type="text" name="diploma" class="glass-input auto-uppercase" placeholder="NYATAKAN DIPLOMA">
+                    </div>
+                    
+                    <div class="md:col-span-2 mt-2">
+                        <label class="form-label">Sarjana Muda</label>
+                        <p class="text-xs text-indigo-300 mb-2 font-bold">Sekiranya Ijazah Sarjana Muda (Kepujian) Elektrik dan Elektronik, HANYA TAIP: ELEKTRIK DAN ELEKTRONIK</p>
+                        <input type="text" name="sarjana_muda" class="glass-input auto-uppercase" placeholder="NYATAKAN SARJANA MUDA">
+                    </div>
+                    <div>
+                        <label class="form-label">Opsyen Major</label>
+                        <input type="text" name="opsyen_major_2" class="glass-input auto-uppercase">
+                    </div>
+                    <div>
+                        <label class="form-label">Opsyen Minor</label>
+                        <input type="text" name="opsyen_minor_2" class="glass-input auto-uppercase">
+                    </div>
+                    <div class="mt-4">
+                        <label class="form-label border-t border-white/10 pt-4">Sarjana</label>
+                        <input type="text" name="sarjana" class="glass-input auto-uppercase">
+                    </div>
+                    <div class="mt-4">
+                        <label class="form-label border-t border-white/10 pt-4">Kedoktoran</label>
+                        <input type="text" name="kedoktoran" class="glass-input auto-uppercase">
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-400 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.6)]"></div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian D: Pengalaman Mengajar</h2>
+                        <p class="text-sm text-slate-400 mt-1 font-medium">Sila nyatakan mata pelajaran yang diajar dan tempoh mengajar.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <div>
+                        <label class="form-label">Mata Pelajaran 1 <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Sila nyatakan mata pelajaran yang paling utama diajar dahulu.</p>
+                        <input type="text" name="mata_pelajaran_1" class="glass-input auto-uppercase" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Tempoh Mengajar (Tahun) <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Taip angka sahaja (Cth: 8)</p>
+                        <input type="number" name="tempoh_mengajar_1" class="glass-input" min="0" required>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Mata Pelajaran 2 <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-transparent mb-2 select-none">.</p>
+                        <input type="text" name="mata_pelajaran_2" class="glass-input auto-uppercase" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Tempoh Mengajar Mata Pelajaran 2 (Tahun) <span class="required-asterisk">*</span></label>
+                        <p class="text-xs text-slate-400 mb-2">Taip angka sahaja (Cth: 8)</p>
+                        <input type="number" name="tempoh_mengajar_2" class="glass-input" min="0" required>
+                    </div>
+
+                    <div class="pt-4 border-t border-white/10">
+                        <label class="form-label">Mata Pelajaran 3</label>
+                        <p class="text-xs text-slate-400 mb-2">(Tidak Wajib)</p>
+                        <input type="text" name="mata_pelajaran_3" class="glass-input auto-uppercase">
+                    </div>
+                    <div class="pt-4 border-t border-white/10">
+                        <label class="form-label">Tempoh Mengajar Mata Pelajaran 3 (Tahun)</label>
+                        <p class="text-xs text-slate-400 mb-2">Taip angka sahaja (Cth: 8)</p>
+                        <input type="number" name="tempoh_mengajar_3" class="glass-input" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-500 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.6)]"></div>
+                    <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian E: Pengiktirafan</h2>
+                </div>
+
+                <div id="pengiktirafanBox" class="glass-box p-6 transition-all duration-300">
+                    <label class="form-label mb-2 text-lg">Pengiktirafan <span class="required-asterisk">*</span></label>
+                    <p class="text-sm text-slate-400 mb-6 font-medium">Sila pilih: (Boleh lebih daripada satu pilihan)</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Guru Cemerlang" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Guru Cemerlang</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Pensyarah Cemerlang" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Pensyarah Cemerlang</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Guru Inovasi" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Guru Inovasi</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Guru Media" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Guru Media</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Guru Data" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Guru Data</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Guru Penyelaras Bestari/ICT" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Guru Penyelaras Bestari/ICT</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Daerah" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Jurulatih Utama Daerah</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Negeri" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Jurulatih Utama Negeri</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Kebangsaan" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Jurulatih Utama Kebangsaan</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Google Certified Educator" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Google Certified Educator</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Apple Distinguished Educator" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Apple Distinguished Educator</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors">
+                            <input type="checkbox" name="pengiktirafan" value="Apple Learning Coach" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Apple Learning Coach</span>
+                        </label>
+                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-800/50 p-2 rounded-xl transition-colors lg:col-span-3">
+                            <input type="checkbox" name="pengiktirafan" value="Lain-lain" id="chkLainPengiktirafan" class="glass-checkbox cursor-pointer appearance-none">
+                            <span class="text-sm font-bold text-slate-300 group-hover:text-indigo-300">Lain-lain (NYATAKAN)</span>
+                        </label>
+                    </div>
+
+                    <div id="lainLainPengiktirafanContainer" class="hidden mt-6 pt-6 border-t border-white/10 transform transition-all">
+                        <label class="form-label">Sila nyatakan pengiktirafan lain <span class="required-asterisk">*</span></label>
+                        <input type="text" name="pengiktirafan_lain" id="pengiktirafanLainInput" class="glass-input auto-uppercase" placeholder="NYATAKAN DI SINI">
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-500 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.6)]"></div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian F: Sumbangan / Pelibatan Di Kementerian Pendidikan</h2>
+                        <p class="text-sm text-slate-400 mt-1 font-medium leading-relaxed">Pelibatan dalam program akademik di sekolah/ universiti peringkat daerah, negeri, kebangsaan dan antarabangsa dalam tempoh 5 tahun terkini.<br><span class="italic font-normal text-indigo-300">Cth: PEMENANG ANUGERAH EMAS PERTANDINGAN INOVASI PERINGKAT UNIVERSITI TAHUN 2024 - PROJEK BAHAN BANTU MENGAJAR PENDIDIKAN KHAS</span></p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                        <div class="md:col-span-3">
+                            <label class="form-label">Sumbangan/Pelibatan 1 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="sumbangan_1" class="glass-input auto-uppercase" required>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">Tahun (Cth: 2026) <span class="required-asterisk">*</span></label>
+                            <input type="number" name="tahun_sumbangan_1" class="glass-input" min="2000" max="2100" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                        <div class="md:col-span-3">
+                            <label class="form-label">Sumbangan/Pelibatan 2 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="sumbangan_2" class="glass-input auto-uppercase" required>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">Tahun <span class="required-asterisk">*</span></label>
+                            <input type="number" name="tahun_sumbangan_2" class="glass-input" min="2000" max="2100" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                        <div class="md:col-span-3">
+                            <label class="form-label">Sumbangan/Pelibatan 3 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="sumbangan_3" class="glass-input auto-uppercase" required>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">Tahun <span class="required-asterisk">*</span></label>
+                            <input type="number" name="tahun_sumbangan_3" class="glass-input" min="2000" max="2100" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                        <div class="md:col-span-3">
+                            <label class="form-label">Sumbangan/Pelibatan 4 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="sumbangan_4" class="glass-input auto-uppercase" required>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">Tahun <span class="required-asterisk">*</span></label>
+                            <input type="number" name="tahun_sumbangan_4" class="glass-input" min="2000" max="2100" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                        <div class="md:col-span-3">
+                            <label class="form-label">Sumbangan/Pelibatan 5 <span class="required-asterisk">*</span></label>
+                            <input type="text" name="sumbangan_5" class="glass-input auto-uppercase" required>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="form-label">Tahun <span class="required-asterisk">*</span></label>
+                            <input type="number" name="tahun_sumbangan_5" class="glass-input" min="2000" max="2100" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-500 space-y-8">
+                <div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="h-8 w-2 bg-orange-400 rounded-full shadow-[0_0_10px_rgba(251,146,60,0.6)]"></div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian G: Pelibatan</h2>
+                    </div>
+                    <div class="glass-box p-6 border-l-4 border-orange-500">
+                        <label class="form-label mb-3 text-base text-slate-200">Panel pernah menghadiri Bengkel Kerja Penyediaan Bakal Penilai yang dianjurkan oleh BBT/BSTP, KPM <span class="required-asterisk">*</span></label>
+                        <select id="bengkelSelect" name="hadir_bengkel" class="glass-input cursor-pointer" required>
+                            <option value="">-- SILA PILIH SATU JAWAPAN --</option>
+                            <option value="YA">YA</option>
+                            <option value="TIDAK">TIDAK</option>
+                        </select>
+                        
+                        <div id="bengkelTahunContainer" class="hidden mt-5 pt-5 border-t border-white/10">
+                            <label class="form-label text-slate-300">Jika YA, sila nyatakan TAHUN penyertaan (Tidak Wajib):</label>
+                            <input type="number" name="tahun_bengkel" class="glass-input" placeholder="CTH: 2025" min="2000" max="2100">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="h-8 w-2 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.6)]"></div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian H: Pengesahan</h2>
+                    </div>
+                    <div class="glass-box p-6 border-l-4 border-teal-500">
+                        <label class="form-label mb-3 text-base text-slate-200">Panel pernah terlibat dengan PENULISAN buku teks KPM/ buku rujukan (Tahun Semasa). <span class="required-asterisk">*</span></label>
+                        <select id="penulisanSelect" name="penulisan_buku" class="glass-input cursor-pointer" required>
+                            <option value="">-- SILA PILIH SATU JAWAPAN --</option>
+                            <option value="YA">YA</option>
+                            <option value="TIDAK">TIDAK</option>
+                        </select>
+                        
+                        <div id="penulisanJudulContainer" class="hidden mt-5 pt-5 border-t border-white/10">
+                            <label class="form-label text-slate-300">Jika YA, sila nyatakan JUDUL BUKU dan PENERBIT yang terlibat (Tidak Wajib):</label>
+                            <input type="text" name="judul_buku" class="glass-input auto-uppercase" placeholder="CTH: BUKU TEKS SEJARAH TINGKATAN 2 - DBP">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fade-up delay-500 space-y-6">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="h-8 w-2 bg-rose-400 rounded-full shadow-[0_0_10px_rgba(251,113,133,0.6)]"></div>
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-wide">Bahagian I: Pengalaman Menyemak Buku Teks KP 2027</h2>
+                        <p class="text-sm text-slate-400 mt-1 font-medium">(TAHUN SEMASA SAHAJA)</p>
+                    </div>
+                </div>
+
+                <!-- Diperkemas susun atur grid 3 kolum -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- PMS 1 -->
+                    <div class="glass-box p-8 flex flex-col justify-center items-center text-center group">
+                        <label class="form-label text-indigo-300 text-lg mb-4 font-bold uppercase tracking-widest group-hover:text-indigo-200 transition-colors">PMS 1</label>
+                        <select name="pms_1" class="glass-input cursor-pointer text-center w-full">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
+                    </div>
+                    <!-- PMS 2 -->
+                    <div class="glass-box p-8 flex flex-col justify-center items-center text-center group">
+                        <label class="form-label text-indigo-300 text-lg mb-4 font-bold uppercase tracking-widest group-hover:text-indigo-200 transition-colors">PMS 2</label>
+                        <select name="pms_2" class="glass-input cursor-pointer text-center w-full">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
+                    </div>
+                    <!-- NSK -->
+                    <div class="glass-box p-8 flex flex-col justify-center items-center text-center group">
+                        <label class="form-label text-indigo-300 text-lg mb-4 font-bold uppercase tracking-widest group-hover:text-indigo-200 transition-colors">NSK</label>
+                        <select name="nsk" class="glass-input cursor-pointer text-center w-full">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button dengan Glow Effect Dark Mode -->
+                <div class="pt-12 flex justify-center md:justify-end">
+                    <button type="submit" class="relative inline-flex group items-center justify-center px-12 py-5 font-bold text-white transition-all duration-300 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] rounded-2xl hover:bg-right focus:outline-none focus:ring-4 focus:ring-purple-500/50 shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:shadow-[0_0_40px_rgba(139,92,246,0.8)] transform hover:-translate-y-1 active:scale-95 text-lg w-full md:w-auto tracking-widest">
+                        HANTAR MAKLUMAT
+                        <svg class="w-6 h-6 ml-3 transform transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <!-- Modal Notifikasi -->
+    <div id="msgModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex justify-center items-center z-50 transition-opacity duration-300 opacity-0">
+        <div class="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.8)] p-8 max-w-sm w-full mx-4 text-center transform scale-95 transition-all duration-300 ease-out">
+            <div id="modalIcon" class="mb-4"></div>
+            <h3 id="modalTitle" class="text-2xl font-extrabold mb-2 tracking-tight"></h3>
+            <p id="modalMsg" class="text-slate-300 mb-8 font-medium leading-relaxed"></p>
+            <button onclick="closeModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl w-full transition-all transform active:scale-95 shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+                TUTUP
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Huruf besar automatik
+        document.querySelectorAll('.auto-uppercase').forEach(element => {
+            element.addEventListener('input', function() {
+                if (this.tagName.toLowerCase() === 'input') {
+                    let start = this.selectionStart;
+                    let end = this.selectionEnd;
+                    this.value = this.value.toUpperCase();
+                    this.setSelectionRange(start, end);
+                } else {
+                    this.value = this.value.toUpperCase();
+                }
+            });
+        });
+
+        // Kawalan logik dropdown LAIN-LAIN
+        const jawatanSelect = document.getElementById('jawatanSelect');
+        const lainContainer = document.getElementById('lainLainJawatanContainer');
+        const lainInput = document.getElementById('jawatanLainInput');
+        jawatanSelect.addEventListener('change', function() {
+            if (this.value === 'LAIN-LAIN') {
+                lainContainer.classList.remove('hidden');
+                lainInput.setAttribute('required', 'required');
+            } else {
+                lainContainer.classList.add('hidden');
+                lainInput.removeAttribute('required');
+                lainInput.value = ''; 
+            }
+        });
+
+        // Kawalan input fail gambar
+        const fileInput = document.getElementById('gambar');
+        const fileError = document.getElementById('fileError');
+        fileInput.addEventListener('change', function() {
+            fileError.classList.add('hidden');
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 256000) {
+                    showModal('Ralat Saiz Fail!', 'Saiz fail melebihi 250KB. Sila kecilkan resolusi gambar anda.', 'error');
+                    this.value = ''; 
+                    fileError.textContent = "Saiz fail terlalu besar (>250KB).";
+                    fileError.classList.remove('hidden');
+                    return;
+                }
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                if (!validTypes.includes(file.type)) {
+                    showModal('Ralat Format!', 'Hanya fail berformat PNG atau JPEG sahaja dibenarkan.', 'error');
+                    this.value = ''; 
+                    fileError.textContent = "Format fail tidak disokong.";
+                    fileError.classList.remove('hidden');
+                    return;
+                }
+            }
+        });
+
+        // Event listener membuang kotak ralat merah apabila pengguna mula menaip / buat pilihan baru
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', function() {
+                this.classList.remove('input-error');
+            });
+            element.addEventListener('change', function() {
+                this.classList.remove('input-error');
+            });
+        });
+
+        document.querySelectorAll('input[name="pengiktirafan"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                document.getElementById('pengiktirafanBox').classList.remove('box-error');
+            });
+        });
+
+        // Proses Submit Borang
+        const form = document.getElementById('mainForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 1. Buang semua highlight merah (reset) setiap kali tekan Hantar
+            document.querySelectorAll('.input-error, .box-error').forEach(el => {
+                el.classList.remove('input-error', 'box-error');
+            });
+
+            let isFormValid = true;
+            let firstErrorElement = null;
+
+            // 2. Semak validasi elemen form standard (input, select)
+            if (!this.checkValidity()) {
+                isFormValid = false;
+                const invalidElements = this.querySelectorAll(':invalid');
+                
+                invalidElements.forEach((el) => {
+                    if (el.offsetParent !== null) { // Jika elemen kelihatan (tidak di-hide)
+                        el.classList.add('input-error');
+                        if (!firstErrorElement) firstErrorElement = el; // Simpan elemen ralat pertama
+                    }
+                });
+            }
+
+            // 3. Semak Pengiktirafan (Checkbox Khas)
+            const pengiktirafanChecked = document.querySelectorAll('input[name="pengiktirafan"]:checked').length > 0;
+            const pengiktirafanBox = document.getElementById('pengiktirafanBox');
+            
+            if (!pengiktirafanChecked) {
+                isFormValid = false;
+                pengiktirafanBox.classList.add('box-error');
+                
+                // Jika checkbox adalah ralat pertama
+                if (!firstErrorElement || pengiktirafanBox.getBoundingClientRect().top < firstErrorElement.getBoundingClientRect().top) {
+                    firstErrorElement = pengiktirafanBox;
+                }
+            }
+
+            // 4. Jika ada ralat, scroll ke elemen tersebut dan hentikan penghantaran
+            if (!isFormValid) {
+                if (firstErrorElement) {
+                    // Tatal (scroll) ke bahagian tengah skrin yang ada ralat
+                    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Fokus kursor padanya (jika elemen tersebut input/select biasa)
+                    if (typeof firstErrorElement.focus === 'function' && firstErrorElement.tagName !== 'DIV') {
+                        setTimeout(() => { firstErrorElement.focus({ preventScroll: true }); }, 400);
+                    }
+                }
+                
+                showModal('Borang Tidak Lengkap', 'Sila pastikan semua ruangan wajib (*) dan petak berwarna MERAH telah diisi dengan betul.', 'warning');
+                return;
+            }
+
+            // 5. Proses penghantaran jika semua sah
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = `SEDANG MENGHANTAR... <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            submitBtn.disabled = true;
+            submitBtn.classList.add('cursor-not-allowed', 'opacity-80');
+
+            const formData = new FormData(this);
+            const dataObj = {};
+            
+            // Pengenalan borang (Penting untuk dikesan di Apps Script)
+            dataObj.formType = "maklumatPenilai"; 
+            
+            formData.forEach((value, key) => {
+                if (!dataObj[key]) {
+                    dataObj[key] = value;
+                } else {
+                    dataObj[key] += `, ${value}`; // Gabungkan jika ada pelbagai pilihan checkbox
+                }
+            });
+
+            // Gantikan URL ini dengan URL Web App Apps Script anda sendiri
+            const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwKG3e76Nqn3ku_nW3ETsixdcNoq_ZNolKj023yWf5vMfoyPRcpvbaPnghjH-WhnUP/exec';
+
+            const sendToGoogle = (base64String = null) => {
+                if (base64String) {
+                    dataObj.gambarBase64 = base64String;
+                }
+
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Penting elak isu CORS
+                    body: JSON.stringify(dataObj)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    submitBtn.innerHTML = originalBtnHtml;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('cursor-not-allowed', 'opacity-80');
+
+                    if (result.result === 'success') {
+                        showModal('Penghantaran Berjaya!', 'Maklumat anda telah berjaya disimpan ke dalam pangkalan data.', 'success');
+                        form.reset(); 
+                        document.querySelectorAll('.hidden').forEach(el => {
+                            if(el.id !== 'msgModal' && el.id !== 'fileError') el.classList.add('hidden');
+                        });
+                    } else {
+                        showModal('Ralat Sistem', 'Gagal menyimpan rekod: ' + result.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    submitBtn.innerHTML = originalBtnHtml;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('cursor-not-allowed', 'opacity-80');
+                    showModal('Ralat Rangkaian', 'Sila periksa sambungan internet anda. Pastikan "Execute as: Me" dan "Who has access: Anyone" ditetapkan di Google Script.', 'error');
+                });
+            };
+
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    const base64String = reader.result.split(',')[1];
+                    sendToGoogle(base64String);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                sendToGoogle();
+            }
+        });
+
+        // FUNGSI KAWALAN MODAL NOTIFIKASI
+        const modal = document.getElementById('msgModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMsg = document.getElementById('modalMsg');
+        const modalIcon = document.getElementById('modalIcon');
+
+        function showModal(title, message, type) {
+            modalTitle.textContent = title;
+            modalMsg.textContent = message;
+            
+            if (type === 'error') {
+                modalTitle.className = 'text-2xl font-extrabold mb-2 text-red-400 tracking-tight';
+                modalIcon.innerHTML = `<div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-900/50"><svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>`;
+            } else if (type === 'success') {
+                modalTitle.className = 'text-2xl font-extrabold mb-2 text-emerald-400 tracking-tight';
+                modalIcon.innerHTML = `<div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-900/50"><svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>`;
+            } else {
+                modalTitle.className = 'text-2xl font-extrabold mb-2 text-amber-400 tracking-tight';
+                modalIcon.innerHTML = `<div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-900/50"><svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg></div>`;
+            }
+
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modal.children[0].classList.remove('scale-95');
+                modal.children[0].classList.add('scale-100');
+            });
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modal.children[0].classList.remove('scale-100');
+            modal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // KAWALAN LOGIK LAIN-LAIN UNTUK CHECKBOX DAN DROPDOWN
+        const chkLainPengiktirafan = document.getElementById('chkLainPengiktirafan');
+        const lainPengiktirafanContainer = document.getElementById('lainLainPengiktirafanContainer');
+        const pengiktirafanLainInput = document.getElementById('pengiktirafanLainInput');
+        chkLainPengiktirafan.addEventListener('change', function() {
+            if (this.checked) {
+                lainPengiktirafanContainer.classList.remove('hidden');
+                pengiktirafanLainInput.setAttribute('required', 'required');
+            } else {
+                lainPengiktirafanContainer.classList.add('hidden');
+                pengiktirafanLainInput.removeAttribute('required');
+                pengiktirafanLainInput.value = ''; 
+            }
+        });
+
+        const bengkelSelect = document.getElementById('bengkelSelect');
+        const bengkelTahunContainer = document.getElementById('bengkelTahunContainer');
+        bengkelSelect.addEventListener('change', function() {
+            if (this.value === 'YA') {
+                bengkelTahunContainer.classList.remove('hidden');
+            } else {
+                bengkelTahunContainer.classList.add('hidden');
+                document.querySelector('input[name="tahun_bengkel"]').value = '';
+            }
+        });
+
+        const penulisanSelect = document.getElementById('penulisanSelect');
+        const penulisanJudulContainer = document.getElementById('penulisanJudulContainer');
+        penulisanSelect.addEventListener('change', function() {
+            if (this.value === 'YA') {
+                penulisanJudulContainer.classList.remove('hidden');
+            } else {
+                penulisanJudulContainer.classList.add('hidden');
+                document.querySelector('input[name="judul_buku"]').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
