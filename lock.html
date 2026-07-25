@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Utama (Terkunci)</title>
+    
+    <!-- KUNCI HALAMAN (SHELL LOCK) -->
+    <!-- Letakkan skrip ini di bahagian atas supaya ia menyemak sebelum page dimuatkan sepenuhnya -->
+    <script>
+        // Semak sama ada statusLogin wujud dalam sessionStorage
+        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
+            // Jika tiada, halang dari masuk dan tendang ke halaman login
+            alert("Anda mesti login terlebih dahulu!");
+            window.location.href = "index.html";
+        }
+    </script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #e9ecef; }
+        .kandungan { background: white; padding: 40px; border-radius: 8px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .btn-logout { padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .btn-logout:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+
+    <div class="kandungan">
+        <h1>Selamat Datang! 🎉</h1>
+        <p>Ini adalah halaman utama rahsia anda.</p>
+        <p>Orang luar yang mengambil link ini tidak akan nampak kandungan ini tanpa login.</p>
+        
+        <!-- Butang Logout -->
+        <button class="btn-logout" onclick="logKeluar()">Log Keluar</button>
+    </div>
+
+    <script>
+        // FUNGSI LOGOUT
+        function logKeluar() {
+            // Buang "kunci" dari browser
+            sessionStorage.removeItem("statusLogin");
+            
+            // Tendang kembali ke halaman login
+            window.location.href = "index.html";
+        }
+    </script>
+
+</body>
+</html>
