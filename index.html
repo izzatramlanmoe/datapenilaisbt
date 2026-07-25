@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halaman Login | Sistem Data Penilai Buku Teks</title>
     
-    <!-- Semakan Automatik: Jika sudah login, terus ke homepage -->
-    <script>
-        if (localStorage.getItem("statusLogin") === "berjaya" || sessionStorage.getItem("statusLogin") === "berjaya") {
-            window.location.href = "homepage.html";
-        }
-    </script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -234,72 +227,104 @@
         
         <p id="mesej-ralat">Email atau Katalaluan salah!</p>
         
-        <button onclick="logMasuk()" id="btn-login">Log Masuk</button>
+        <button id="btn-login">Log Masuk</button>
     </div>
 
-    <script>
-        function logMasuk() {
-            let btn = document.getElementById('btn-login');
-            let originalText = btn.innerHTML;
+    <!-- SKRIP FIREBASE INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ⚠️ GANTIKAN DENGAN MAKLUMAT CONFIG FIREBASE PROJECT ANDA ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEWm-AHbEMJuNhON6hZk96wqWfn07-Vy0",
+            authDomain: "data-penilai-eb50d.firebaseapp.com",
+            projectId: "data-penilai-eb50d",
+            storageBucket: "data-penilai-eb50d.firebasestorage.app",
+            messagingSenderId: "1045070075543",
+            appId: "1:1045070075543:web:8916364d9be36a6eb77bd2"
+        };
+
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const btn = document.getElementById('btn-login');
+        const mesejRalat = document.getElementById("mesej-ralat");
+
+        // Semak status sesi automatik (Apabila membuka semula laman)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Pengguna telah dilog masuk
+                localStorage.setItem("statusLogin", "berjaya");
+                localStorage.setItem("emailLogin", user.email);
+                sessionStorage.setItem("statusLogin", "berjaya");
+                sessionStorage.setItem("emailLogin", user.email);
+                window.location.href = "homepage.html";
+            }
+        });
+
+        // Fungsi Proses Log Masuk Firebase
+        async function logMasuk() {
+            const emailInput = document.getElementById("email").value.trim();
+            const passInput = document.getElementById("password").value;
+
+            if (!emailInput || !passInput) {
+                tunjukkanRalat("Sila isi Email dan Katalaluan!");
+                return;
+            }
+
             btn.innerHTML = "Memeriksa...";
             btn.style.pointerEvents = 'none';
 
-            setTimeout(() => {
-                // 1. Ambil nilai input
-                let emailInput = document.getElementById("email").value.trim();
-                let passInput = document.getElementById("password").value;
+            try {
+                // Pengesahan log masuk melalui Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, emailInput, passInput);
+                const user = userCredential.user;
 
-                // 2. Senarai pengguna yang dibenarkan
-                const senaraiPengguna = [
-                    { email: "izzat.ramlan@moe.gov.my", password: "data_sbt" },
-                    { email: "admindata", password: "data_sbt" },
-                    { email: "pengguna2@web.com", password: "pass2" },
-                    { email: "pengguna3@web.com", password: "pass3" },
-                    { email: "cikgu.ali@moe.edu.my", password: "alibest" },
-                    { email: "cikgu.siti@moe.edu.my", password: "sitibest" },
-                    { email: "guru.data@web.com", password: "data123" },
-                    { email: "pengetua@web.com", password: "bos123" },
-                    { email: "kerani@web.com", password: "kerani123" },
-                    { email: "user10@web.com", password: "pwd10" },
-                    { email: "user11@web.com", password: "pwd11" }
-                ];
+                btn.innerHTML = "Berjaya!";
+                btn.style.background = "rgba(40, 167, 69, 0.5)";
+                mesejRalat.style.display = "none";
 
-                let mesejRalat = document.getElementById("mesej-ralat");
+                // Simpan status dalam storage untuk kebolehoperasian sistem legacy
+                localStorage.setItem("statusLogin", "berjaya");
+                localStorage.setItem("emailLogin", user.email);
+                sessionStorage.setItem("statusLogin", "berjaya");
+                sessionStorage.setItem("emailLogin", user.email);
 
-                mesejRalat.style.animation = 'none';
-                mesejRalat.offsetHeight; /* trigger reflow */
-                mesejRalat.style.animation = null;
+                setTimeout(() => {
+                    window.location.href = "homepage.html";
+                }, 500);
 
-                // 3. Semak padanan pengguna (tanpa peka huruf besar/kecil untuk email)
-                let penggunaSah = senaraiPengguna.find(
-                    user => user.email.toLowerCase() === emailInput.toLowerCase() && user.password === passInput
-                );
+            } catch (error) {
+                btn.innerHTML = "Log Masuk";
+                btn.style.pointerEvents = 'auto';
 
-                if (penggunaSah) {
-                    btn.innerHTML = "Berjaya!";
-                    btn.style.background = "rgba(40, 167, 69, 0.5)";
-                    mesejRalat.style.display = "none";
-                    
-                    // Simpan status login dalam localStorage DAN sessionStorage untuk kestabilan maksimum
-                    localStorage.setItem("statusLogin", "berjaya");
-                    localStorage.setItem("emailLogin", penggunaSah.email);
-                    
-                    sessionStorage.setItem("statusLogin", "berjaya");
-                    sessionStorage.setItem("emailLogin", penggunaSah.email);
-                    
-                    setTimeout(() => {
-                        window.location.href = "homepage.html";
-                    }, 500);
-                } else {
-                    btn.innerHTML = originalText;
-                    btn.style.pointerEvents = 'auto';
-                    mesejRalat.style.display = "block";
-                    mesejRalat.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+                // Pemprosesan mesej ralat mesra pengguna mengikut Firebase Error Code
+                let mesej = "Email atau Katalaluan salah!";
+                if (error.code === 'auth/invalid-email') {
+                    mesej = "Format email tidak sah!";
+                } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    mesej = "Email atau Katalaluan salah!";
+                } else if (error.code === 'auth/too-many-requests') {
+                    mesej = "Terlalu banyak percubaan gagaI. Sila cuba sebentar lagi.";
                 }
-            }, 600);
+
+                tunjukkanRalat(mesej);
+            }
         }
-        
-        // Membenarkan tekan 'Enter' untuk log masuk
+
+        function tunjukkanRalat(teks) {
+            mesejRalat.innerText = teks;
+            mesejRalat.style.animation = 'none';
+            mesejRalat.offsetHeight; /* trigger reflow */
+            mesejRalat.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+            mesejRalat.style.display = "block";
+        }
+
+        // Event listener untuk butang dan kekunci Enter
+        btn.addEventListener('click', logMasuk);
+
         document.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 logMasuk();
