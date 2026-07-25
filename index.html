@@ -2,47 +2,40 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8">
-  <title>Sistem Login Google Sheets</title>
+  <title>Sistem Login</title>
   <style>
-    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
-    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
-    input { width: 90%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
-    button { width: 95%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; margin: 0; }
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+    input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { width: 90%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     button:hover { background: #0056b3; }
-    .hidden { display: none; }
+    #message { margin-top: 15px; font-size: 14px; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <!-- Borang Login -->
-    <div id="loginSection">
-      <h2>Sistem Login</h2>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="handleLogin()">Login</button>
-    </div>
+    <h2>Sistem Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="handleLogin()">Login</button>
 
-    <!-- Paparan Selepas Login -->
-    <div id="dashboardSection" class="hidden">
-      <h2>Selamat Datang!</h2>
-      <p>Anda log masuk sebagai: <b id="userDisplay"></b></p>
-      <button onclick="handleLogout()" style="background: #dc3545;">Logout</button>
-    </div>
-
-    <p id="message" style="color: red; margin-top: 15px;"></p>
+    <p id="message"></p>
   </div>
 
   <script>
     // ⚠️ TUKAR URL INI KEPADA WEB APP URL ANDA DARIPADA APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz12md4cwpAbzWZ0vPf28xh-xxNbNc43mgG-TQ1vJEDBB2MAGxab5Yz7fC8Twcn75l4HQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzFxP7dyMVHgnLgOrDDbM53ohzAQoGd07pgyCH4X3ZEqM7L37HWPdty472eWLnQXcSMhg/exec";
+    
+    // URL Homepage anda
+    const HOMEPAGE_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/homepage.html";
 
-    // Semak jika pengguna dah pernah login sebelum ini (menggunakan localStorage)
+    // Semak jika pengguna sudah pun login sebelum ini
     window.onload = function() {
       const savedToken = localStorage.getItem("sessionToken");
-      const savedUser = localStorage.getItem("sessionUser");
-      if (savedToken && savedUser) {
-        showDashboard(savedUser);
+      if (savedToken) {
+        // Jika dah ada token, terus bawa ke homepage
+        window.location.href = HOMEPAGE_URL;
       }
     };
 
@@ -52,7 +45,14 @@
       const passwordInput = document.getElementById("password").value;
       const msg = document.getElementById("message");
 
-      msg.innerText = "Sila tunggu...";
+      if (!usernameInput || !passwordInput) {
+        msg.style.color = "red";
+        msg.innerText = "Sila isi username dan password!";
+        return;
+      }
+
+      msg.style.color = "black";
+      msg.innerText = "Sila tunggu, menyemak akaun...";
 
       try {
         const response = await fetch(SCRIPT_URL, {
@@ -67,54 +67,25 @@
         const result = await response.json();
 
         if (result.status === "success") {
-          msg.innerText = "";
-          // Simpan token sesi dalam browser
+          msg.style.color = "green";
+          msg.innerText = "Login berjaya! Mengalihkan halaman...";
+
+          // Simpan token & info sesi dalam simpanan browser (localStorage)
           localStorage.setItem("sessionToken", result.token);
           localStorage.setItem("sessionUser", result.username);
-          showDashboard(result.username);
+
+          // 🚀 HALAKAN PENGGUNA KE HOMEPAGE
+          setTimeout(() => {
+            window.location.href = HOMEPAGE_URL;
+          }, 1000); // Tunggu 1 saat sebelum lencongkan halaman
         } else {
+          msg.style.color = "red";
           msg.innerText = result.message;
         }
       } catch (err) {
-        msg.innerText = "Ralat semasa berhubung dengan server.";
+        msg.style.color = "red";
+        msg.innerText = "Ralat sistem. Cuba lagi kemudian.";
       }
-    }
-
-    // Fungsi Logout
-    async function handleLogout() {
-      const token = localStorage.getItem("sessionToken");
-      const msg = document.getElementById("message");
-
-      msg.innerText = "Logging out...";
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "logout",
-            token: token
-          })
-        });
-      } catch (err) {
-        console.log("Logout error:", err);
-      }
-
-      // Padam data sesi tempatan
-      localStorage.removeItem("sessionToken");
-      localStorage.removeItem("sessionUser");
-      
-      // Kembalikan ke skrin login
-      document.getElementById("loginSection").classList.remove("hidden");
-      document.getElementById("dashboardSection").classList.add("hidden");
-      document.getElementById("username").value = "";
-      document.getElementById("password").value = "";
-      msg.innerText = "Anda telah logout.";
-    }
-
-    function showDashboard(username) {
-      document.getElementById("userDisplay").innerText = username;
-      document.getElementById("loginSection").classList.add("hidden");
-      document.getElementById("dashboardSection").classList.remove("hidden");
     }
   </script>
 </body>
