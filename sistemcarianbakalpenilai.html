@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Carian Panel Bakal Penilai 2024-2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        darkBg: '#0f172a', // Slate 900
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism utility classes */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7); /* slate-800 with opacity */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem; /* rounded-3xl equivalent */
+        }
+
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6); /* slate-900 with opacity */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: rgba(96, 165, 250, 0.5); /* blue-400 */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .glass-card {
+            background: rgba(51, 65, 85, 0.4); /* slate-700 with opacity */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: rgba(51, 65, 85, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.8); 
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #60a5fa; /* blue-400 */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased p-4 md:p-8 flex items-center justify-center">
+
+    <div class="glass-panel w-full max-w-4xl p-6 md:p-10 mx-auto flex flex-col gap-6">
+        
+        <!-- Header -->
+        <div class="text-center space-y-2 mb-4">
+            <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight">
+                Sistem Carian Panel Bakal Penilai 2024-2025
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base">Masukkan nama untuk mencari maklumat terperinci.</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="relative w-full max-w-2xl mx-auto">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input type="text" id="searchInput" 
+                class="glass-input block w-full pl-12 pr-4 py-4 rounded-2xl text-lg md:text-xl placeholder-slate-500" 
+                placeholder="Taip nama di sini..." 
+                autocomplete="off"
+                disabled>
+        </div>
+
+        <!-- Status & Loading Indicator -->
+        <div id="statusMessage" class="text-center h-6 text-sm text-slate-400 flex items-center justify-center gap-2">
+            <div class="loader inline-block"></div>
+            <span>Memuat turun pangkalan data...</span>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-2 pb-4">
+            <!-- Results will be injected here -->
+        </div>
+
+        <!-- No Results Message (Hidden by default) -->
+        <div id="noResults" class="hidden text-center py-8 text-slate-500">
+            <svg class="mx-auto h-12 w-12 mb-3 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>Tiada rekod ditemui untuk carian tersebut.</p>
+        </div>
+
+    </div>
+
+    <!-- Modal Pop-up Container -->
+    <div id="infoModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div class="modal-content glass-panel w-full max-w-lg p-6 relative overflow-hidden">
+            <!-- Close Button -->
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/50 hover:bg-slate-700 p-2 rounded-full transition-colors z-10">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Decorative background glow -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+
+            <!-- Modal Content Body -->
+            <div id="modalBody" class="mt-2 space-y-5">
+                <!-- Content injected here via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTU9sMaS08XNwGMxqDLiDhdir3Xb9s35lEtA8XYO93jQlPvOH_L3zcvNx-sp0EiQPdIgd8F1ppQTTOj/pub?output=csv';
+        
+        let database = [];
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const statusMessage = document.getElementById('statusMessage');
+        const noResults = document.getElementById('noResults');
+        
+        const infoModal = document.getElementById('infoModal');
+        const modalBody = document.getElementById('modalBody');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        // Headers expected from the CSV (must match exactly or we normalize)
+        const HEADERS = {
+            TEMPAT: 'TEMPAT BENGKEL',
+            PENYELARAS: 'NAMA PENYELARAS PROJEK',
+            KATEGORI: 'KATEGORI',
+            SUBJEK: 'MATA PELAJARAN',
+            NAMA: 'NAMA',
+            URL: 'URL MUAT TURUN'
+        };
+
+        // Basic CSV parser to handle quotes and commas properly
+        function parseCSV(text) {
+            const lines = [];
+            let currentLine = [];
+            let currentCell = '';
+            let insideQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const nextChar = text[i + 1];
+
+                if (char === '"' && insideQuotes && nextChar === '"') {
+                    // Escaped quote ""
+                    currentCell += '"';
+                    i++; // Skip next quote
+                } else if (char === '"') {
+                    // Toggle quote state
+                    insideQuotes = !insideQuotes;
+                } else if (char === ',' && !insideQuotes) {
+                    // End of cell
+                    currentLine.push(currentCell.trim());
+                    currentCell = '';
+                } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                    // End of line
+                    if (char === '\r' && nextChar === '\n') i++; // Skip \n in \r\n
+                    currentLine.push(currentCell.trim());
+                    lines.push(currentLine);
+                    currentLine = [];
+                    currentCell = '';
+                } else {
+                    currentCell += char;
+                }
+            }
+            // Push last cell/line if file doesn't end with newline
+            if (currentCell || currentLine.length > 0) {
+                currentLine.push(currentCell.trim());
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+
+        async function fetchAndProcessData() {
+            try {
+                // Fetch the CSV data
+                // Note: Fetching directly from Google Sheets pub URL might face CORS issues depending on context.
+                // If it fails, a proxy might be needed, but usually 'pub?output=csv' allows GET requests.
+                const response = await fetch(CSV_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                const rows = parseCSV(csvText);
+
+                if (rows.length < 2) {
+                    throw new Error("Data tidak mencukupi dalam fail CSV.");
+                }
+
+                // Extract headers and create mapping
+                const rawHeaders = rows[0].map(h => h.trim().toUpperCase());
+                
+                // Map indices based on expected headers
+                const headerMap = {
+                    nama: rawHeaders.indexOf(HEADERS.NAMA),
+                    tempat: rawHeaders.indexOf(HEADERS.TEMPAT),
+                    penyelaras: rawHeaders.indexOf(HEADERS.PENYELARAS),
+                    kategori: rawHeaders.indexOf(HEADERS.KATEGORI),
+                    subjek: rawHeaders.indexOf(HEADERS.SUBJEK),
+                    url: rawHeaders.indexOf(HEADERS.URL)
+                };
+
+                // Validate if 'NAMA' column exists as it's our primary search key
+                if (headerMap.nama === -1) {
+                    throw new Error(`Lajur '${HEADERS.NAMA}' tidak dijumpai.`);
+                }
+
+                // Process rows into objects
+                database = rows.slice(1)
+                    .filter(row => row.length > 0 && row[headerMap.nama]) // Keep rows that have at least a name
+                    .map(row => {
+                        return {
+                            nama: row[headerMap.nama] || 'Tiada Maklumat',
+                            tempat: headerMap.tempat !== -1 ? (row[headerMap.tempat] || '-') : '-',
+                            penyelaras: headerMap.penyelaras !== -1 ? (row[headerMap.penyelaras] || '-') : '-',
+                            kategori: headerMap.kategori !== -1 ? (row[headerMap.kategori] || '-') : '-',
+                            subjek: headerMap.subjek !== -1 ? (row[headerMap.subjek] || '-') : '-',
+                            url: headerMap.url !== -1 ? (row[headerMap.url] || '') : ''
+                        };
+                    });
+
+                // Setup complete
+                statusMessage.innerHTML = `<span class="text-emerald-400">Pangkalan data sedia (${database.length} rekod)</span>`;
+                setTimeout(() => statusMessage.style.opacity = '0', 3000); // Fade out success message
+                
+                searchInput.disabled = false;
+                searchInput.focus();
+
+            } catch (error) {
+                console.error("Ralat mengambil data:", error);
+                statusMessage.innerHTML = `<span class="text-red-400">Ralat: ${error.message}. Sila semak pautan CSV.</span>`;
+            }
+        }
+
+        function openModal(item) {
+            let downloadBtn = '';
+            if (item.url && item.url.trim() !== '' && item.url !== '-') {
+                if(item.url.startsWith('http')) {
+                    downloadBtn = `
+                        <a href="${item.url}" target="_blank" rel="noopener noreferrer" 
+                           class="mt-6 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl text-sm font-semibold transition-colors w-full shadow-lg shadow-blue-900/20">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Muat Turun Dokumen
+                        </a>
+                    `;
+                }
+            }
+
+            modalBody.innerHTML = `
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-1 pr-8 leading-tight">${item.nama}</h2>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mt-2">
+                        ${item.kategori}
+                    </span>
+                </div>
+                
+                <div class="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50 space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 text-blue-400">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Mata Pelajaran</p>
+                            <p class="text-slate-100 font-medium">${item.subjek}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 text-blue-400">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Tempat Bengkel</p>
+                            <p class="text-slate-100 font-medium">${item.tempat}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="mt-0.5 text-blue-400">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-0.5">Penyelaras Projek</p>
+                            <p class="text-slate-100 font-medium">${item.penyelaras}</p>
+                        </div>
+                    </div>
+                </div>
+                ${downloadBtn}
+            `;
+            infoModal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal() {
+            infoModal.classList.remove('active');
+            setTimeout(() => {
+                modalBody.innerHTML = ''; // Clear content after animation
+                document.body.style.overflow = ''; // Restore scrolling
+            }, 300); // Wait for transition to finish
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        
+        // Close modal when clicking outside the content
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                closeModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && infoModal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        function renderResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            }
+            
+            noResults.classList.add('hidden');
+
+            results.forEach((item, index) => {
+                const card = document.createElement('div');
+                // Added cursor-pointer to indicate it's clickable
+                card.className = 'glass-card p-5 flex flex-col h-full relative overflow-hidden group cursor-pointer';
+                
+                // Add click listener to open modal
+                card.addEventListener('click', () => openModal(item));
+                
+                const accentLine = document.createElement('div');
+                accentLine.className = 'absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500/50 to-emerald-500/50 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300';
+                card.appendChild(accentLine);
+
+                // Simplified card content
+                card.innerHTML += `
+                    <div class="flex-grow flex items-center justify-between gap-4">
+                        <div class="space-y-1 w-full">
+                            <h3 class="text-lg font-bold text-white leading-snug group-hover:text-blue-200 transition-colors">${item.nama}</h3>
+                            <p class="text-sm text-slate-400 truncate">${item.subjek}</p>
+                        </div>
+                        <div class="text-slate-500 group-hover:text-blue-400 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            // Clear previous timeout to debounce
+            clearTimeout(searchTimeout);
+
+            if (query.length === 0) {
+                resultsContainer.innerHTML = '';
+                noResults.classList.add('hidden');
+                return;
+            }
+
+            // Debounce search to improve performance while typing
+            searchTimeout = setTimeout(() => {
+                // Filter database
+                const results = database.filter(item => {
+                    return item.nama.toLowerCase().includes(query);
+                });
+                
+                // Menunjukkan semua hasil yang dijumpai tanpa had
+                renderResults(results);
+                
+                // Show message about total matches found if there are any
+                if (results.length > 0) {
+                    const msg = document.createElement('div');
+                    msg.className = 'col-span-1 md:col-span-2 text-center text-xs text-slate-400 mt-2 pb-2';
+                    msg.textContent = `Menjumpai ${results.length} padanan untuk carian ini.`;
+                    resultsContainer.appendChild(msg);
+                }
+
+            }, 300); // 300ms delay
+        });
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchAndProcessData();
+        });
+
+    </script>
+</body>
+</html>
