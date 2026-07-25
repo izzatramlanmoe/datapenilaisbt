@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demografi 3D Keseluruhan Bakal Penilai 2024-2025</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PapaParse untuk membaca CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- Three.js untuk animasi 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls untuk kawalan kamera -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- CSS2DRenderer untuk memaparkan teks HTML sebagai objek 3D -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS2DRenderer.js"></script>
+    <!-- TWEEN.js untuk animasi pergerakan kamera dan objek -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Sembunyikan scrollbar kerana canvas 3D penuh skrin */
+            background: linear-gradient(135deg, #0f172a, #1e1b4b);
+            color: #ffffff;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Di belakang UI */
+        }
+
+        /* UI Overlay Layer */
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none; /* Benarkan klik melepasi ke canvas 3D */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Elemen UI yang boleh diklik perlu menetapkan pointer-events: auto */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
+            pointer-events: auto; 
+        }
+
+        .text-glow {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: rgba(99, 102, 241, 0.5); /* Warna Indigo */
+            border-color: rgba(165, 180, 252, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Tooltip untuk memaparkan nilai data apabila hover pada objek 3D */
+        #tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 0.75rem;
+            pointer-events: none;
+            display: none; /* Sembunyi secara default */
+            z-index: 20;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transform: translate(-50%, -100%);
+            margin-top: -15px;
+        }
+
+        #tooltip-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 4px;
+        }
+
+        /* Label Data pada Carta 3D */
+        .chart-label {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            pointer-events: none; /* Biarkan tetikus melepasi label */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .chart-label.show {
+            opacity: 1;
+        }
+
+        .chart-label .highlight-count {
+            color: #a5b4fc;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            transition: opacity 1s ease;
+            pointer-events: auto;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Sembunyikan scrollbar untuk navigasi */
+        .nav-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .nav-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Screen Loader -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner mb-6"></div>
+        <h2 class="text-2xl font-semibold mb-2">Memuat Turun Data...</h2>
+        <p class="text-sm text-gray-400">Menyediakan persekitaran 3D</p>
+    </div>
+
+    <!-- Container for Three.js -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Layer Over Three.js -->
+    <div id="ui-layer" class="p-4 md:p-8 justify-between">
+        
+        <!-- Header -->
+        <header class="glass-panel p-5 text-center max-w-3xl mx-auto w-full mb-4 bg-black/60 border border-slate-500/40 shadow-2xl">
+            <h1 class="text-xl md:text-3xl font-bold text-white text-glow uppercase tracking-wider">
+                Demografi 3D Bakal Penilai
+            </h1>
+            <p class="text-sm md:text-base text-indigo-300 mt-1">Sesi 2024-2025</p>
+        </header>
+
+        <!-- Dynamic Navigation Buttons for Categories -->
+        <div class="glass-panel p-2 max-w-3xl mx-auto w-full mb-auto bg-black/40 border border-slate-600/30 shadow-xl">
+            <div id="category-nav" class="flex flex-wrap justify-center gap-1.5">
+                <!-- Butang akan dijana oleh JS -->
+            </div>
+        </div>
+
+        <!-- Title of Current Chart displayed in 3D -->
+        <div class="text-center pointer-events-none mt-auto mb-8 px-4 w-full flex justify-center">
+            <!-- Kotak tajuk yang dimurnikan dengan latar belakang kaca yang lebih gelap/kontras -->
+            <div class="glass-panel p-5 md:p-8 bg-black/40 border-2 border-indigo-500/40 rounded-2xl max-w-2xl shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                <h2 id="current-chart-title" class="text-2xl md:text-4xl font-bold text-white text-glow mb-3 capitalize">
+                    Memuatkan...
+                </h2>
+                <!-- Garisan Hiasan -->
+                <div class="h-1 w-3/4 bg-gradient-to-r from-transparent via-indigo-400 to-transparent mx-auto rounded-full mb-3"></div>
+                <p class="text-xs md:text-sm text-indigo-100 font-light">Kamera 3D: Sentuh/Tarik untuk putar &bull; Hover/Klik rajah untuk butiran</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tooltip Element -->
+    <div id="tooltip">
+        <div id="tooltip-title">Kategori</div>
+        <div id="tooltip-value">0 orang (0%)</div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI DATA ---
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTU9sMaS08XNwGMxqDLiDhdir3Xb9s35lEtA8XYO93jQlPvOH_L3zcvNx-sp0EiQPdIgd8F1ppQTTOj/pub?output=csv";
+
+        // Senarai kolum yang dikemas kini (Dibuang: Nama Penyelaras Projek, Nama)
+        const TARGET_COLUMNS = [
+            "TAHUN",
+            "KATEGORI",
+            "ZON",
+            "MATA PELAJARAN",
+            "JAWATAN DALAM BENGKEL KERJA/MESYUARAT",
+            "GELARAN",
+            "KELAYAKAN",
+            "JANTINA"
+        ];
+
+        let parsedData = []; // Simpan data asal
+        let processedData = {}; // Simpan data yang dikira untuk setiap kategori
+        let totalRespondents = 0;
+
+        // --- PEMBOLEH UBAH THREE.JS ---
+        let scene, camera, renderer, labelRenderer, controls;
+        let chartGroup; // Kumpulan untuk memegang objek carta semasa
+        let raycaster, mouse; // Untuk interaksi klik/hover
+        let hoveredMesh = null;
+
+        // --- WARNA ---
+        // Palet warna yang cantik untuk objek 3D
+        const colorPalette = [
+            0x6366f1, // Indigo
+            0xec4899, // Pink
+            0x14b8a6, // Teal
+            0xf59e0b, // Amber
+            0x8b5cf6, // Violet
+            0x10b981, // Emerald
+            0xf43f5e, // Rose
+            0x3b82f6, // Blue
+            0x06b6d4, // Cyan
+            0xd946ef  // Fuchsia
+        ];
+
+        // --- MULA ---
+        window.onload = () => {
+            initThreeJS();
+            fetchData();
+        };
+
+        // --- 1. MEMUAT TURUN & MEMPROSES DATA ---
+        function fetchData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    parsedData = results.data;
+                    totalRespondents = parsedData.length;
+                    processData();
+                    buildNavigation();
+                    
+                    // Sembunyikan loader
+                    const loader = document.getElementById('loader');
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 1000);
+
+                    // Tunjukkan carta pertama jika ada
+                    if (TARGET_COLUMNS.length > 0) {
+                        showChart(TARGET_COLUMNS[0]);
+                    }
+                },
+                error: function(err) {
+                    console.error("Ralat membaca fail CSV:", err);
+                    document.getElementById('loader').innerHTML = `
+                        <h2 class="text-2xl text-red-500 font-semibold mb-2">Gagal Memuat Turun Data</h2>
+                        <p class="text-sm">${err.message}</p>
+                    `;
+                }
+            });
+        }
+
+        function processData() {
+            if (parsedData.length === 0) return;
+            const headers = Object.keys(parsedData[0]);
+
+            TARGET_COLUMNS.forEach(targetTitle => {
+                const actualHeader = findBestHeaderMatch(headers, targetTitle);
+                
+                if (actualHeader) {
+                    const counts = {};
+                    parsedData.forEach(row => {
+                        let value = row[actualHeader];
+                        if (value !== undefined && value !== null) {
+                            value = value.trim();
+                            if (value === "") value = "TIDAK DINYATAKAN";
+                            counts[value] = (counts[value] || 0) + 1;
+                        }
+                    });
+
+                    // Sort dari tinggi ke rendah
+                    const sortedEntries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+                    
+                    processedData[targetTitle] = sortedEntries.map(([label, count]) => ({
+                        label: label,
+                        count: count,
+                        percentage: ((count / totalRespondents) * 100).toFixed(1)
+                    }));
+                }
+            });
+        }
+
+        function findBestHeaderMatch(headers, target) {
+            let exact = headers.find(h => h.trim().toUpperCase() === target.toUpperCase());
+            if (exact) return exact;
+            let partial = headers.find(h => h.toUpperCase().includes(target.toUpperCase()) || target.toUpperCase().includes(h.toUpperCase()));
+            return partial || null;
+        }
+
+        // --- 2. BINA UI NAVIGASI ---
+        function buildNavigation() {
+            const navContainer = document.getElementById('category-nav');
+            navContainer.innerHTML = ''; // Clear
+
+            TARGET_COLUMNS.forEach((category, index) => {
+                // Hanya bina butang jika data berjaya diproses
+                if (processedData[category]) {
+                    const btn = document.createElement('button');
+                    // Buang flex-shrink-0 supaya butang boleh tersusun ke bawah secara automatik
+                    btn.className = "category-btn px-2.5 py-1 rounded-full text-[10px] md:text-xs font-semibold tracking-wide cursor-pointer pointer-events-auto";
+                    btn.innerText = category;
+                    btn.onclick = () => showChart(category);
+                    btn.id = `btn-${category.replace(/[^a-zA-Z0-9]/g, '')}`; // ID selamat
+                    
+                    if (index === 0) btn.classList.add('active');
+                    
+                    navContainer.appendChild(btn);
+                }
+            });
+        }
+
+        function updateActiveButton(category) {
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-${category.replace(/[^a-zA-Z0-9]/g, '')}`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // --- 3. SET UP THREE.JS PERSEKITARAN ASAS ---
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            // Kabus halus untuk memberi kedalaman (depth)
+            scene.fog = new THREE.FogExp2(0x0f172a, 0.015);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 15, 35); // Posisi awal
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            // Bayang-bayang untuk nampak lebih realistik
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Label Renderer (Untuk teks/indikator HTML di atas 3D)
+            labelRenderer = new THREE.CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            labelRenderer.domElement.style.pointerEvents = 'none'; // Elak menghalang interaksi dengan model 3D
+            container.appendChild(labelRenderer.domElement);
+
+            // Controls (Orbit)
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 + 0.1; // Hadkan putaran bawah (jangan sampai lihat dari bawah tanah sangat)
+            controls.minDistance = 10;
+            controls.maxDistance = 100;
+            // Penting: Benarkan kawalan walaupun UI ada di atas (sebab kita letak pointer-events:none pada ui-layer)
+            controls.domElement = document.getElementById('ui-layer');
+
+            // Lights (Pencahayaan)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
+
+            const pointLight = new THREE.PointLight(0x6366f1, 0.5, 50); // Lampu rona indigo
+            pointLight.position.set(-10, 10, -10);
+            scene.add(pointLight);
+
+            // Lantai (Grid / Pantulan)
+            createFloor();
+
+            // Kumpulan Carta (untuk mudah dibuang/ditambah bila tukar kategori)
+            chartGroup = new THREE.Group();
+            scene.add(chartGroup);
+
+            // Interaksi (Raycaster)
+            raycaster = new THREE.Raycaster();
+            mouse = new THREE.Vector2();
+
+            window.addEventListener('resize', onWindowResize);
+            
+            // Kita letak listener pada ui-layer kerana ia cover keseluruhan skrin
+            const uiLayer = document.getElementById('ui-layer');
+            uiLayer.addEventListener('mousemove', onMouseMove);
+            // Untuk touch peranti mudah alih
+            uiLayer.addEventListener('touchstart', onTouchMove, {passive: false});
+            uiLayer.addEventListener('touchmove', onTouchMove, {passive: false});
+
+            // Start Animation Loop
+            animateLoop();
+        }
+
+        function createFloor() {
+            // Lantai nipis separa lutsinar (ala-ala cermin gelap)
+            const geometry = new THREE.PlaneGeometry(200, 200);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x0f172a,
+                roughness: 0.1,
+                metalness: 0.8,
+                transparent: true,
+                opacity: 0.8
+            });
+            const plane = new THREE.Mesh(geometry, material);
+            plane.rotation.x = -Math.PI / 2;
+            plane.position.y = -0.5; // Sedikit di bawah objek
+            plane.receiveShadow = true;
+            scene.add(plane);
+
+            // Grid dekorasi
+            const gridHelper = new THREE.GridHelper(100, 40, 0x334155, 0x1e293b);
+            gridHelper.position.y = -0.49;
+            // Jadikan material grid telus
+            gridHelper.material.transparent = true;
+            gridHelper.material.opacity = 0.3;
+            scene.add(gridHelper);
+        }
+
+        // --- 4. MEMBINA VISUALISASI 3D CARTA ---
+        function showChart(category) {
+            if (!processedData[category]) return;
+
+            document.getElementById('current-chart-title').innerText = category;
+            updateActiveButton(category);
+
+            // Buang objek lama dengan animasi
+            clearChartGroup();
+
+            const data = processedData[category];
+            const itemCount = data.length;
+
+            // Logik pemilihan jenis carta:
+            // Jika sikit (< 5), guna carta Donat 3D.
+            // Jika banyak, guna carta Bar 3D Bulat (Cylindrical Bar Chart).
+            setTimeout(() => {
+                if (itemCount <= 5) {
+                    create3DPieChart(data);
+                } else {
+                    create3DCircularBarChart(data);
+                }
+                
+                // Animasikan kamera setiap kali tukar carta
+                resetCamera();
+            }, 300); // Tunggu chart lama dibuang
+        }
+
+        function clearChartGroup() {
+            // Animasi turun/kecil sebelum dibuang
+            chartGroup.children.forEach(child => {
+                new TWEEN.Tween(child.scale)
+                    .to({ x: 0.01, y: 0.01, z: 0.01 }, 300)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+                
+                // Sembunyikan label sebelum dibuang
+                child.children.forEach(c => {
+                    if(c.isCSS2DObject && c.element) c.element.classList.remove('show');
+                });
+            });
+
+            setTimeout(() => {
+                while(chartGroup.children.length > 0){ 
+                    const obj = chartGroup.children[0];
+                    
+                    // Bersihkan Label CSS2DObject dari DOM
+                    if (obj.children) {
+                        obj.children.forEach(c => {
+                            if(c.isCSS2DObject && c.element && c.element.parentNode) {
+                                c.element.parentNode.removeChild(c.element);
+                            }
+                        });
+                    }
+
+                    if (obj.geometry) obj.geometry.dispose();
+                    if (obj.material) {
+                        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+                        else obj.material.dispose();
+                    }
+                    chartGroup.remove(obj); 
+                }
+            }, 300);
+        }
+
+        function create3DPieChart(data) {
+            let startAngle = 0;
+            const radius = 6;
+            const tube = 2.5; // Lebar donat
+            const depth = 2;  // Ketebalan donat
+
+            // Jumlah (sudah tahu = totalRespondents, tapi kita kira semula berdasarkan data spesifik ini berjaga-jaga)
+            const total = data.reduce((sum, item) => sum + item.count, 0);
+
+            data.forEach((item, index) => {
+                const angle = (item.count / total) * Math.PI * 2; // Berapa besar hirisan
+                
+                // RingGeometry tak sesuai untuk 'depth', kita guna ExtrudeGeometry pada Shape
+                const shape = new THREE.Shape();
+                shape.absarc(0, 0, radius + tube, startAngle, startAngle + angle, false);
+                shape.lineTo((radius) * Math.cos(startAngle + angle), (radius) * Math.sin(startAngle + angle));
+                shape.absarc(0, 0, radius, startAngle + angle, startAngle, true);
+                shape.lineTo((radius + tube) * Math.cos(startAngle), (radius + tube) * Math.sin(startAngle));
+
+                const extrudeSettings = {
+                    depth: depth,
+                    bevelEnabled: true,
+                    bevelSegments: 2,
+                    steps: 1,
+                    bevelSize: 0.1,
+                    bevelThickness: 0.1
+                };
+
+                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                
+                // Center geometry supaya pusingan cantik
+                geometry.computeBoundingBox();
+                const centerOffset = -0.5 * (geometry.boundingBox.max.z - geometry.boundingBox.min.z);
+                geometry.translate(0, 0, centerOffset);
+
+                const color = colorPalette[index % colorPalette.length];
+                const material = new THREE.MeshStandardMaterial({ 
+                    color: color, 
+                    roughness: 0.3,
+                    metalness: 0.4,
+                    transparent: true,
+                    opacity: 0.9
+                });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = -Math.PI / 2; // Baringkan
+                mesh.position.y = 2; // Angkat sikit
+                
+                // Simpan data untuk tooltip
+                mesh.userData = {
+                    label: item.label,
+                    count: item.count,
+                    percentage: item.percentage,
+                    baseColor: color,
+                    type: 'slice',
+                    originalY: 2,
+                    direction: new THREE.Vector3(
+                        Math.cos(startAngle + angle/2),
+                        0,
+                        -Math.sin(startAngle + angle/2) // Tolak sin sbb X-rotation
+                    )
+                };
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                
+                // --- INDIKATOR DATA ---
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'chart-label';
+                labelDiv.innerHTML = `${item.label}<br/><span class="highlight-count">${item.count}</span> (${item.percentage}%)`;
+                const labelObj = new THREE.CSS2DObject(labelDiv);
+                
+                // Posisi label di luar sedikit dari donat
+                const midAngle = startAngle + angle / 2;
+                const labelRadius = radius + tube + 1.5;
+                // Susun atur berdasarkan posisi extrude geometry
+                labelObj.position.set(
+                    labelRadius * Math.cos(midAngle),
+                    labelRadius * Math.sin(midAngle),
+                    depth / 2
+                );
+                mesh.add(labelObj);
+
+                // Animasi Muncul Label
+                setTimeout(() => {
+                    labelDiv.classList.add('show');
+                }, index * 100 + 800);
+
+                // Animasi Muncul Meshes (Scale from 0)
+                mesh.scale.set(0.01, 0.01, 0.01);
+                new TWEEN.Tween(mesh.scale)
+                    .to({ x: 1, y: 1, z: 1 }, 1000)
+                    .easing(TWEEN.Easing.Elastic.Out)
+                    .delay(index * 100)
+                    .start();
+
+                chartGroup.add(mesh);
+
+                startAngle += angle;
+            });
+        }
+
+        function create3DCircularBarChart(data) {
+            const count = data.length;
+            const radius = 8;
+            
+            // Cari nilai maksimum untuk normalkan tinggi bar
+            const maxCount = Math.max(...data.map(d => d.count));
+            const maxHeight = 15; // Tinggi maksimum visual dalam unit 3D
+
+            data.forEach((item, index) => {
+                const angle = (index / count) * Math.PI * 2;
+                
+                // Kira tinggi bar
+                // Kita gunakan Math.max untuk pastikan bar bernilai 0 atau 1 masih nampak sedikit
+                const h = Math.max(0.5, (item.count / maxCount) * maxHeight);
+                
+                const geometry = new THREE.CylinderGeometry(0.8, 0.8, h, 32);
+                
+                const color = colorPalette[index % colorPalette.length];
+                const material = new THREE.MeshStandardMaterial({
+                    color: color,
+                    roughness: 0.2,
+                    metalness: 0.6, // Jadikan berkilat sikit
+                });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                
+                // Susun dalam bentuk bulatan
+                mesh.position.x = Math.cos(angle) * radius;
+                mesh.position.z = Math.sin(angle) * radius;
+                // Letak tapak cylinder pada paksi Y=0 (sebab titik tengah geometry adalah di tengah cylinder)
+                mesh.position.y = h / 2; 
+
+                // Simpan data
+                mesh.userData = {
+                    label: item.label,
+                    count: item.count,
+                    percentage: item.percentage,
+                    baseColor: color,
+                    type: 'bar',
+                    originalY: mesh.position.y
+                };
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+
+                // --- INDIKATOR DATA ---
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'chart-label';
+                // Singkatkan tajuk jika terlalu panjang, tunjuk nombor
+                const shortLabel = item.label.length > 15 ? item.label.substring(0, 15) + '...' : item.label;
+                labelDiv.innerHTML = `${shortLabel}<br/><span class="highlight-count">${item.count}</span>`;
+                const labelObj = new THREE.CSS2DObject(labelDiv);
+                
+                // Letak label di atas silinder
+                labelObj.position.set(0, h / 2 + 1.5, 0); 
+                mesh.add(labelObj);
+
+                // Animasi Muncul Label
+                setTimeout(() => {
+                    labelDiv.classList.add('show');
+                }, index * 50 + 800);
+
+                // Animasi Muncul (Naik dari bawah tanah)
+                const targetY = mesh.position.y;
+                mesh.position.y = -h; 
+                mesh.scale.set(0.01, 1, 0.01);
+
+                new TWEEN.Tween(mesh.position)
+                    .to({ y: targetY }, 1000)
+                    .easing(TWEEN.Easing.Back.Out)
+                    .delay(index * 50)
+                    .start();
+                
+                new TWEEN.Tween(mesh.scale)
+                    .to({ x: 1, y: 1, z: 1 }, 800)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .delay(index * 50)
+                    .start();
+
+                chartGroup.add(mesh);
+            });
+        }
+
+        function resetCamera() {
+            // Gerakkan kamera sedikit supaya nampak dinamik
+            new TWEEN.Tween(camera.position)
+                .to({ x: (Math.random() - 0.5) * 20, y: 15 + Math.random()*10, z: 30 + Math.random()*10 }, 1500)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
+            
+            // Fokus balik ke tengah
+            new TWEEN.Tween(controls.target)
+                .to({ x: 0, y: 3, z: 0 }, 1000)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
+        }
+
+        // --- 5. INTERAKSI (HOVER & TOOLTIP) ---
+        function updateRaycaster(event) {
+            // Tukar koordinat tetikus kepada koordinat webgl normalized (-1 ke +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            // Cari pertembungan ray dari kamera ke posisi tetikus
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Kita hanya semak chartGroup
+            const intersects = raycaster.intersectObjects(chartGroup.children);
+
+            const tooltip = document.getElementById('tooltip');
+
+            if (intersects.length > 0) {
+                // Ambil objek pertama yang dilanggar
+                const object = intersects[0].object;
+
+                if (hoveredMesh !== object) {
+                    // Reset objek sebelumnya
+                    if (hoveredMesh) resetHoverState(hoveredMesh);
+                    
+                    // Highlight objek baru
+                    hoveredMesh = object;
+                    highlightMesh(hoveredMesh);
+
+                    // Update dan tunjuk Tooltip
+                    document.getElementById('tooltip-title').innerText = hoveredMesh.userData.label;
+                    document.getElementById('tooltip-value').innerText = `${hoveredMesh.userData.count} orang (${hoveredMesh.userData.percentage}%)`;
+                    tooltip.style.display = 'block';
+                }
+
+                // Gerakkan tooltip ikut tetikus (tambah sikit offset elak lindung tetikus)
+                tooltip.style.left = event.clientX + 'px';
+                tooltip.style.top = event.clientY + 'px';
+                // Cursor pointer
+                document.body.style.cursor = 'pointer';
+
+            } else {
+                if (hoveredMesh) {
+                    resetHoverState(hoveredMesh);
+                    hoveredMesh = null;
+                }
+                tooltip.style.display = 'none';
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        function highlightMesh(mesh) {
+            // Cerahkan material
+            mesh.material.emissive.setHex(mesh.userData.baseColor);
+            mesh.material.emissiveIntensity = 0.5;
+
+            // Animasi pop-out bergantung pada jenis
+            if (mesh.userData.type === 'slice') {
+                // Tarik slice keluar sikit dari pusat donat
+                const dir = mesh.userData.direction;
+                const distance = 1.0;
+                new TWEEN.Tween(mesh.position)
+                    .to({ 
+                        x: dir.x * distance, 
+                        y: mesh.userData.originalY + 0.5, 
+                        z: dir.z * distance 
+                    }, 200)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            } else if (mesh.userData.type === 'bar') {
+                // Naikkan bar sikit
+                new TWEEN.Tween(mesh.position)
+                    .to({ y: mesh.userData.originalY + 1 }, 200)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+                // Besarkan scale
+                new TWEEN.Tween(mesh.scale)
+                    .to({ x: 1.2, z: 1.2 }, 200)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            }
+        }
+
+        function resetHoverState(mesh) {
+            // Kembalikan material asal
+            mesh.material.emissive.setHex(0x000000);
+            
+            // Kembalikan posisi/scale asal
+            if (mesh.userData.type === 'slice') {
+                new TWEEN.Tween(mesh.position)
+                    .to({ x: 0, y: mesh.userData.originalY, z: 0 }, 300)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            } else if (mesh.userData.type === 'bar') {
+                new TWEEN.Tween(mesh.position)
+                    .to({ y: mesh.userData.originalY }, 300)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+                new TWEEN.Tween(mesh.scale)
+                    .to({ x: 1, z: 1 }, 300)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            }
+        }
+
+        function onMouseMove(event) {
+            // Jangan halang event supaya butang UI boleh ditekan
+            updateRaycaster(event);
+        }
+
+        function onTouchMove(event) {
+            if (event.touches.length > 0) {
+                // Simulasi tetikus dengan sentuhan pertama
+                const touch = event.touches[0];
+                updateRaycaster({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        }
+
+        // --- 6. RENDER LOOP & RESIZE ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animateLoop(time) {
+            requestAnimationFrame(animateLoop);
+            
+            // Kemaskini animasi TWEEN
+            TWEEN.update(time);
+            
+            // Kemaskini kawalan kamera
+            controls.update();
+            
+            // Render scene
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
