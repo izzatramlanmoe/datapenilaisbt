@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
+    <head>
+    <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <script>
+        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
+            // Jika tiada kunci login, tendang balik ke halaman utama (index.html)
+            alert("Sila log masuk terlebih dahulu!");
+            window.location.href = "index.html";
+        }
+    </script>
+    
+    <!-- Kod sedia ada anda untuk homepage.html bermula di sini -->
+    <meta charset="UTF-8">
+    <title>Data Penilai SBT</title>
+    ...
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Data Penilai Buku Teks | KPM</title>
