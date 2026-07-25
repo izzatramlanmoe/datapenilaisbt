@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borang Penilaian Panel Buku Teks</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --text-color: #ffffff;
+            --accent-color: #00ffcc;
+            --accent-hover: #00e6b8;
+            --border-radius-main: 24px;
+            --border-radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-main);
+            box-shadow: var(--glass-shadow);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            z-index: -1;
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: var(--border-radius-main);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+            display: inline-block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .glass-input {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-sm);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .glass-input:focus, .glass-input:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .glass-input option {
+            background-color: #2c3e50;
+            color: #fff;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+        }
+        
+        .question-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 10px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .rating-option {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .rating-option input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .rating-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .rating-option:hover .rating-circle {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+        .rating-option input:checked ~ .rating-circle {
+            background: var(--accent-color);
+            color: #000;
+            border-color: #fff;
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.15);
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            max-width: 400px;
+            margin: 5px auto 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .score-display {
+            font-size: 20px;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 25px;
+            border-radius: var(--border-radius-main);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #total-score {
+            color: var(--accent-color);
+            font-size: 28px;
+        }
+
+        .btn-submit {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-submit:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 204, 0.6);
+        }
+
+        /* Modal Popup Berjaya (Gaya Baharu) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius-main);
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            color: #fff;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+        }
+
+        .modal-title {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .modal-text {
+            font-size: 15px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .btn-close-modal {
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+        }
+
+        .btn-close-modal:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 204, 0.6);
+        }
+        
+        .error-modal {
+            display: none;
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            padding: 20px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            color: #fff;
+            animation: fadeIn 0.5s;
+        }
+
+        .loading-modal {
+            display: none;
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            padding: 20px;
+            border-radius: var(--border-radius-sm);
+            text-align: center;
+            margin-top: 20px;
+            font-weight: 600;
+            color: #fff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; box-shadow: 0 0 15px rgba(52, 152, 219, 0.5); }
+            100% { opacity: 0.7; }
+        }
+
+        @media (max-width: 600px) {
+            .glass-container { padding: 20px; }
+            .rating-container, .scale-labels { max-width: 100%; }
+            .rating-circle { width: 35px; height: 35px; font-size: 16px; }
+            .footer-section { flex-direction: column; text-align: center; }
+            .btn-submit { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-container">
+        <h1 class="header-title">BORANG PENILAIAN PANEL BUKU TEKS</h1>
+
+        <form id="evaluation-form">
+            <!-- Maklumat Asas -->
+            <div class="form-section">
+                <div class="input-group">
+                    <label for="namaPanel">Nama Panel Penilai:</label>
+                    <select id="namaPanel" name="namaPanel" class="glass-input" required>
+                        <option value="" disabled selected>-- Sila Pilih Nama --</option>
+                        <!-- Pilihan akan dimuatkan melalui JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="mataPelajaran">Mata Pelajaran:</label>
+                    <select id="mataPelajaran" name="mataPelajaran" class="glass-input" required>
+                        <option value="" disabled selected>-- Sila Pilih Mata Pelajaran --</option>
+                        <!-- Pilihan akan dimuatkan melalui JavaScript -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">BAHAGIAN A - PERIBADI</h2>
+                
+                <!-- Soalan A1 -->
+                <div class="question-block">
+                    <p class="question-text">1. PANEL PENILAI DAPAT MENGURUSKAN MASA DENGAN BAIK</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qA1" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qA1" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qA1" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qA1" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qA1" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan A2 -->
+                <div class="question-block">
+                    <p class="question-text">2. PANEL PENILAI MEMPUNYAI KETERAMPILAN DIRI YANG BAIK</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qA2" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qA2" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qA2" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qA2" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qA2" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan A3 -->
+                <div class="question-block">
+                    <p class="question-text">3. PANEL PENILAI BOLEH BERKONGSI IDEA DALAM KUMPULAN</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qA3" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qA3" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qA3" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qA3" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qA3" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">BAHAGIAN B - KERJASAMA</h2>
+                
+                <!-- Soalan B1 -->
+                <div class="question-block">
+                    <p class="question-text">1. PANEL PENILAI MEMPUNYAI PELIBATAN YANG BAIK DALAM KUMPULAN</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qB1" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qB1" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qB1" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qB1" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qB1" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan B2 -->
+                <div class="question-block">
+                    <p class="question-text">2. PANEL PENILAI MEMPUNYAI KEMAMPUAN MEMBERIKAN CADANGAN YANG BAIK DALAM KUMPULAN</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qB2" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qB2" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qB2" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qB2" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qB2" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan B3 -->
+                <div class="question-block">
+                    <p class="question-text">3. PANEL PENILAI MAMPU MENERIMA PENDAPAT DAN IDEA DARIPADA AHLI KUMPULAN YANG LAIN</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qB3" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qB3" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qB3" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qB3" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qB3" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">BAHAGIAN C - KEPIMPINAN</h2>
+                
+                <!-- Soalan C1 -->
+                <div class="question-block">
+                    <p class="question-text">1. PANEL PENILAI MEMPUNYAI MEMIMPIN / DIPIMPIN SEPANJANG BENGKEL</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qC1" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qC1" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qC1" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qC1" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qC1" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan C2 -->
+                <div class="question-block">
+                    <p class="question-text">2. PANEL PENILAI MEMPUNYAI KEUPAYAAN MEMBUAT KEPUTUSAN</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qC2" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qC2" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qC2" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qC2" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qC2" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+
+                <!-- Soalan C3 -->
+                <div class="question-block">
+                    <p class="question-text">3. PANEL PENILAI MEMPUNYAI KEUPAYAAN MENGURUSKAN KONFLIK</p>
+                    <div class="rating-container">
+                        <label class="rating-option"><input type="radio" name="qC3" value="1" required><span class="rating-circle">1</span></label>
+                        <label class="rating-option"><input type="radio" name="qC3" value="2"><span class="rating-circle">2</span></label>
+                        <label class="rating-option"><input type="radio" name="qC3" value="3"><span class="rating-circle">3</span></label>
+                        <label class="rating-option"><input type="radio" name="qC3" value="4"><span class="rating-circle">4</span></label>
+                        <label class="rating-option"><input type="radio" name="qC3" value="5"><span class="rating-circle">5</span></label>
+                    </div>
+                    <div class="scale-labels"><span>Sangat Lemah</span><span>Sangat Baik</span></div>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <div class="score-display">
+                    Skor Semasa: <span id="total-score">0</span> / 45
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">Hantar Penilaian</button>
+            </div>
+            
+            <!-- Loading Message Box -->
+            <div id="loading-msg" class="loading-modal">
+                ⏳ Sedang memproses... Sila tunggu sebentar.
+            </div>
+            
+            <!-- Error Message Box -->
+            <div id="error-msg" class="error-modal">
+                ❌ Ralat sistem. Sila periksa sambungan atau cuba sebentar lagi.
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Modal Popup Berjaya (Gaya Baharu) diletakkan di luar kontena utama -->
+    <div class="modal-overlay" id="successPopup">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <h3 class="modal-title">Berjaya!</h3>
+            <p class="modal-text">Borang penilaian telah dihantar dengan selamat.<br>Terima kasih atas kerjasama anda.</p>
+            <button type="button" class="btn-close-modal" onclick="closeSuccessPopup()">Tutup Borang</button>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL WEB APP ANDA DI BAWAH (Mesti sama dengan URL Borang 1)
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzwKG3e76Nqn3ku_nW3ETsixdcNoq_ZNolKj023yWf5vMfoyPRcpvbaPnghjH-WhnUP/exec'; 
+
+        // Populate dropdowns apabila halaman dimuatkan
+        window.onload = function() {
+            const namaSelect = document.getElementById('namaPanel');
+            const subjekSelect = document.getElementById('mataPelajaran');
+
+            // Tambah state loading pada dropdown
+            namaSelect.innerHTML = '<option value="" disabled selected>Memuat turun senarai...</option>';
+            subjekSelect.innerHTML = '<option value="" disabled selected>Memuat turun senarai...</option>';
+
+            // URL dengan parameter untuk memberitahu Apps Script menarik data
+            const fetchURL = scriptURL + "?action=getPanelData";
+            
+            fetch(fetchURL)
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
+            .then(data => {
+                if(data.status === 'success') {
+                    // Kosongkan dan masukkan data baharu
+                    namaSelect.innerHTML = '<option value="" disabled selected>-- Sila Pilih Nama Panel --</option>';
+                    subjekSelect.innerHTML = '<option value="" disabled selected>-- Sila Pilih Mata Pelajaran --</option>';
+
+                    if(data.nama.length === 0) {
+                        namaSelect.innerHTML = '<option value="" disabled>Tiada rekod panel dijumpai</option>';
+                    } else {
+                        data.nama.forEach(nama => {
+                            let option = document.createElement('option');
+                            option.value = nama;
+                            option.textContent = nama;
+                            namaSelect.appendChild(option);
+                        });
+                    }
+
+                    if(data.subjek.length === 0) {
+                        subjekSelect.innerHTML = '<option value="" disabled>Tiada rekod subjek dijumpai</option>';
+                    } else {
+                        data.subjek.forEach(subjek => {
+                            let option = document.createElement('option');
+                            option.value = subjek;
+                            option.textContent = subjek;
+                            subjekSelect.appendChild(option);
+                        });
+                    }
+                } else {
+                    throw new Error(data.message || 'Ralat dari server');
+                }
+            })
+            .catch(error => {
+                console.error('Ralat mengambil data:', error);
+                namaSelect.innerHTML = '<option value="" disabled selected>Gagal memuat turun data</option>';
+                subjekSelect.innerHTML = '<option value="" disabled selected>Gagal memuat turun data</option>';
+            });
+        };
+
+        const allRadios = document.querySelectorAll('input[type="radio"]');
+        const scoreDisplay = document.getElementById('total-score');
+
+        function calculateScore() {
+            let total = 0;
+            allRadios.forEach(radio => {
+                if (radio.checked) {
+                    total += parseInt(radio.value);
+                }
+            });
+            scoreDisplay.textContent = total;
+            
+            // Tukar warna teks berdasarkan markah
+            if(total < 20) {
+                scoreDisplay.style.color = "#ff6b6b"; 
+            } else if (total < 35) {
+                scoreDisplay.style.color = "#feca57"; 
+            } else {
+                scoreDisplay.style.color = "var(--accent-color)"; 
+            }
+        }
+
+        allRadios.forEach(radio => {
+            radio.addEventListener('change', calculateScore);
+        });
+
+        const form = document.getElementById('evaluation-form');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingMsg = document.getElementById('loading-msg');
+        const errorMsg = document.getElementById('error-msg');
+
+        // Fungsi kawalan popup
+        function openSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.classList.add('active');
+            // Halang skrin background dari ter-scroll semasa popup aktif (elak stuck)
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.classList.remove('active');
+            // Kembalikan kebolehan tatal (scroll) seperti biasa!
+            document.body.style.overflow = 'auto'; 
+            
+            // Pilihan: Tatal skrin kembali ke bahagian atas
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const formData = new FormData(form);
+            const dataObj = Object.fromEntries(formData.entries());
+            dataObj.totalScore = document.getElementById('total-score').textContent; 
+            
+            // Pengesahan jenis borang agar tersimpan di helaian (sheet) yang betul
+            dataObj.formType = "penilaianPanel"; 
+
+            // Urus antaramuka
+            loadingMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(dataObj)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if(result.result === "success") {
+                    loadingMsg.style.display = 'none';
+                    
+                    // Kosongkan form dan reset markah
+                    form.reset();
+                    calculateScore(); 
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+
+                    // Panggil popup menarik
+                    openSuccessPopup();
+                } else {
+                    throw new Error("Gagal menyimpan");
+                }
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                loadingMsg.style.display = 'none';
+                errorMsg.style.display = 'block';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                
+                setTimeout(() => { errorMsg.style.display = 'none'; }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
