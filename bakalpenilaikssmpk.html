@@ -6,13 +6,12 @@
     <!-- ========================================== -->
     <script>
         if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
             alert("Sila log masuk terlebih dahulu!");
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
     </script>
     <!-- ========================================== -->
-  
+    
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistem Data Bakal Penilai KSSMPK</title>
@@ -79,7 +78,6 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
-    /* Custom Glassmorphic Cards */
     .glass-card {
       background: rgba(19, 27, 46, 0.7);
       backdrop-filter: blur(16px);
@@ -205,6 +203,10 @@
             <i class="fa-solid fa-rotate-right" id="refreshIcon"></i>
             <span>Muat Semula Data</span>
           </button>
+          <button onclick="logKeluar()" class="glass-card px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:text-rose-300 transition flex items-center gap-2 hover:bg-rose-950/30 border-rose-500/30">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Log Keluar</span>
+          </button>
         </div>
       </div>
     </header>
@@ -212,7 +214,6 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
 
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <!-- Total Penilai -->
         <div class="glass-card p-6 relative overflow-hidden group">
           <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition-all"></div>
           <div class="flex justify-between items-start">
@@ -457,7 +458,6 @@
               </tr>
             </thead>
             <tbody id="dataTableBody" class="divide-y divide-white/5 text-xs text-slate-300 font-medium">
-              <!-- Data rows rendered dynamically via JavaScript -->
             </tbody>
           </table>
         </div>
@@ -541,16 +541,13 @@
       </div>
 
       <div id="modalDownloadContainer" class="pt-2">
-        <!-- Rendered download button -->
       </div>
     </div>
   </div>
 
   <script>
-    // New KSSMPK CSV URL
     const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxzgyuK2tSdY72MCEvfueGR4dD6hMd9FWsZn30WysxFNEVUlCtbk1bTdvJ7L0aloTwjyZfqpBhb-te/pub?output=csv";
 
-    // Backup Data for KSSMPK
     const BACKUP_DATABASE = [
       {
         "TEMPAT BENGKEL": "Hotel Grand Darul Makmur, Kuantan",
@@ -590,6 +587,7 @@
 
     window.onload = function() {
       initApp();
+      mulaKiraan();
     };
 
     async function initApp() {
@@ -653,14 +651,13 @@
                   return Object.keys(row).find(k => normalize(k) === targetNorm) || target;
                 };
                 
-                // Advanced searching for the URL column to fix the "Tiada Link" issue
                 const findUrlKey = () => {
                    const possibleKeys = ['URL', 'LINK', 'PAUTAN', 'MUATTURUN', 'DOCUMENT', 'DOKUMEN'];
                    for (const pk of possibleKeys) {
                        const found = Object.keys(row).find(k => k.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().includes(pk));
                        if (found) return found;
                    }
-                   return 'URL MUAT TURUN'; // fallback
+                   return 'URL MUAT TURUN';
                 };
 
                 const tempat = row[getFlexibleKey('TEMPAT BENGKEL')] || row['TEMPAT BENGKEL'] || '-';
@@ -669,7 +666,6 @@
                 const mataPelajaran = row[getFlexibleKey('MATA PELAJARAN')] || row['MATA PELAJARAN'] || '-';
                 const nama = row[getFlexibleKey('NAMA')] || row['NAMA'] || '-';
                 
-                // Fetch URL safely
                 let rawUrl = row[findUrlKey()];
                 const url = rawUrl ? rawUrl.trim() : '';
                 
@@ -955,12 +951,10 @@
         const tr = document.createElement('tr');
         tr.className = "table-row-hover transition border-b border-white/5 hover:bg-slate-800/30";
 
-        // URL Download Button Construction (With fix implemented)
         let downloadBtnHtml = '';
         const linkUrl = item["URL MUAT TURUN"];
         
         if (linkUrl && linkUrl.trim().length > 3 && linkUrl.trim().toUpperCase() !== '-' && linkUrl.trim().toUpperCase() !== 'TIADA') {
-          // Tambah https:// jika tiada protokol HTTP supaya pautan tidak berlaku error
           let safeUrl = linkUrl.trim();
           if (!safeUrl.startsWith('http://') && !safeUrl.startsWith('https://')) {
             safeUrl = 'https://' + safeUrl;
@@ -1099,68 +1093,27 @@
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
+
+    // ==========================================
+    // SKRIP TIMEOUT & LOGOUT
+    // ==========================================
+    function logKeluar() {
+        sessionStorage.removeItem("statusLogin");
+        window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+    }
+
+    let masaTamat;
+    function mulaKiraan() {
+        clearTimeout(masaTamat);
+        masaTamat = setTimeout(logKeluar, 600000); // 10 minit
+    }
+
+    document.onmousemove = mulaKiraan;
+    document.onmousedown = mulaKiraan;
+    document.ontouchstart = mulaKiraan;
+    document.onclick = mulaKiraan;
+    document.onkeypress = mulaKiraan;
+    document.onscroll = mulaKiraan;
   </script>
-</body>
-</html>
-
-<!-- SKRIP UNTUK FUNGSI HALAMAN -->
-    <script>
-        // ==========================================
-        // FUNGSI UNTUK LOGOUT
-        // ==========================================
-        function logKeluar() {
-            // Padam status login
-            sessionStorage.removeItem("statusLogin");
-            // Kembali ke URL halaman yang telah ditetapkan
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
-        }
-
-        // ==========================================
-        // FUNGSI AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
-        // ==========================================
-        let masaTamat;
-
-        function mulaKiraan() {
-            // Padam kiraan masa yang lama
-            clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
-            masaTamat = setTimeout(logKeluar, 600000);
-        }
-
-        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
-        window.onload = mulaKiraan;
-        document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan; // Klik tetikus
-        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
-        document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
-        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
-
-        // ==========================================
-        // Skrip untuk mengawal menu 'Hamburger' (Mobile)
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('mobile-menu-btn');
-            const menu = document.getElementById('mobile-menu');
-            const iconMenu = document.getElementById('icon-menu');
-            const iconClose = document.getElementById('icon-close');
-
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('open');
-                
-                // Tukar ikon menu <-> pangkah
-                if (menu.classList.contains('open')) {
-                    iconMenu.classList.add('hidden');
-                    iconClose.classList.remove('hidden');
-                    iconClose.classList.add('block');
-                } else {
-                    iconMenu.classList.remove('hidden');
-                    iconMenu.classList.add('block');
-                    iconClose.classList.add('hidden');
-                    iconClose.classList.remove('block');
-                }
-            });
-        });
-    </script>
 </body>
 </html>
