@@ -1,314 +1,121 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Login</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            overflow: hidden; /* Mengelakkan scroll jika ada elemen hiasan yang melimpah */
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .shape {
-            position: absolute;
-            filter: blur(40px);
-            z-index: -1;
-            opacity: 0.8;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape1 {
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.2);
-            top: -100px;
-            left: -100px;
-            border-radius: 50%;
-        }
-
-        .shape2 {
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.15);
-            bottom: -150px;
-            right: -100px;
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            animation-delay: -3s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-
-        .login-box {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding: 40px;
-            border-radius: 20px;
-            width: 450px;
-            max-width: 90%;
-            text-align: center;
-            color: white;
-            /* Animasi masuk */
-            animation: slideUpFade 0.8s ease-out forwards;
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        @keyframes slideUpFade {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-box h2 {
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            box-sizing: border-box;
-            color: white;
-            font-size: 16px;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .input-group input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-        }
-
-        .login-box button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 500;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Kesan 'shine' pada butang semasa hover */
-        .login-box button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            transition: all 0.5s ease;
-        }
-
-        .login-box button:hover {
-            background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .login-box button:hover::after {
-            left: 200%;
-        }
-
-        .login-box button:active {
-            transform: translateY(1px);
-        }
-
-        #mesej-ralat {
-            color: #ff6b6b;
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.4);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-            display: none;
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        .footer-text {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
-            letter-spacing: 1.5px;
-            font-weight: 500;
-            z-index: 10;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Sistem Login Google Sheets</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; text-align: center; }
+    input { width: 90%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+    button { width: 95%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
 
-    <div class="shape shape1"></div>
-    <div class="shape shape2"></div>
-
-    <div class="login-box">
-        <h1 style="font-size: clamp(14px, 4.5vw, 21px); font-weight: 700; margin-bottom: 10px; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;">SISTEM DATA PENILAI BUKU TEKS</h1>
-        <div style="font-size: 12px; font-weight: 400; margin-top: 0; margin-bottom: 30px; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.6;">
-            SEKTOR PENGHASILAN BUKU TEKS<br>
-            BAHAGIAN SUMBER DAN TEKNOLOGI PENDIDIKAN<br>
-            KEMENTERIAN PENDIDIKAN
-        </div>
-        
-        <h2 style="margin-bottom: 20px; font-size: 24px;">Log Masuk</h2>
-        
-        <div class="input-group">
-            <!-- Tetapkan ID untuk setiap input -->
-            <input type="email" id="email" placeholder="Email (cth: admin@moe.gov.my)" required autocomplete="off">
-        </div>
-        
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Katalaluan" required>
-        </div>
-        
-        <p id="mesej-ralat">Email atau Katalaluan salah!</p>
-        
-        <button onclick="logMasuk()" id="btn-login">Log Masuk</button>
+  <div class="card">
+    <!-- Borang Login -->
+    <div id="loginSection">
+      <h2>Sistem Login</h2>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="handleLogin()">Login</button>
     </div>
 
-    <script>
-        function logMasuk() {
-            let btn = document.getElementById('btn-login');
-            // Menambah sedikit efek klik pada butang
-            let originalText = btn.innerHTML;
-            btn.innerHTML = "Memeriksa...";
-            btn.style.pointerEvents = 'none';
+    <!-- Paparan Selepas Login -->
+    <div id="dashboardSection" class="hidden">
+      <h2>Selamat Datang!</h2>
+      <p>Anda log masuk sebagai: <b id="userDisplay"></b></p>
+      <button onclick="handleLogout()" style="background: #dc3545;">Logout</button>
+    </div>
 
-            // Sedikit kelewatan (delay) untuk mensimulasikan proses pelayan supaya animasi nampak
-            setTimeout(() => {
-                // 1. Ambil nilai yang ditaip oleh pengguna
-                let emailInput = document.getElementById("email").value;
-                let passInput = document.getElementById("password").value;
+    <p id="message" style="color: red; margin-top: 15px;"></p>
+  </div>
 
-                // 2. Senarai pengguna yang dibenarkan (Anda boleh tambah seberapa banyak yang dimahukan)
-                const senaraiPengguna = [
-                    { email: "izzat.ramlan@moe.gov.my", password: "data_sbt" },
-                    { email: "admindata", password: "data_sbt" },
-                    { email: "pengguna2@web.com", password: "pass2" },
-                    { email: "pengguna3@web.com", password: "pass3" },
-                    { email: "cikgu.ali@moe.edu.my", password: "alibest" },
-                    { email: "cikgu.siti@moe.edu.my", password: "sitibest" },
-                    { email: "guru.data@web.com", password: "data123" },
-                    { email: "pengetua@web.com", password: "bos123" },
-                    { email: "kerani@web.com", password: "kerani123" },
-                    { email: "user10@web.com", password: "pwd10" },
-                    { email: "user11@web.com", password: "pwd11" } // Boleh letak koma dan tambah lagi ke bawah
-                ];
+  <script>
+    // ⚠️ TUKAR URL INI KEPADA WEB APP URL ANDA DARIPADA APPS SCRIPT
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz12md4cwpAbzWZ0vPf28xh-xxNbNc43mgG-TQ1vJEDBB2MAGxab5Yz7fC8Twcn75l4HQ/exec";
 
-                let mesejRalat = document.getElementById("mesej-ralat");
+    // Semak jika pengguna dah pernah login sebelum ini (menggunakan localStorage)
+    window.onload = function() {
+      const savedToken = localStorage.getItem("sessionToken");
+      const savedUser = localStorage.getItem("sessionUser");
+      if (savedToken && savedUser) {
+        showDashboard(savedUser);
+      }
+    };
 
-                // Reset animasi ralat jika ia sudah ditunjukkan sebelumnya
-                mesejRalat.style.animation = 'none';
-                mesejRalat.offsetHeight; /* trigger reflow */
-                mesejRalat.style.animation = null;
+    // Fungsi Login
+    async function handleLogin() {
+      const usernameInput = document.getElementById("username").value;
+      const passwordInput = document.getElementById("password").value;
+      const msg = document.getElementById("message");
 
-                // 3. Semak jika padanan wujud di dalam senarai
-                // Fungsi .find() akan mencari pengguna yang mempunyai email DAN password yang sama
-                let penggunaSah = senaraiPengguna.find(
-                    user => user.email === emailInput && user.password === passInput
-                );
+      msg.innerText = "Sila tunggu...";
 
-                if (penggunaSah) {
-                    // Berjaya: Tukar gaya butang
-                    btn.innerHTML = "Berjaya!";
-                    btn.style.background = "rgba(40, 167, 69, 0.5)";
-                    mesejRalat.style.display = "none";
-                    
-                    // Simpan "kunci" dalam sessionStorage browser
-                    sessionStorage.setItem("statusLogin", "berjaya");
-                    
-                    // Simpan info email siapa yang login untuk digunakan di homepage
-                    sessionStorage.setItem("emailLogin", penggunaSah.email);
-                    
-                    // Hantar pengguna ke homepage selepas delay sekejap
-                    setTimeout(() => {
-                        window.location.href = "homepage.html";
-                    }, 500);
-                } else {
-                    // Gagal: Tunjukkan mesej ralat dengan animasi goyang (shake)
-                    btn.innerHTML = originalText;
-                    btn.style.pointerEvents = 'auto';
-                    mesejRalat.style.display = "block";
-                    // Memastikan animasi shake berlaku setiap kali ralat
-                    mesejRalat.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
-                }
-            }, 600); // 600ms kelewatan buatan
-        }
-        
-        // Membenarkan tekan 'Enter' untuk log masuk
-        document.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                logMasuk();
-            }
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "login",
+            username: usernameInput,
+            password: passwordInput
+          })
         });
-    </script>
 
-    <div class="footer-text">TEAM DATA.SBT.2026</div>
+        const result = await response.json();
+
+        if (result.status === "success") {
+          msg.innerText = "";
+          // Simpan token sesi dalam browser
+          localStorage.setItem("sessionToken", result.token);
+          localStorage.setItem("sessionUser", result.username);
+          showDashboard(result.username);
+        } else {
+          msg.innerText = result.message;
+        }
+      } catch (err) {
+        msg.innerText = "Ralat semasa berhubung dengan server.";
+      }
+    }
+
+    // Fungsi Logout
+    async function handleLogout() {
+      const token = localStorage.getItem("sessionToken");
+      const msg = document.getElementById("message");
+
+      msg.innerText = "Logging out...";
+
+      try {
+        await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "logout",
+            token: token
+          })
+        });
+      } catch (err) {
+        console.log("Logout error:", err);
+      }
+
+      // Padam data sesi tempatan
+      localStorage.removeItem("sessionToken");
+      localStorage.removeItem("sessionUser");
+      
+      // Kembalikan ke skrin login
+      document.getElementById("loginSection").classList.remove("hidden");
+      document.getElementById("dashboardSection").classList.add("hidden");
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+      msg.innerText = "Anda telah logout.";
+    }
+
+    function showDashboard(username) {
+      document.getElementById("userDisplay").innerText = username;
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("dashboardSection").classList.remove("hidden");
+    }
+  </script>
 </body>
 </html>
