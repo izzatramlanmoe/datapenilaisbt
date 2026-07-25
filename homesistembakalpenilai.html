@@ -5,14 +5,14 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
+        // Menggunakan localStorage supaya status login dikekalkan merentasi tab baharu
+        if (localStorage.getItem("statusLogin") !== "berjaya") {
             alert("Sila log masuk terlebih dahulu!");
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
     </script>
     <!-- ========================================== -->
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Data Bakal Penilai Buku Teks</title>
@@ -31,19 +31,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1e293b; /* Warna teks gelap untuk kontras */
+            color: #1e293b;
             overflow: hidden;
             position: relative;
         }
 
-        /* Animasi pergerakan latar belakang */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* Hiasan bulatan di latar belakang (Bokeh effect) */
         .bg-shape {
             position: absolute;
             border-radius: 50%;
@@ -92,7 +90,7 @@
             padding: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            text-decoration: none; /* Buang garisan bawah pada tag a */
+            text-decoration: none;
         }
 
         .glass-btn:hover {
@@ -117,7 +115,7 @@
             border: 1px solid rgba(255, 255, 255, 1);
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             padding: 1rem 2rem;
-            border-radius: 9999px; /* Pill shape */
+            border-radius: 9999px;
             font-weight: 600;
             color: #0f172a;
             transition: top 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -137,7 +135,7 @@
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
-    <!-- Kotak Notifikasi Tersuai (Menggantikan alert) -->
+    <!-- Kotak Notifikasi Tersuai -->
     <div id="notification">
         <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span id="notif-text">Modul dipilih</span>
@@ -161,28 +159,28 @@
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssr.html" target="_blank" rel="noopener noreferrer" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSR')">
+            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssr.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSR')">
                 <span class="relative">
                     KSSR
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
                 </span>
             </a>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssm.html" target="_blank" rel="noopener noreferrer" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSM')">
+            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssm.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSM')">
                 <span class="relative">
                     KSSM
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
                 </span>
             </a>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssrpk.html" target="_blank" rel="noopener noreferrer" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSRPK')">
+            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssrpk.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSRPK')">
                 <span class="relative">
                     KSSRPK
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
                 </span>
             </a>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssmpk.html" target="_blank" rel="noopener noreferrer" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSMPK')">
+            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssmpk.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSMPK')">
                 <span class="relative">
                     KSSMPK
                     <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
@@ -204,6 +202,63 @@
         </p>
     </div>
 
+    <!-- SKRIP UNTUK FUNGSI HALAMAN & FIREBASE LOGOUT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ⚠️ SAMAKAN MAKLUMAT CONFIG DENGAN INDEX.HTML ANDA ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyYourApiKeyHere...",
+            authDomain: "your-app.firebaseapp.com",
+            projectId: "your-app-id",
+            storageBucket: "your-app.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const INDEX_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+
+        // ==========================================
+        // FUNGSI LOGOUT (DISAKSIKAN DENGAN FIREBASE)
+        // ==========================================
+        window.logKeluar = async function() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Ralat Firebase Logout:", error);
+            }
+
+            localStorage.removeItem("statusLogin");
+            localStorage.removeItem("emailLogin");
+            sessionStorage.removeItem("statusLogin");
+            sessionStorage.removeItem("emailLogin");
+
+            window.location.href = INDEX_URL;
+        };
+
+        // ==========================================
+        // AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
+        // ==========================================
+        let masaTamat;
+
+        function mulaKiraan() {
+            clearTimeout(masaTamat);
+            masaTamat = setTimeout(window.logKeluar, 600000);
+        }
+
+        window.onload = mulaKiraan;
+        document.onmousemove = mulaKiraan;
+        document.onmousedown = mulaKiraan;
+        document.ontouchstart = mulaKiraan;
+        document.onclick = mulaKiraan;
+        document.onkeypress = mulaKiraan;
+        document.onscroll = mulaKiraan;
+    </script>
+
     <script>
         let notifTimeout;
 
@@ -211,81 +266,15 @@
             const notif = document.getElementById('notification');
             const notifText = document.getElementById('notif-text');
             
-            // Set teks
             notifText.innerText = message;
-            
-            // Tunjuk notifikasi dengan menambah class
             notif.classList.add('show-notification');
             
-            // Reset timer jika butang ditekan banyak kali
             clearTimeout(notifTimeout);
             
-            // Sembunyikan selepas 3 saat
             notifTimeout = setTimeout(() => {
                 notif.classList.remove('show-notification');
             }, 3000);
         }
-    </script>
-</body>
-</html>
-<!-- SKRIP UNTUK FUNGSI HALAMAN -->
-    <script>
-        // ==========================================
-        // FUNGSI UNTUK LOGOUT
-        // ==========================================
-        function logKeluar() {
-            // Padam status login
-            sessionStorage.removeItem("statusLogin");
-            // Kembali ke URL halaman yang telah ditetapkan
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
-        }
-
-        // ==========================================
-        // FUNGSI AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
-        // ==========================================
-        let masaTamat;
-
-        function mulaKiraan() {
-            // Padam kiraan masa yang lama
-            clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
-            masaTamat = setTimeout(logKeluar, 600000);
-        }
-
-        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
-        window.onload = mulaKiraan;
-        document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan; // Klik tetikus
-        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
-        document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
-        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
-
-        // ==========================================
-        // Skrip untuk mengawal menu 'Hamburger' (Mobile)
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('mobile-menu-btn');
-            const menu = document.getElementById('mobile-menu');
-            const iconMenu = document.getElementById('icon-menu');
-            const iconClose = document.getElementById('icon-close');
-
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('open');
-                
-                // Tukar ikon menu <-> pangkah
-                if (menu.classList.contains('open')) {
-                    iconMenu.classList.add('hidden');
-                    iconClose.classList.remove('hidden');
-                    iconClose.classList.add('block');
-                } else {
-                    iconMenu.classList.remove('hidden');
-                    iconMenu.classList.add('block');
-                    iconClose.classList.add('hidden');
-                    iconClose.classList.remove('block');
-                }
-            });
-        });
     </script>
 </body>
 </html>
