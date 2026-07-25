@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Login</title>
+    <title>Halaman Login | Sistem Data Penilai Buku Teks</title>
+    
+    <!-- Semakan Automatik: Jika sudah login, terus ke homepage -->
+    <script>
+        if (localStorage.getItem("statusLogin") === "berjaya" || sessionStorage.getItem("statusLogin") === "berjaya") {
+            window.location.href = "homepage.html";
+        }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -19,7 +27,7 @@
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            overflow: hidden; /* Mengelakkan scroll jika ada elemen hiasan yang melimpah */
+            overflow: hidden;
         }
 
         @keyframes gradientBG {
@@ -73,7 +81,6 @@
             max-width: 90%;
             text-align: center;
             color: white;
-            /* Animasi masuk */
             animation: slideUpFade 0.8s ease-out forwards;
             opacity: 0;
             transform: translateY(30px);
@@ -142,7 +149,6 @@
             overflow: hidden;
         }
         
-        /* Kesan 'shine' pada butang semasa hover */
         .login-box button::after {
             content: '';
             position: absolute;
@@ -219,7 +225,6 @@
         <h2 style="margin-bottom: 20px; font-size: 24px;">Log Masuk</h2>
         
         <div class="input-group">
-            <!-- Tetapkan ID untuk setiap input -->
             <input type="email" id="email" placeholder="Email (cth: admin@moe.gov.my)" required autocomplete="off">
         </div>
         
@@ -235,18 +240,16 @@
     <script>
         function logMasuk() {
             let btn = document.getElementById('btn-login');
-            // Menambah sedikit efek klik pada butang
             let originalText = btn.innerHTML;
             btn.innerHTML = "Memeriksa...";
             btn.style.pointerEvents = 'none';
 
-            // Sedikit kelewatan (delay) untuk mensimulasikan proses pelayan supaya animasi nampak
             setTimeout(() => {
-                // 1. Ambil nilai yang ditaip oleh pengguna
-                let emailInput = document.getElementById("email").value;
+                // 1. Ambil nilai input
+                let emailInput = document.getElementById("email").value.trim();
                 let passInput = document.getElementById("password").value;
 
-                // 2. Senarai pengguna yang dibenarkan (Anda boleh tambah seberapa banyak yang dimahukan)
+                // 2. Senarai pengguna yang dibenarkan
                 const senaraiPengguna = [
                     { email: "izzat.ramlan@moe.gov.my", password: "data_sbt" },
                     { email: "admindata", password: "data_sbt" },
@@ -258,47 +261,42 @@
                     { email: "pengetua@web.com", password: "bos123" },
                     { email: "kerani@web.com", password: "kerani123" },
                     { email: "user10@web.com", password: "pwd10" },
-                    { email: "user11@web.com", password: "pwd11" } // Boleh letak koma dan tambah lagi ke bawah
+                    { email: "user11@web.com", password: "pwd11" }
                 ];
 
                 let mesejRalat = document.getElementById("mesej-ralat");
 
-                // Reset animasi ralat jika ia sudah ditunjukkan sebelumnya
                 mesejRalat.style.animation = 'none';
                 mesejRalat.offsetHeight; /* trigger reflow */
                 mesejRalat.style.animation = null;
 
-                // 3. Semak jika padanan wujud di dalam senarai
-                // Fungsi .find() akan mencari pengguna yang mempunyai email DAN password yang sama
+                // 3. Semak padanan pengguna (tanpa peka huruf besar/kecil untuk email)
                 let penggunaSah = senaraiPengguna.find(
-                    user => user.email === emailInput && user.password === passInput
+                    user => user.email.toLowerCase() === emailInput.toLowerCase() && user.password === passInput
                 );
 
                 if (penggunaSah) {
-                    // Berjaya: Tukar gaya butang
                     btn.innerHTML = "Berjaya!";
                     btn.style.background = "rgba(40, 167, 69, 0.5)";
                     mesejRalat.style.display = "none";
                     
-                    // Simpan "kunci" dalam sessionStorage browser
-                    sessionStorage.setItem("statusLogin", "berjaya");
+                    // Simpan status login dalam localStorage DAN sessionStorage untuk kestabilan maksimum
+                    localStorage.setItem("statusLogin", "berjaya");
+                    localStorage.setItem("emailLogin", penggunaSah.email);
                     
-                    // Simpan info email siapa yang login untuk digunakan di homepage
+                    sessionStorage.setItem("statusLogin", "berjaya");
                     sessionStorage.setItem("emailLogin", penggunaSah.email);
                     
-                    // Hantar pengguna ke homepage selepas delay sekejap
                     setTimeout(() => {
                         window.location.href = "homepage.html";
                     }, 500);
                 } else {
-                    // Gagal: Tunjukkan mesej ralat dengan animasi goyang (shake)
                     btn.innerHTML = originalText;
                     btn.style.pointerEvents = 'auto';
                     mesejRalat.style.display = "block";
-                    // Memastikan animasi shake berlaku setiap kali ralat
                     mesejRalat.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
                 }
-            }, 600); // 600ms kelewatan buatan
+            }, 600);
         }
         
         // Membenarkan tekan 'Enter' untuk log masuk
