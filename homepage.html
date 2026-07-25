@@ -5,8 +5,9 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
+        // Semak token login dalam localStorage (Diselaraskan dengan Google Sheets API)
+        const token = localStorage.getItem("sessionToken");
+        if (!token) {
             alert("Sila log masuk terlebih dahulu!");
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
@@ -220,7 +221,7 @@
         </div>
     </nav>
 
-    <!-- Content Wrapper (Added padding top so it doesn't hide behind fixed navbar) -->
+    <!-- Content Wrapper -->
     <div class="flex-grow flex items-center justify-center w-full p-4 sm:p-8 pt-28 sm:pt-32 relative z-10">
         
         <main class="glass-panel w-full max-w-4xl rounded-[2rem] p-8 sm:p-12 md:p-16 flex flex-col items-center text-center">
@@ -250,10 +251,8 @@
                 <a href="https://sites.google.com/moe.gov.my/datapenilaisbt/2026-panel-penilai" target="_blank" 
                    class="glass-button flex-1 rounded-2xl p-6 sm:p-8 flex flex-col items-center group relative overflow-hidden text-gray-900 hover:text-blue-800">
                     
-                    <!-- Kesan cahaya semasa hover -->
                     <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     
-                    <!-- Ikon Panel Penilai -->
                     <div class="bg-blue-100/80 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-blue-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -268,10 +267,8 @@
                 <a href="https://sites.google.com/moe.gov.my/datapenilaisbt/2024-2025-bakal-penilai" target="_blank" 
                    class="glass-button flex-1 rounded-2xl p-6 sm:p-8 flex flex-col items-center group relative overflow-hidden text-gray-900 hover:text-teal-800">
                     
-                    <!-- Kesan cahaya semasa hover -->
                     <div class="absolute inset-0 bg-gradient-to-b from-teal-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     
-                    <!-- Ikon Bakal Penilai -->
                     <div class="bg-teal-100/80 p-4 rounded-full mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-teal-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 sm:h-12 sm:w-12 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -284,7 +281,7 @@
 
             </div>
 
-            <!-- Footer / Maklumat hak cipta -->
+            <!-- Footer -->
             <div class="mt-12 pt-6 border-t border-gray-400/30 w-full text-center">
                 <p class="text-gray-600 text-xs sm:text-sm font-medium">
                     &copy; 2026 : Team Data SBT ; BSTP ; KPM.
@@ -292,16 +289,40 @@
             </div>
         </main>
     </div>
-    <!-- SKRIP UNTUK FUNGSI HALAMAN -->
+
+    <!-- SKRIP UNTUK FUNGSI HALAMAN & GOOGLE SHEETS AUTH -->
     <script>
+        // ⚠️ TUKAR URL INI KEPADA WEB APP URL APPS SCRIPT ANDA
+        const SCRIPT_URL = "TEKAN_PASTE_WEB_APP_URL_ANDA_DI_SINI";
+        const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+
         // ==========================================
-        // FUNGSI UNTUK LOGOUT
+        // FUNGSI UNTUK LOGOUT (SAMBUNG KEPADA APPS SCRIPT)
         // ==========================================
-        function logKeluar() {
-            // Padam status login
-            sessionStorage.removeItem("statusLogin");
-            // Kembali ke URL halaman yang telah ditetapkan
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        async function logKeluar() {
+            const token = localStorage.getItem("sessionToken");
+
+            if (token && SCRIPT_URL !== "TEKAN_PASTE_WEB_APP_URL_ANDA_DI_SINI") {
+                try {
+                    // Hantar permintaan untuk memadam token di Google Sheet
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "logout",
+                            token: token
+                        })
+                    });
+                } catch (err) {
+                    console.error("Ralat log keluar server:", err);
+                }
+            }
+
+            // Padam simpanan sesi tempatan
+            localStorage.removeItem("sessionToken");
+            localStorage.removeItem("sessionUser");
+
+            // Kembali ke halaman log masuk
+            window.location.href = LOGIN_URL;
         }
 
         // ==========================================
@@ -310,20 +331,18 @@
         let masaTamat;
 
         function mulaKiraan() {
-            // Padam kiraan masa yang lama
             clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
-            masaTamat = setTimeout(logKeluar, 600000);
+            masaTamat = setTimeout(logKeluar, 600000); // 10 minit
         }
 
-        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
+        // Pantau pergerakan pengguna untuk mereset pemasa
         window.onload = mulaKiraan;
         document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan; // Klik tetikus
-        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
+        document.onmousedown = mulaKiraan;
+        document.ontouchstart = mulaKiraan;
         document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
-        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
+        document.onkeypress = mulaKiraan;
+        document.onscroll = mulaKiraan;
 
         // ==========================================
         // Skrip untuk mengawal menu 'Hamburger' (Mobile)
@@ -337,7 +356,6 @@
             btn.addEventListener('click', () => {
                 menu.classList.toggle('open');
                 
-                // Tukar ikon menu <-> pangkah
                 if (menu.classList.contains('open')) {
                     iconMenu.classList.add('hidden');
                     iconClose.classList.remove('hidden');
