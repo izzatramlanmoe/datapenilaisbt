@@ -5,8 +5,8 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
+        // Menggunakan localStorage supaya status login dikekalkan merentasi tab baharu
+        if (localStorage.getItem("statusLogin") !== "berjaya") {
             alert("Sila log masuk terlebih dahulu!");
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
@@ -220,7 +220,7 @@
         </div>
     </nav>
 
-    <!-- Content Wrapper (Added padding top so it doesn't hide behind fixed navbar) -->
+    <!-- Content Wrapper -->
     <div class="flex-grow flex items-center justify-center w-full p-4 sm:p-8 pt-28 sm:pt-32 relative z-10">
         
         <main class="glass-panel w-full max-w-4xl rounded-[2rem] p-8 sm:p-12 md:p-16 flex flex-col items-center text-center">
@@ -292,15 +292,17 @@
             </div>
         </main>
     </div>
+
     <!-- SKRIP UNTUK FUNGSI HALAMAN -->
     <script>
         // ==========================================
         // FUNGSI UNTUK LOGOUT
         // ==========================================
         function logKeluar() {
-            // Padam status login
+            // Padam status login daripada localStorage dan sessionStorage
+            localStorage.removeItem("statusLogin");
             sessionStorage.removeItem("statusLogin");
-            // Kembali ke URL halaman yang telah ditetapkan
+            // Kembali ke URL halaman utama
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
 
@@ -310,20 +312,18 @@
         let masaTamat;
 
         function mulaKiraan() {
-            // Padam kiraan masa yang lama
             clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
             masaTamat = setTimeout(logKeluar, 600000);
         }
 
-        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
+        // Pantau pergerakan pengguna
         window.onload = mulaKiraan;
         document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan; // Klik tetikus
-        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
+        document.onmousedown = mulaKiraan;
+        document.ontouchstart = mulaKiraan;
         document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
-        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
+        document.onkeypress = mulaKiraan;
+        document.onscroll = mulaKiraan;
 
         // ==========================================
         // Skrip untuk mengawal menu 'Hamburger' (Mobile)
@@ -337,7 +337,6 @@
             btn.addEventListener('click', () => {
                 menu.classList.toggle('open');
                 
-                // Tukar ikon menu <-> pangkah
                 if (menu.classList.contains('open')) {
                     iconMenu.classList.add('hidden');
                     iconClose.classList.remove('hidden');
