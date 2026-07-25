@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <head>
+    <!-- ========================================== -->
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <!-- ========================================== -->
     <script>
         if (sessionStorage.getItem("statusLogin") !== "berjaya") {
             // Jika tiada kunci login, tendang balik ke halaman utama (index.html)
@@ -10,11 +11,8 @@
             window.location.href = "index.html";
         }
     </script>
-    
-    <!-- Kod sedia ada anda untuk homepage.html bermula di sini -->
-    <meta charset="UTF-8">
-    <title>Data Penilai SBT</title>
-    ...
+    <!-- ========================================== -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Data Penilai Buku Teks | KPM</title>
@@ -167,7 +165,8 @@
                     <a href="sistemcarianbakalpenilai.html" class="nav-link text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase px-2 py-2">Carian Bakal Penilai</a>
                     
                     <div class="pl-2 border-l border-gray-300 ml-2">
-                        <a href="#" class="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-xl text-[11px] lg:text-[13px] font-bold uppercase transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
+                        <!-- PENGAKTIFAN BUTANG LOGOUT (Desktop) -->
+                        <a href="#" onclick="logKeluar()" class="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-xl text-[11px] lg:text-[13px] font-bold uppercase transition-all shadow-md hover:shadow-lg flex items-center gap-1.5">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                             Logout
                         </a>
@@ -221,7 +220,8 @@
                 </div>
                 
                 <div class="border-t border-gray-200 mt-4 pt-4">
-                    <a href="#" class="flex items-center justify-center gap-2 px-3 py-3 rounded-lg text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-100 transition-colors">
+                    <!-- PENGAKTIFAN BUTANG LOGOUT (Mobile) -->
+                    <a href="#" onclick="logKeluar()" class="flex items-center justify-center gap-2 px-3 py-3 rounded-lg text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-100 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         LOGOUT
                     </a>
@@ -303,8 +303,21 @@
         </main>
     </div>
 
+    <!-- SKRIP UNTUK FUNGSI HALAMAN -->
     <script>
-        // Skrip untuk mengawal menu 'Hamburger' di paparan mudah alih (Mobile)
+        // ==========================================
+        // FUNGSI UNTUK LOGOUT
+        // ==========================================
+        function logKeluar() {
+            // Padam status login
+            sessionStorage.removeItem("statusLogin");
+            // Kembali ke halaman index.html (Halaman Login)
+            window.location.href = "index.html";
+        }
+
+        // ==========================================
+        // Skrip untuk mengawal menu 'Hamburger' (Mobile)
+        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('mobile-menu-btn');
             const menu = document.getElementById('mobile-menu');
