@@ -224,7 +224,7 @@
         </div>
         
         <div class="input-group">
-            <input type="password" id="password" placeholder="Katalaluan (cth: 12345)" required>
+            <input type="password" id="password" placeholder="Katalaluan" required>
         </div>
         
         <p id="mesej-ralat">Email atau Katalaluan salah!</p>
@@ -246,9 +246,21 @@
                 let emailInput = document.getElementById("email").value;
                 let passInput = document.getElementById("password").value;
 
-                // 2. Tetapkan email dan password rahsia anda di sini
-                let emailBetul = "admin@web.com";
-                let passBetul = "12345";
+                // 2. Senarai pengguna yang dibenarkan (Anda boleh tambah seberapa banyak yang dimahukan)
+                const senaraiPengguna = [
+                    { email: "izzat.ramlan@moe.gov.my", password: "data_sbt" },
+                    { email: "admindata", password: "data_sbt" },
+                    { email: "pengguna2@web.com", password: "pass2" },
+                    { email: "pengguna3@web.com", password: "pass3" },
+                    { email: "cikgu.ali@moe.edu.my", password: "alibest" },
+                    { email: "cikgu.siti@moe.edu.my", password: "sitibest" },
+                    { email: "guru.data@web.com", password: "data123" },
+                    { email: "pengetua@web.com", password: "bos123" },
+                    { email: "kerani@web.com", password: "kerani123" },
+                    { email: "user10@web.com", password: "pwd10" },
+                    { email: "user11@web.com", password: "pwd11" } // Boleh letak koma dan tambah lagi ke bawah
+                ];
+
                 let mesejRalat = document.getElementById("mesej-ralat");
 
                 // Reset animasi ralat jika ia sudah ditunjukkan sebelumnya
@@ -256,8 +268,13 @@
                 mesejRalat.offsetHeight; /* trigger reflow */
                 mesejRalat.style.animation = null;
 
-                // 3. Semak jika ia sepadan
-                if (emailInput === emailBetul && passInput === passBetul) {
+                // 3. Semak jika padanan wujud di dalam senarai
+                // Fungsi .find() akan mencari pengguna yang mempunyai email DAN password yang sama
+                let penggunaSah = senaraiPengguna.find(
+                    user => user.email === emailInput && user.password === passInput
+                );
+
+                if (penggunaSah) {
                     // Berjaya: Tukar gaya butang
                     btn.innerHTML = "Berjaya!";
                     btn.style.background = "rgba(40, 167, 69, 0.5)";
@@ -265,6 +282,9 @@
                     
                     // Simpan "kunci" dalam sessionStorage browser
                     sessionStorage.setItem("statusLogin", "berjaya");
+                    
+                    // Simpan info email siapa yang login untuk digunakan di homepage
+                    sessionStorage.setItem("emailLogin", penggunaSah.email);
                     
                     // Hantar pengguna ke homepage selepas delay sekejap
                     setTimeout(() => {
