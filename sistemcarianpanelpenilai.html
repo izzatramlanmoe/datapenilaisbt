@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Carian Data Bengkel</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Latar belakang kecerunan cerah dan lembut */
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1f2937; /* Teks gelap (Tailwind gray-800) untuk kontras */
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Bayang lembut gelap sedikit */
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #1f2937;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input::placeholder {
+            color: #6b7280; /* Tailwind gray-500 */
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: #93c5fd; /* Biru muda Tailwind blue-300 */
+            outline: none;
+            box-shadow: 0 0 15px rgba(147, 197, 253, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 10px 30px rgba(31, 38, 135, 0.15);
+            border-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .glass-button {
+            background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            color: #3b82f6; /* Biru terang untuk butang */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: scale(1.02);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animasi pusingan untuk ikon loading */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-custom {
+            animation: spin 1s linear infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3); 
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-start text-gray-800">
+
+    <div class="glass-panel rounded-3xl w-full max-w-5xl p-6 md:p-10 mt-4">
+        
+        <!-- Pengepala Sistem -->
+        <div class="text-center mb-10">
+            <h1 class="text-3xl md:text-5xl font-bold mb-3 tracking-tight text-gray-900">Sistem Carian Panel penilai</h1>
+            <p class="text-gray-600 text-lg">Cari maklumat dengan memasukkan nama di bawah</p>
+        </div>
+
+        <!-- Ruangan Carian -->
+        <div class="relative max-w-2xl mx-auto mb-10">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="glass-input rounded-full w-full py-4 pl-12 pr-6 text-lg focus:ring-0" 
+                placeholder="Masukkan nama untuk carian..."
+                autocomplete="off"
+                disabled
+            >
+        </div>
+
+        <!-- Status Memuatkan Data -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-12">
+            <svg class="animate-spin-custom h-10 w-10 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-gray-700 font-medium">Sedang memuat turun pangkalan data...</p>
+        </div>
+
+        <!-- Ruangan Hasil Carian (Tersembunyi pada asalnya) -->
+        <div id="resultsContainer" class="hidden">
+            <div class="flex justify-between items-end mb-4 px-2">
+                <h2 class="text-xl font-semibold text-gray-800">Hasil Carian</h2>
+                <span id="resultCount" class="text-sm bg-blue-100 px-3 py-1 rounded-full text-blue-800 font-medium border border-blue-200">0 rekod ditemui</span>
+            </div>
+            
+            <!-- Grid untuk memaparkan kad-kad hasil carian -->
+            <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Kad hasil carian akan dijana di sini oleh JavaScript -->
+            </div>
+
+            <!-- Mesej Tiada Hasil (Dipaparkan jika carian tidak sepadan) -->
+            <div id="noResults" class="hidden text-center py-12 bg-white/40 rounded-2xl border border-white/60 mt-4 shadow-sm">
+                <svg class="h-16 w-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="text-xl font-medium text-gray-800">Tiada rekod ditemui</h3>
+                <p class="text-gray-500 mt-2">Cuba gunakan kata kunci atau ejaan yang lain.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Pop-up -->
+    <div id="infoModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <!-- Latar belakang gelap (Backdrop) -->
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm cursor-pointer" onclick="closeModal()"></div>
+        
+        <!-- Kandungan Modal -->
+        <div class="glass-panel relative rounded-3xl w-full max-w-lg p-6 md:p-8 transform scale-95 transition-transform duration-300 shadow-2xl z-10" id="modalBox">
+            
+            <!-- Butang Tutup -->
+            <button onclick="closeModal()" class="absolute top-5 right-5 text-gray-500 hover:text-gray-800 bg-gray-100/50 hover:bg-gray-200/50 rounded-full p-2 transition-colors focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            
+            <!-- Pengepala Modal -->
+            <div class="mb-6 pr-8">
+                <h3 id="modalNama" class="text-2xl font-bold text-gray-900 leading-tight uppercase mb-2"></h3>
+                <span id="modalKategori" class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 border border-blue-200"></span>
+            </div>
+            
+            <!-- Butiran Maklumat -->
+            <div class="space-y-5 bg-white/40 rounded-2xl p-5 border border-white/60">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Tempat Bengkel</p>
+                    <p id="modalTempat" class="text-base text-gray-800 font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Mata Pelajaran</p>
+                    <p id="modalSubjek" class="text-base text-gray-800 font-medium"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Penyelaras Projek</p>
+                    <p id="modalPenyelaras" class="text-base text-gray-800 font-medium"></p>
+                </div>
+            </div>
+            
+            <!-- Ruang Butang Muat Turun -->
+            <div id="modalBtnContainer" class="mt-6">
+                <!-- Dijana oleh JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL Data daripada Google Sheets CSV
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQEeqFr3PqdIrXLFfIxDsBRCOChr_BVcDbJqZrgADsq4PTtUfa4DJ_v1Sqju2kVR3trniZeBd-Pa08z/pub?output=csv';
+        
+        // Pembolehubah untuk menyimpan data yang telah diproses
+        let database = [];
+
+        // Elemen-elemen DOM
+        const searchInput = document.getElementById('searchInput');
+        const loadingState = document.getElementById('loadingState');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsGrid = document.getElementById('resultsGrid');
+        const resultCount = document.getElementById('resultCount');
+        const noResults = document.getElementById('noResults');
+
+        // Elemen-elemen Modal DOM
+        const infoModal = document.getElementById('infoModal');
+        const modalBox = document.getElementById('modalBox');
+
+        function initData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    // Menyimpan data yang berjaya ditarik
+                    // Kita tapis (filter) jika ada baris yang NAMA nya kosong
+                    database = results.data.filter(row => row['NAMA'] && row['NAMA'].trim() !== '');
+                    
+                    // Kemas kini Antaramuka (UI)
+                    loadingState.classList.add('hidden');
+                    searchInput.disabled = false;
+                    searchInput.focus();
+                    
+                    // Tunjuk keadaan sedia (Boleh papar semua atau tunggu carian)
+                    // Kita akan paparkan mesej suapan awal
+                    showInitialState();
+                },
+                error: function(error) {
+                    console.error('Ralat ketika memuat turun data:', error);
+                    loadingState.innerHTML = `
+                        <div class="text-red-500 text-center">
+                            <svg class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="font-semibold text-lg">Gagal memuat turun pangkalan data.</p>
+                            <p class="text-sm opacity-80 mt-1 text-red-400">Sila semak pautan URL CSV atau periksa sambungan internet anda.</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function showInitialState() {
+            resultsContainer.classList.remove('hidden');
+            resultsGrid.innerHTML = '';
+            noResults.classList.add('hidden');
+            resultCount.textContent = `${database.length} rekod sedia untuk dicari`;
+            
+            // Paparan bantuan awal
+            const helpText = document.createElement('div');
+            helpText.className = 'col-span-1 md:col-span-2 text-center py-10 bg-white/40 rounded-2xl border border-white/60 shadow-sm';
+            helpText.innerHTML = `
+                <svg class="h-16 w-16 text-blue-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h3 class="text-xl font-medium text-gray-800">Sistem Sedia Digunakan</h3>
+                <p class="text-gray-600 mt-2">Sila masukkan nama pada ruangan carian di atas.</p>
+            `;
+            resultsGrid.appendChild(helpText);
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query === '') {
+                showInitialState();
+                return;
+            }
+
+            // Menapis data berdasarkan ruangan 'NAMA'
+            const filteredData = database.filter(item => {
+                const nama = item['NAMA'] ? item['NAMA'].toLowerCase() : '';
+                return nama.includes(query);
+            });
+
+            renderResults(filteredData);
+        }
+
+        function renderResults(data) {
+            resultsGrid.innerHTML = ''; // Bersihkan hasil sebelum ini
+            resultCount.textContent = `${data.length} rekod ditemui`;
+
+            if (data.length === 0) {
+                noResults.classList.remove('hidden');
+                return;
+            } else {
+                noResults.classList.add('hidden');
+            }
+
+            // Membina kad untuk setiap data yang ditemui
+            data.forEach(item => {
+                const card = document.createElement('div');
+                // Tambah kursor tangan (pointer) dan animasi hover untuk petunjuk klik
+                card.className = 'glass-card rounded-2xl p-6 flex flex-col h-full cursor-pointer hover:ring-2 hover:ring-blue-300/50 relative group';
+                
+                // Tambah fungsi klik pada kad untuk buka modal
+                card.onclick = (e) => {
+                    // Elakkan buka modal jika pengguna klik terus pada butang muat turun di luar
+                    if (e.target.closest('a')) return;
+                    openModal(item);
+                };
+
+                // Menentukan sama ada URL muat turun sah (bukan kosong atau N/A)
+                const urlVal = item['URL MUAT TURUN'];
+                let buttonHTML = '';
+                
+                if (urlVal && urlVal.trim() !== '' && urlVal.toLowerCase().startsWith('http')) {
+                    buttonHTML = `
+                        <a href="${urlVal}" target="_blank" class="glass-button w-full mt-4 py-3 rounded-xl flex items-center justify-center font-medium gap-2 relative z-10">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Muat Turun
+                        </a>
+                    `;
+                } else {
+                    buttonHTML = `
+                        <div class="w-full mt-4 py-3 rounded-xl flex items-center justify-center text-gray-400 bg-gray-100/50 border border-gray-200/50 font-medium gap-2 cursor-not-allowed">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Tiada Fail
+                        </div>
+                    `;
+                }
+
+                // Menyusun struktur dalaman kad (Papar info asas sahaja di luar)
+                card.innerHTML = `
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500 bg-white/60 p-1.5 rounded-full shadow-sm">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-start justify-between mb-2 pr-6">
+                            <h3 class="text-xl font-bold leading-tight uppercase text-gray-900">
+                                ${item['NAMA'] || '-'}
+                            </h3>
+                        </div>
+                        <div class="mb-4">
+                            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 border border-blue-200">
+                                ${item['KATEGORI'] || '-'}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <!-- Tempat Bengkel (Dipaparkan pada kad hadapan) -->
+                            <div class="flex items-start gap-3">
+                                <svg class="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <div class="overflow-hidden">
+                                    <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Tempat Bengkel</p>
+                                    <p class="text-sm text-gray-800 truncate">${item['TEMPAT BENGKEL'] || 'Tidak dinyatakan'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${buttonHTML}
+                `;
+
+                resultsGrid.appendChild(card);
+            });
+        }
+
+        // Fungsi Buka Modal
+        function openModal(item) {
+            // Masukkan data ke dalam modal
+            document.getElementById('modalNama').textContent = item['NAMA'] || '-';
+            document.getElementById('modalKategori').textContent = item['KATEGORI'] || '-';
+            document.getElementById('modalTempat').textContent = item['TEMPAT BENGKEL'] || 'Tidak dinyatakan';
+            document.getElementById('modalSubjek').textContent = item['MATA PELAJARAN'] || 'Tidak dinyatakan';
+            document.getElementById('modalPenyelaras').textContent = item['NAMA PENYELARAS PROJEK'] || 'Tidak dinyatakan';
+            
+            // Konfigurasi Butang Muat Turun di dalam Modal
+            const urlVal = item['URL MUAT TURUN'];
+            const btnContainer = document.getElementById('modalBtnContainer');
+            
+            if (urlVal && urlVal.trim() !== '' && urlVal.toLowerCase().startsWith('http')) {
+                btnContainer.innerHTML = `
+                    <a href="${urlVal}" target="_blank" class="glass-button w-full py-4 rounded-xl flex items-center justify-center font-bold text-lg gap-2 shadow-md">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Muat Turun Fail
+                    </a>
+                `;
+            } else {
+                btnContainer.innerHTML = `
+                    <div class="w-full py-4 rounded-xl flex items-center justify-center text-gray-500 bg-gray-200/60 border border-gray-300/50 font-bold text-lg gap-2 cursor-not-allowed">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Tiada Fail Disediakan
+                    </div>
+                `;
+            }
+
+            // Tunjukkan Modal
+            infoModal.classList.remove('hidden');
+            infoModal.classList.add('flex');
+            
+            // Halang halaman belakang dari diskrol
+            document.body.style.overflow = 'hidden';
+            
+            // Kelewatan untuk membolehkan efek transisi CSS diproses (animasi muncul)
+            requestAnimationFrame(() => {
+                infoModal.classList.remove('opacity-0');
+                modalBox.classList.remove('scale-95');
+                modalBox.classList.add('scale-100');
+            });
+        }
+
+        // Fungsi Tutup Modal
+        function closeModal() {
+            // Mainkan animasi pudar/mengecil terlebih dahulu
+            infoModal.classList.add('opacity-0');
+            modalBox.classList.remove('scale-100');
+            modalBox.classList.add('scale-95');
+            
+            // Sembunyikan sepenuhnya selepas durasi animasi tamat (300ms)
+            setTimeout(() => {
+                infoModal.classList.add('hidden');
+                infoModal.classList.remove('flex');
+                document.body.style.overflow = ''; // Kembalikan skrol halaman asal
+            }, 300);
+        }
+        
+        // Membolehkan modal ditutup jika menekan butang ESC pada papan kekunci
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !infoModal.classList.contains('hidden')) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Memulakan proses memuat turun data sebaik sahaja laman dibuka
+            initData();
+
+            // Mendengar setiap ketikan pada papan kekunci untuk memberikan hasil carian pantas
+            searchInput.addEventListener('input', handleSearch);
+        });
+
+    </script>
+</body>
+</html>
