@@ -5,8 +5,8 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
+        // Semak jika pengguna mempunyai token sesi sah dalam localStorage
+        if (!localStorage.getItem("sessionToken")) {
             alert("Sila log masuk terlebih dahulu!");
             window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
@@ -121,12 +121,15 @@
                     <p class="text-gray-500 font-medium">Paparan Analitik Profesional</p>
                 </div>
                 
-                <!-- Live Update Section -->
-                <div class="flex flex-col items-center md:items-end">
+                <!-- Live Update & Logout Section -->
+                <div class="flex flex-wrap items-center justify-center md:justify-end gap-3">
                     <button id="btnLiveUpdate" class="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 px-5 py-2.5 rounded-full shadow-sm border border-blue-200/60 transition-all font-bold text-sm active:scale-95">
                         <i class="fas fa-sync-alt" id="syncIcon"></i> Muat Semula (Live)
                     </button>
-                    <div class="text-xs text-gray-500 mt-2 font-medium bg-gray-100/50 px-3 py-1 rounded-full border border-gray-200/50">
+                    <button onclick="logKeluar()" class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-full shadow-sm transition-all font-bold text-sm active:scale-95">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                    <div class="w-full text-center md:text-right text-xs text-gray-500 font-medium bg-gray-100/50 px-3 py-1 rounded-full border border-gray-200/50 mt-1">
                         <i class="far fa-clock mr-1 text-gray-400"></i> <span id="lastUpdateTime">Dikemas kini: -</span>
                     </div>
                 </div>
@@ -255,17 +258,20 @@
 
     </div>
 
+    <!-- SKRIP UTAMA APLIKASI -->
     <script>
-        // Data URL
+        // ⚠️ TUKAR URL INI KEPADA WEB APP URL APPS SCRIPT ANDA
+        const SCRIPT_URL = "TEKAN_PASTE_WEB_APP_URL_ANDA_DI_SINI";
+        const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+
+        // Data URL Google Sheets CSV
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQEeqFr3PqdIrXLFfIxDsBRCOChr_BVcDbJqZrgADsq4PTtUfa4DJ_v1Sqju2kVR3trniZeBd-Pa08z/pub?output=csv';
 
-        // Global state to store the parsed data and chart instances
+        // Global state
         let globalData = [];
         let filteredData = [];
         let chartInstances = {};
 
-        // Configuration for standardizing keys (since CSV headers might have spaces/special chars)
-        // We will map based on the columns requested
         const KEYS = {
             TEMPAT: 'TEMPAT BENGKEL',
             PENYELARAS: 'NAMA PENYELARAS PROJEK',
@@ -273,26 +279,24 @@
             SUBJEK: 'MATA PELAJARAN',
             NAMA: 'NAMA',
             URL: 'URL MUAT TURUN',
-            JAWATAN_BENGKEL: 'JAWATAN DALAM BENGKEL KERJA/MESYUARAT', // Assuming this exists based on filter request
-            // Keys for Pie Charts
+            JAWATAN_BENGKEL: 'JAWATAN DALAM BENGKEL KERJA/MESYUARAT',
             JANTINA: 'JANTINA',
             GELARAN: 'GELARAN',
-            JAWATAN: 'JAWATAN', // Assuming Hakiki
+            JAWATAN: 'JAWATAN',
             GRED: 'GRED JAWATAN'
         };
 
-        // Theme colors for charts (Liquid aesthetic)
         const chartColors = [
-            'rgba(59, 130, 246, 0.8)',   // Blue
-            'rgba(147, 51, 234, 0.8)',   // Purple
-            'rgba(236, 72, 153, 0.8)',   // Pink
-            'rgba(16, 185, 129, 0.8)',   // Emerald
-            'rgba(245, 158, 11, 0.8)',   // Amber
-            'rgba(6, 182, 212, 0.8)',    // Cyan
-            'rgba(244, 63, 94, 0.8)',    // Rose
-            'rgba(139, 92, 246, 0.8)',   // Violet
-            'rgba(20, 184, 166, 0.8)',   // Teal
-            'rgba(234, 88, 12, 0.8)'     // Orange
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(147, 51, 234, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(245, 158, 11, 0.8)',
+            'rgba(6, 182, 212, 0.8)',
+            'rgba(244, 63, 94, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(20, 184, 166, 0.8)',
+            'rgba(234, 88, 12, 0.8)'
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -301,8 +305,50 @@
             setupEventListeners();
         });
 
+        // ==========================================
+        // FUNGSI LOGOUT (DISAKSIKAN DENGAN APPS SCRIPT)
+        // ==========================================
+        async function logKeluar() {
+            const token = localStorage.getItem("sessionToken");
+
+            if (token && SCRIPT_URL !== "TEKAN_PASTE_WEB_APP_URL_ANDA_DI_SINI") {
+                try {
+                    await fetch(SCRIPT_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "logout",
+                            token: token
+                        })
+                    });
+                } catch (err) {
+                    console.error("Ralat pemadaman token:", err);
+                }
+            }
+
+            localStorage.removeItem("sessionToken");
+            localStorage.removeItem("sessionUser");
+            window.location.href = LOGIN_URL;
+        }
+
+        // Auto Logout Selepas 10 Minit (600,000 ms)
+        let masaTamat;
+        function mulaKiraan() {
+            clearTimeout(masaTamat);
+            masaTamat = setTimeout(logKeluar, 600000);
+        }
+
+        window.onload = mulaKiraan;
+        document.onmousemove = mulaKiraan;
+        document.onmousedown = mulaKiraan;
+        document.ontouchstart = mulaKiraan;
+        document.onclick = mulaKiraan;
+        document.onkeypress = mulaKiraan;
+        document.onscroll = mulaKiraan;
+
+        // ==========================================
+        // PEMPROSESAN DATA CSV & DASHBOARD
+        // ==========================================
         function fetchData(isLiveRefresh = false) {
-            // Jika live refresh, elakkan cache dengan menambah parameter unik pada URL
             const targetUrl = isLiveRefresh ? `${CSV_URL}&t=${new Date().getTime()}` : CSV_URL;
             
             if (isLiveRefresh) {
@@ -314,9 +360,6 @@
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    console.log("Data parsed:", results.data);
-                    
-                    // Clean headers by trimming whitespace
                     let cleanedData = results.data.map(row => {
                         let newRow = {};
                         for (let key in row) {
@@ -328,7 +371,7 @@
                     globalData = cleanedData;
                     
                     if (isLiveRefresh) {
-                        applyFilters(); // Apply existing filters to new data
+                        applyFilters();
                     } else {
                         filteredData = [...globalData];
                         initApp();
@@ -342,7 +385,7 @@
                 },
                 error: function(error) {
                     console.error("Error parsing CSV:", error);
-                    alert("Ralat memuat turun data. Sila pastikan pautan Google Sheet boleh diakses umum (Published to web).");
+                    alert("Ralat memuat turun data. Sila pastikan pautan Google Sheet boleh diakses umum.");
                     document.getElementById('loader').innerHTML = "<p class='text-red-500 font-bold'>Gagal memuat turun data.</p>";
                     if (isLiveRefresh) document.getElementById('syncIcon').classList.remove('animate-spin');
                 }
@@ -359,19 +402,16 @@
             populateFilterOptions();
             updateDashboard();
             
-            // Hide loader, show content
             document.getElementById('loader').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
         }
 
         function getUniqueValues(data, key) {
-            // Get unique values, filter out empty, sort alphabetically
             return [...new Set(data.map(item => item[key]).filter(val => val !== undefined && val !== ''))].sort();
         }
 
         function populateSelect(selectId, values) {
             const select = document.getElementById(selectId);
-            // Keep the first default option
             const firstOption = select.options[0];
             select.innerHTML = '';
             select.appendChild(firstOption);
@@ -385,31 +425,18 @@
         }
 
         function populateFilterOptions() {
-            // Populate based on available columns, fallback gracefully if column doesn't exist perfectly
+            populateSelect('filterMataPelajaran', getUniqueValues(globalData, KEYS.SUBJEK));
+            populateSelect('filterTempatBengkel', getUniqueValues(globalData, KEYS.TEMPAT));
+            populateSelect('filterKategori', getUniqueValues(globalData, KEYS.KATEGORI));
+            populateSelect('filterPenyelaras', getUniqueValues(globalData, KEYS.PENYELARAS));
             
-            const subjekValues = getUniqueValues(globalData, KEYS.SUBJEK);
-            populateSelect('filterMataPelajaran', subjekValues);
-
-            const tempatValues = getUniqueValues(globalData, KEYS.TEMPAT);
-            populateSelect('filterTempatBengkel', tempatValues);
-
-            const kategoriValues = getUniqueValues(globalData, KEYS.KATEGORI);
-            populateSelect('filterKategori', kategoriValues);
-
-            const penyelarasValues = getUniqueValues(globalData, KEYS.PENYELARAS);
-            populateSelect('filterPenyelaras', penyelarasValues);
-            
-            // For jawatan bengkel, check if the exact key exists, otherwise try partial match
             let jawatanKey = KEYS.JAWATAN_BENGKEL;
             if (globalData.length > 0 && !(jawatanKey in globalData[0])) {
-                // Find a key that contains 'JAWATAN' and 'BENGKEL'
                 const keys = Object.keys(globalData[0]);
                 const fallback = keys.find(k => k.toUpperCase().includes('JAWATAN') && (k.toUpperCase().includes('BENGKEL') || k.toUpperCase().includes('MESYUARAT')));
                 if(fallback) jawatanKey = fallback;
             }
-            const jawatanValues = getUniqueValues(globalData, jawatanKey);
-            populateSelect('filterJawatanBengkel', jawatanValues);
-            // Store the dynamic key for filtering later
+            populateSelect('filterJawatanBengkel', getUniqueValues(globalData, jawatanKey));
             document.getElementById('filterJawatanBengkel').dataset.key = jawatanKey;
         }
 
@@ -454,59 +481,45 @@
         }
 
         function updateDashboard() {
-            // Update Record Count
             document.getElementById('recordCount').textContent = `Menunjukkan ${filteredData.length} rekod`;
 
-            // Update Charts
             renderPieChart('chartJantina', filteredData, KEYS.JANTINA);
             renderPieChart('chartGelaran', filteredData, KEYS.GELARAN);
             renderPieChart('chartJawatan', filteredData, KEYS.JAWATAN);
             renderPieChart('chartGred', filteredData, KEYS.GRED);
 
-            // Update Table
             renderTable(filteredData);
         }
 
         function aggregateData(data, key) {
-            // Count occurrences of each value
             const counts = {};
             data.forEach(item => {
                 let val = item[key] || 'Tiada Maklumat';
-                // Clean up slight variations if needed, here just trimming
                 val = val.trim();
                 if(val === '') val = 'Tiada Maklumat';
-                
                 counts[val] = (counts[val] || 0) + 1;
             });
 
-            // Convert to arrays for Chart.js
-            const labels = Object.keys(counts);
-            const values = Object.values(counts);
-
-            return { labels, values };
+            return { labels: Object.keys(counts), values: Object.values(counts) };
         }
 
         function renderPieChart(canvasId, data, key) {
-            // Check if key exists in data
             let actualKey = key;
             if(globalData.length > 0 && !(key in globalData[0])) {
-                 const keys = Object.keys(globalData[0]);
-                 const fallback = keys.find(k => k.toUpperCase().includes(key));
-                 if(fallback) actualKey = fallback;
+                const keys = Object.keys(globalData[0]);
+                const fallback = keys.find(k => k.toUpperCase().includes(key));
+                if(fallback) actualKey = fallback;
             }
 
             const aggregated = aggregateData(data, actualKey);
-            
             const ctx = document.getElementById(canvasId).getContext('2d');
             
-            // Destroy existing chart if it exists
             if (chartInstances[canvasId]) {
                 chartInstances[canvasId].destroy();
             }
 
-            // If no data, render empty chart state
             if (aggregated.values.length === 0) {
-                 chartInstances[canvasId] = new Chart(ctx, {
+                chartInstances[canvasId] = new Chart(ctx, {
                     type: 'pie',
                     data: {
                         labels: ['Tiada Data'],
@@ -518,7 +531,7 @@
             }
 
             chartInstances[canvasId] = new Chart(ctx, {
-                type: 'doughnut', // Doughnut looks better for liquid/modern UI
+                type: 'doughnut',
                 data: {
                     labels: aggregated.labels,
                     datasets: [{
@@ -532,17 +545,14 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '50%', // Make it a nice doughnut
+                    cutout: '50%',
                     plugins: {
                         legend: {
                             position: 'right',
                             labels: {
                                 usePointStyle: true,
                                 boxWidth: 8,
-                                font: {
-                                    family: "'Inter', sans-serif",
-                                    size: 11
-                                }
+                                font: { family: "'Inter', sans-serif", size: 11 }
                             }
                         },
                         tooltip: {
@@ -557,12 +567,9 @@
                             callbacks: {
                                 label: function(context) {
                                     let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
+                                    if (label) label += ': ';
                                     if (context.parsed !== null) {
                                         label += context.parsed;
-                                        // Calculate percentage
                                         const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
                                         const percentage = ((context.parsed / total) * 100).toFixed(1) + '%';
                                         label += ` (${percentage})`;
@@ -589,7 +596,6 @@
                 noDataMsg.classList.add('hidden');
             }
 
-            // Find URL key dynamically if it varies slightly
             let urlKey = KEYS.URL;
             if(data.length > 0 && !(urlKey in data[0])) {
                 const keys = Object.keys(data[0]);
@@ -601,11 +607,9 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-blue-50 transition-colors duration-150 group';
                 
-                // Construct download button logic
                 const url = item[urlKey] || '#';
                 let downloadBtn = '-';
                 if (url && url !== '#' && url.trim() !== '') {
-                    // Modern stylized download button
                     downloadBtn = `
                         <a href="${url}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white transition-all duration-200 bg-gradient-to-r from-blue-500 to-indigo-600 border border-transparent rounded-full shadow-sm hover:from-blue-600 hover:to-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             <i class="fas fa-download mr-1.5"></i> Muat Turun
@@ -613,7 +617,6 @@
                     `;
                 }
 
-                // Handle missing fields gracefully
                 const nama = item[KEYS.NAMA] || '-';
                 const subjek = item[KEYS.SUBJEK] || '-';
                 const kategori = item[KEYS.KATEGORI] || '-';
@@ -638,68 +641,6 @@
                 tbody.appendChild(tr);
             });
         }
-    </script>
-</body>
-</html>
-
-<!-- SKRIP UNTUK FUNGSI HALAMAN -->
-    <script>
-        // ==========================================
-        // FUNGSI UNTUK LOGOUT
-        // ==========================================
-        function logKeluar() {
-            // Padam status login
-            sessionStorage.removeItem("statusLogin");
-            // Kembali ke URL halaman yang telah ditetapkan
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
-        }
-
-        // ==========================================
-        // FUNGSI AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
-        // ==========================================
-        let masaTamat;
-
-        function mulaKiraan() {
-            // Padam kiraan masa yang lama
-            clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
-            masaTamat = setTimeout(logKeluar, 600000);
-        }
-
-        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
-        window.onload = mulaKiraan;
-        document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan; // Klik tetikus
-        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
-        document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
-        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
-
-        // ==========================================
-        // Skrip untuk mengawal menu 'Hamburger' (Mobile)
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('mobile-menu-btn');
-            const menu = document.getElementById('mobile-menu');
-            const iconMenu = document.getElementById('icon-menu');
-            const iconClose = document.getElementById('icon-close');
-
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('open');
-                
-                // Tukar ikon menu <-> pangkah
-                if (menu.classList.contains('open')) {
-                    iconMenu.classList.add('hidden');
-                    iconClose.classList.remove('hidden');
-                    iconClose.classList.add('block');
-                } else {
-                    iconMenu.classList.remove('hidden');
-                    iconMenu.classList.add('block');
-                    iconClose.classList.add('hidden');
-                    iconClose.classList.remove('block');
-                }
-            });
-        });
     </script>
 </body>
 </html>
