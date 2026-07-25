@@ -306,6 +306,27 @@
         }
 
         // ==========================================
+        // FUNGSI AUTO LOGOUT SELEPAS 10 SAAT (10000 ms)
+        // ==========================================
+        let masaTamat;
+
+        function mulaKiraan() {
+            // Padam kiraan masa yang lama
+            clearTimeout(masaTamat);
+            // Tetapkan kiraan baru (10000 milisaat = 10 saat)
+            masaTamat = setTimeout(logKeluar, 10000);
+        }
+
+        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
+        window.onload = mulaKiraan;
+        document.onmousemove = mulaKiraan;
+        document.onmousedown = mulaKiraan; // Klik tetikus
+        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
+        document.onclick = mulaKiraan;
+        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
+        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
+
+        // ==========================================
         // Skrip untuk mengawal menu 'Hamburger' (Mobile)
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
