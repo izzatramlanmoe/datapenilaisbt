@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
+    <!-- ========================================== -->
+    <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <!-- ========================================== -->
+    <script>
+        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
+            // Jika tiada kunci login, tendang balik ke halaman utama
+            alert("Sila log masuk terlebih dahulu!");
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        }
+    </script>
+    <!-- ========================================== -->
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Carian Data Bengkel</title>
@@ -459,6 +471,67 @@
             searchInput.addEventListener('input', handleSearch);
         });
 
+    </script>
+</body>
+</html>
+<!-- SKRIP UNTUK FUNGSI HALAMAN -->
+    <script>
+        // ==========================================
+        // FUNGSI UNTUK LOGOUT
+        // ==========================================
+        function logKeluar() {
+            // Padam status login
+            sessionStorage.removeItem("statusLogin");
+            // Kembali ke URL halaman yang telah ditetapkan
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        }
+
+        // ==========================================
+        // FUNGSI AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
+        // ==========================================
+        let masaTamat;
+
+        function mulaKiraan() {
+            // Padam kiraan masa yang lama
+            clearTimeout(masaTamat);
+            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
+            masaTamat = setTimeout(logKeluar, 600000);
+        }
+
+        // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
+        window.onload = mulaKiraan;
+        document.onmousemove = mulaKiraan;
+        document.onmousedown = mulaKiraan; // Klik tetikus
+        document.ontouchstart = mulaKiraan; // Sentuhan pada skrin (mobile)
+        document.onclick = mulaKiraan;
+        document.onkeypress = mulaKiraan; // Tekanan papan kekunci
+        document.onscroll = mulaKiraan; // Tatal (scroll) skrin
+
+        // ==========================================
+        // Skrip untuk mengawal menu 'Hamburger' (Mobile)
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('mobile-menu-btn');
+            const menu = document.getElementById('mobile-menu');
+            const iconMenu = document.getElementById('icon-menu');
+            const iconClose = document.getElementById('icon-close');
+
+            btn.addEventListener('click', () => {
+                menu.classList.toggle('open');
+                
+                // Tukar ikon menu <-> pangkah
+                if (menu.classList.contains('open')) {
+                    iconMenu.classList.add('hidden');
+                    iconClose.classList.remove('hidden');
+                    iconClose.classList.add('block');
+                } else {
+                    iconMenu.classList.remove('hidden');
+                    iconMenu.classList.add('block');
+                    iconClose.classList.add('hidden');
+                    iconClose.classList.remove('block');
+                }
+            });
+        });
     </script>
 </body>
 </html>
