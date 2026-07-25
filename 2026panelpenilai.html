@@ -642,17 +642,28 @@
 </body>
 </html>
 
+<!-- SKRIP UNTUK FUNGSI HALAMAN -->
+    <script>
+        // ==========================================
+        // FUNGSI UNTUK LOGOUT
+        // ==========================================
+        function logKeluar() {
+            // Padam status login
+            sessionStorage.removeItem("statusLogin");
+            // Kembali ke URL halaman yang telah ditetapkan
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        }
 
         // ==========================================
-        // FUNGSI AUTO LOGOUT SELEPAS 10 SAAT (10000 ms)
+        // FUNGSI AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
         // ==========================================
         let masaTamat;
 
         function mulaKiraan() {
             // Padam kiraan masa yang lama
             clearTimeout(masaTamat);
-            // Tetapkan kiraan baru (10000 milisaat = 10 saat)
-            masaTamat = setTimeout(logKeluar, 10000);
+            // Tetapkan kiraan baru (600000 milisaat = 10 minit)
+            masaTamat = setTimeout(logKeluar, 600000);
         }
 
         // Pantau pergerakan pengguna. Jika pengguna bergerak/klik, masa reset semula
