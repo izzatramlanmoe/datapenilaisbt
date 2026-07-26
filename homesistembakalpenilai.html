@@ -3,12 +3,13 @@
 <head>
     <!-- ========================================== -->
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <!-- PASTIKAN KOD INI JUGA ADA DI DALAM FAIL KSSR.HTML, KSSM.HTML, DLL -->
     <!-- ========================================== -->
     <script>
-        // Menggunakan localStorage supaya status login dikekalkan merentasi tab baharu
+        // Semak status login menggunakan localStorage
         if (localStorage.getItem("statusLogin") !== "berjaya") {
-            alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+            alert("Akses ditolak! Sila log masuk terlebih dahulu.");
+            window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
         }
     </script>
     <!-- ========================================== -->
@@ -24,7 +25,6 @@
             margin: 0;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
-            /* Latar belakang Aurora Cerah (Light Gradient) */
             background: linear-gradient(-45deg, #a1c4fd, #c2e9fb, #e0c3fc, #8ec5fc);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -158,43 +158,36 @@
             Buku Teks
         </h2>
 
+        <!-- Pautan telah ditukar menggunakan onclick navigasi() untuk paparkan notifikasi dahulu -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full px-4">
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssr.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSR')">
-                <span class="relative">
-                    KSSR
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-                </span>
-            </a>
+            <button onclick="navigasi('https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssr.html', 'Membuka pautan: KSSR')" class="glass-btn group relative border-none">
+                <span class="relative z-10">KSSR</span>
+                <span class="absolute bottom-4 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-20"></span>
+            </button>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssm.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSM')">
-                <span class="relative">
-                    KSSM
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-                </span>
-            </a>
+            <button onclick="navigasi('https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssm.html', 'Membuka pautan: KSSM')" class="glass-btn group relative border-none">
+                <span class="relative z-10">KSSM</span>
+                <span class="absolute bottom-4 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-20"></span>
+            </button>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssrpk.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSRPK')">
-                <span class="relative">
-                    KSSRPK
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-                </span>
-            </a>
+            <button onclick="navigasi('https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssrpk.html', 'Membuka pautan: KSSRPK')" class="glass-btn group relative border-none">
+                <span class="relative z-10">KSSRPK</span>
+                <span class="absolute bottom-4 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-20"></span>
+            </button>
             
-            <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssmpk.html" class="glass-btn group" onclick="showNotification('Membuka pautan: KSSMPK')">
-                <span class="relative">
-                    KSSMPK
-                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-full"></span>
-                </span>
-            </a>
+            <button onclick="navigasi('https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilaikssmpk.html', 'Membuka pautan: KSSMPK')" class="glass-btn group relative border-none">
+                <span class="relative z-10">KSSMPK</span>
+                <span class="absolute bottom-4 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-500 transition-all group-hover:w-20"></span>
+            </button>
         </div>
 
         <div class="w-full px-4 mt-8">
-            <a href="https://sites.google.com/moe.gov.my/datapenilaisbt/2024-2025-bakal-penilai/demografi" target="_blank" rel="noopener noreferrer" class="glass-btn group w-full !py-6 md:!py-8 !text-2xl md:!text-3xl bg-gradient-to-r from-blue-100/50 to-indigo-100/50 border-2 border-blue-300/60 shadow-lg hover:shadow-xl hover:bg-white/80" onclick="showNotification('Membuka pautan: DEMOGRAFI')">
+            <button onclick="navigasi('https://sites.google.com/moe.gov.my/datapenilaisbt/2024-2025-bakal-penilai/demografi', 'Membuka pautan: DEMOGRAFI', true)" class="glass-btn group w-full !py-6 md:!py-8 !text-2xl md:!text-3xl bg-gradient-to-r from-blue-100/50 to-indigo-100/50 border-2 border-blue-300/60 shadow-lg hover:shadow-xl hover:bg-white/80">
                 <span class="relative font-bold text-blue-900 tracking-wider">
                     DEMOGRAFI
                     <span class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300 group-hover:w-full rounded-full"></span>
                 </span>
-            </a>
+            </button>
         </div>
 
         <p class="mt-12 text-sm text-slate-500 font-medium tracking-wide">
@@ -207,7 +200,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // ⚠️ SAMAKAN MAKLUMAT CONFIG DENGAN INDEX.HTML ANDA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyYourApiKeyHere...",
             authDomain: "your-app.firebaseapp.com",
@@ -222,9 +214,7 @@
 
         const INDEX_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
 
-        // ==========================================
-        // FUNGSI LOGOUT (DISAKSIKAN DENGAN FIREBASE)
-        // ==========================================
+        // Fungsi log keluar
         window.logKeluar = async function() {
             try {
                 await signOut(auth);
@@ -240,11 +230,8 @@
             window.location.href = INDEX_URL;
         };
 
-        // ==========================================
-        // AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
-        // ==========================================
+        // Auto log keluar selepas 10 minit
         let masaTamat;
-
         function mulaKiraan() {
             clearTimeout(masaTamat);
             masaTamat = setTimeout(window.logKeluar, 600000);
@@ -259,6 +246,7 @@
         document.onscroll = mulaKiraan;
     </script>
 
+    <!-- Skrip untuk notifikasi dan navigasi -->
     <script>
         let notifTimeout;
 
@@ -270,10 +258,23 @@
             notif.classList.add('show-notification');
             
             clearTimeout(notifTimeout);
-            
             notifTimeout = setTimeout(() => {
                 notif.classList.remove('show-notification');
             }, 3000);
+        }
+
+        // Fungsi khas supaya sistem sempat tunjuk kotak hijau sebelum redirect
+        function navigasi(url, mesej, tabBaru = false) {
+            showNotification(mesej);
+            
+            // Beri masa 800ms untuk pengguna lihat animasi sebelum beralih muka surat
+            setTimeout(() => {
+                if(tabBaru) {
+                    window.open(url, '_blank');
+                } else {
+                    window.location.href = url;
+                }
+            }, 800);
         }
     </script>
 </body>
