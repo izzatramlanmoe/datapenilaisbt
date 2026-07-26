@@ -5,10 +5,10 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
-            alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        // Menggunakan localStorage supaya selari dengan index.html dan KSSR
+        if (localStorage.getItem("statusLogin") !== "berjaya") {
+            alert("Akses ditolak! Sila log masuk terlebih dahulu.");
+            window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
         }
     </script>
     <!-- ========================================== -->
@@ -540,7 +540,7 @@
           <p id="modalQualification" class="text-slate-200 font-semibold mt-0.5">-</p>
         </div>
         <div class="col-span-2 bg-slate-900/60 p-3 rounded-xl border border-white/5">
-          <p class="text-slate-400 text-[10px] uppercase font-bold">Jawatan Dalam Bengkel Kerja/Mesyuara</p>
+          <p class="text-slate-400 text-[10px] uppercase font-bold">Jawatan Dalam Bengkel Kerja/Mesyuarat</p>
           <p id="modalPosition" class="text-slate-200 font-semibold mt-0.5">-</p>
         </div>
       </div>
@@ -1167,8 +1167,10 @@
     // SKRIP TIMEOUT & LOGOUT
     // ==========================================
     function logKeluar() {
+        // Padam status login dari localStorage
+        localStorage.removeItem("statusLogin");
         sessionStorage.removeItem("statusLogin");
-        window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
     }
 
     let masaTamat;
