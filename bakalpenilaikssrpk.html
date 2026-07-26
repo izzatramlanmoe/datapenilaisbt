@@ -5,10 +5,10 @@
     <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
     <!-- ========================================== -->
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "berjaya") {
-            // Jika tiada kunci login, tendang balik ke halaman utama
-            alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        // Menggunakan localStorage supaya selari dengan index.html
+        if (localStorage.getItem("statusLogin") !== "berjaya") {
+            alert("Akses ditolak! Sila log masuk terlebih dahulu.");
+            window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
         }
     </script>
     <!-- ========================================== -->
@@ -152,7 +152,7 @@
 
     /* Mobile menu state */
     #mobile-menu.open {
-      display: block;
+      display: flex;
     }
   </style>
 </head>
@@ -663,8 +663,9 @@
     let masaTamat;
 
     function logKeluar() {
+        localStorage.removeItem("statusLogin");
         sessionStorage.removeItem("statusLogin");
-        window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
     }
 
     function mulaKiraan() {
@@ -743,21 +744,34 @@
               }
 
               rawData = validData.map(row => {
-                const getKey = (target) => {
-                  return Object.keys(row).find(k => k.trim().toUpperCase() === target.trim().toUpperCase()) || target;
+                const getFlexibleKey = (target) => {
+                  const normalize = (str) => str.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                  const targetNorm = normalize(target);
+                  return Object.keys(row).find(k => normalize(k) === targetNorm) || target;
                 };
 
-                const tempat = row[getKey('TEMPAT BENGKEL')] || row['TEMPAT BENGKEL'] || '-';
-                const penyelaras = row[getKey('NAMA PENYELARAS PROJEK')] || row['NAMA PENYELARAS PROJEK'] || '-';
-                const kategori = row[getKey('KATEGORI')] || row['KATEGORI'] || '-';
-                const mataPelajaran = row[getKey('MATA PELAJARAN')] || row['MATA PELAJARAN'] || '-';
-                const nama = row[getKey('NAMA')] || row['NAMA'] || '-';
-                const url = row[getKey('URL MUAT TURUN')] || row['URL MUAT TURUN'] || '';
+                const findUrlKey = () => {
+                   const possibleKeys = ['URL', 'LINK', 'PAUTAN', 'MUATTURUN', 'DOCUMENT', 'DOKUMEN'];
+                   for (const pk of possibleKeys) {
+                       const found = Object.keys(row).find(k => k.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().includes(pk));
+                       if (found) return found;
+                   }
+                   return 'URL MUAT TURUN';
+                };
+
+                const tempat = row[getFlexibleKey('TEMPAT BENGKEL')] || row['TEMPAT BENGKEL'] || '-';
+                const penyelaras = row[getFlexibleKey('NAMA PENYELARAS PROJEK')] || row['NAMA PENYELARAS PROJEK'] || '-';
+                const kategori = row[getFlexibleKey('KATEGORI')] || row['KATEGORI'] || '-';
+                const mataPelajaran = row[getFlexibleKey('MATA PELAJARAN')] || row['MATA PELAJARAN'] || '-';
+                const nama = row[getFlexibleKey('NAMA')] || row['NAMA'] || '-';
                 
-                const gelaran = row[getKey('GELARAN')] || deriveGelaran(nama);
-                const jantina = row[getKey('JANTINA')] || deriveJantina(nama, gelaran);
-                const kelayakan = row[getKey('KELAYAKAN')] || row[getKey('KELAYAKAN AKADEMIK')] || 'Tiada Maklumat';
-                const jawatan = row[getKey('JAWATAN DALAM BENGKEL KERJA/MESYUARAT')] || row[getKey('JAWATAN')] || '-';
+                let rawUrl = row[findUrlKey()];
+                const url = rawUrl ? rawUrl.trim() : '';
+                
+                const gelaran = row[getFlexibleKey('GELARAN')] || deriveGelaran(nama);
+                const jantina = row[getFlexibleKey('JANTINA')] || deriveJantina(nama, gelaran);
+                const kelayakan = row[getFlexibleKey('KELAYAKAN')] || row[getFlexibleKey('KELAYAKAN AKADEMIK')] || 'Tiada Maklumat';
+                const jawatan = row[getFlexibleKey('JAWATAN DALAM BENGKEL KERJA/MESYUARAT')] || row[getFlexibleKey('JAWATAN')] || '-';
 
                 return {
                   "TEMPAT BENGKEL": tempat.trim(),
@@ -1069,9 +1083,15 @@
         tr.className = "table-row-hover transition border-b border-white/5 hover:bg-slate-800/30";
 
         let downloadBtnHtml = '';
-        if (item["URL MUAT TURUN"] && item["URL MUAT TURUN"].length > 5 && item["URL MUAT TURUN"] !== '-') {
+        const linkUrl = item["URL MUAT TURUN"];
+
+        if (linkUrl && linkUrl.trim().length > 3 && linkUrl.trim().toUpperCase() !== '-' && linkUrl.trim().toUpperCase() !== 'TIADA') {
+          let safeUrl = linkUrl.trim();
+          if (!safeUrl.startsWith('http://') && !safeUrl.startsWith('https://')) {
+            safeUrl = 'https://' + safeUrl;
+          }
           downloadBtnHtml = `
-            <a href="${escapeHtml(item["URL MUAT TURUN"])}" target="_blank" rel="noopener noreferrer" 
+            <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" 
                class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-liquid-cyan transition-all transform hover:scale-105 active:scale-95 w-full max-w-[140px]">
               <i class="fa-solid fa-cloud-arrow-down"></i>
               <span>Muat Turun</span>
@@ -1145,9 +1165,15 @@
       document.getElementById('modalPosition').innerText = item["JAWATAN DALAM BENGKEL KERJA/MESYUARAT"];
 
       const downloadContainer = document.getElementById('modalDownloadContainer');
-      if (item["URL MUAT TURUN"] && item["URL MUAT TURUN"].length > 5 && item["URL MUAT TURUN"] !== '-') {
+      const linkUrl = item["URL MUAT TURUN"];
+
+      if (linkUrl && linkUrl.trim().length > 3 && linkUrl.trim().toUpperCase() !== '-' && linkUrl.trim().toUpperCase() !== 'TIADA') {
+        let safeUrl = linkUrl.trim();
+        if (!safeUrl.startsWith('http://') && !safeUrl.startsWith('https://')) {
+          safeUrl = 'https://' + safeUrl;
+        }
         downloadContainer.innerHTML = `
-          <a href="${escapeHtml(item["URL MUAT TURUN"])}" target="_blank" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-liquid-cyan">
+          <a href="${escapeHtml(safeUrl)}" target="_blank" class="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-liquid-cyan">
             <i class="fa-solid fa-download"></i>
             <span>Muat Turun Dokumen / Bahan Penilai</span>
           </a>
