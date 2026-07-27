@@ -17,15 +17,14 @@
         
         body { 
             font-family: 'Inter', sans-serif; 
-            /* Latar belakang cerah - Peach, Lavender, Soft Blue, Mint */
             background: linear-gradient(-45deg, #fce7f3, #e0e7ff, #e0f2fe, #fef08a);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             min-height: 100vh;
-            color: #1e293b; /* Teks utama gelap */
+            color: #1e293b; 
         }
 
-        /* Glassmorphism Panel Utama (Light Mode) */
+        /* Glassmorphism Panel Utama */
         .glass-panel {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(28px);
@@ -34,7 +33,7 @@
             box-shadow: 0 30px 60px -12px rgba(30, 41, 59, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
         }
 
-        /* Kotak Bahagian Dalaman (Light Mode) */
+        /* Kotak Bahagian Dalaman */
         .glass-box {
             background: rgba(255, 255, 255, 0.5); 
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -51,7 +50,7 @@
             border-color: rgba(255, 255, 255, 1);
         }
 
-        /* Ruangan Menaip & Dropdown (Light Mode) */
+        /* Ruangan Menaip & Dropdown */
         .glass-input {
             width: 100%;
             padding: 0.875rem 1.25rem;
@@ -70,11 +69,10 @@
         .glass-input:focus {
             outline: none;
             background: rgba(255, 255, 255, 0.95);
-            border-color: #6366f1; /* Indigo */
+            border-color: #6366f1; 
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), inset 0 2px 4px rgba(30, 41, 59, 0.05);
             transform: translateY(-2px);
         }
-        /* Warnakan pilihan dropdown supaya jelas di light mode */
         select option, select optgroup {
             background-color: #ffffff;
             color: #1e293b;
@@ -84,7 +82,7 @@
             display: block;
             font-size: 0.875rem;
             font-weight: 700;
-            color: #334155; /* Kelabu gelap untuk label */
+            color: #334155; 
             margin-bottom: 0.5rem;
             letter-spacing: 0.025em;
         }
@@ -105,7 +103,7 @@
         .delay-400 { animation-delay: 400ms; }
         .delay-500 { animation-delay: 500ms; }
 
-        /* Checkbox styling (Light Mode) */
+        /* Checkbox styling */
         .glass-checkbox {
             width: 1.25rem;
             height: 1.25rem;
@@ -119,21 +117,31 @@
             border-color: #6366f1;
         }
         
-        /* Kelas Ralat - Ralat Input */
+        /* Kelas Ralat */
         .input-error {
             border-color: #ef4444 !important; 
             box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15), inset 0 2px 4px rgba(0,0,0,0.05) !important;
-            background-color: rgba(254, 226, 226, 0.6) !important; /* Merah jambu cair */
+            background-color: rgba(254, 226, 226, 0.6) !important;
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
 
-        /* Kelas untuk kotak ralat khusus (checkbox) */
+        /* Kelas Berjaya Isi (Hijau Cair) */
+        .input-success {
+            background-color: rgba(220, 252, 231, 0.8) !important; /* Warna Hijau Cair */
+            border-color: #22c55e !important; /* Border Hijau */
+            color: #14532d !important; /* Teks Hijau Gelap */
+            box-shadow: inset 0 2px 4px rgba(34, 197, 94, 0.05) !important;
+            transition: all 0.3s ease;
+        }
+        .input-success:focus {
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2), inset 0 2px 4px rgba(30, 41, 59, 0.05) !important;
+        }
+
         .box-error {
             border-color: #ef4444 !important;
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.2) !important;
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
-
         @keyframes shake {
             10%, 90% { transform: translate3d(-1px, 0, 0); }
             20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -145,14 +153,11 @@
 
 <body class="antialiased flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
 
-    <!-- Blobs Latar Belakang - Guna mix-blend-multiply untuk light mode -->
     <div class="fixed top-20 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-60 animate-blob"></div>
     <div class="fixed top-40 right-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-blob animation-delay-2000"></div>
     <div class="fixed -bottom-8 left-40 w-72 h-72 bg-cyan-300 rounded-full mix-blend-multiply filter blur-[100px] opacity-50 animate-blob animation-delay-4000"></div>
 
     <main class="w-full max-w-4xl glass-panel rounded-[2rem] overflow-hidden fade-up relative z-10">
-        
-        <!-- Header Borang (Light Mode) -->
         <div class="relative bg-gradient-to-br from-white/90 via-indigo-50/90 to-white/90 px-8 py-12 text-center backdrop-blur-md overflow-hidden rounded-t-[2rem] border-b border-white/50">
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
             <h1 class="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight relative z-10 drop-shadow-sm text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-purple-700">BORANG MAKLUMAT PANEL PENILAI BUKU TEKS KPM</h1>
@@ -256,101 +261,23 @@
                     
                     <div>
                         <label class="form-label">Penerbitan <span class="required-asterisk">*</span></label>
-                        <select name="penerbitan" class="glass-input auto-uppercase cursor-pointer" required>
+                        <!-- Pilihan Penerbitan yang akan mencetuskan senarai Mata Pelajaran (Javascript) -->
+                        <select name="penerbitan" id="penerbitanSelect" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
                             <option value="KP 2027 SEKOLAH RENDAH">KP 2027 SEKOLAH RENDAH</option>
                             <option value="KP 2027 SEKOLAH MENENGAH">KP 2027 SEKOLAH MENENGAH</option>
-                            <option value="KP 2027 SEKOLAH RENDAH PENDIDIKAN KHAS">KP 2027 PENDIDIKAN KHAS</option>
-                            <option value="KP 2027 MPV">KP 2027 BRAILLE</option>
+                            <option value="KP 2027 PENDIDIKAN KHAS">KP 2027 PENDIDIKAN KHAS</option>
+                            <option value="KP 2027 BRAILLE">KP 2027 BRAILLE</option>
                             <option value="KP 2027 DLP">KP 2027 DLP</option>
                         </select>
                     </div>
 
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="form-label">Mata Pelajaran <span class="required-asterisk">*</span></label>
-                        <select name="matapelajaran" class="glass-input auto-uppercase cursor-pointer" required>
-                            <option value="">-- SILA PILIH --</option>
-                            <option value="SENI TARI">SENI TARI</option>
-                            <option value="SEJARAH">SEJARAH</option>
-                            <option value="SENI TEATER">SENI TEATER</option>
-                            <option value="PEND. MUZIK/ SENI MUZIK">PEND. MUZIK/ SENI MUZIK</option>
-                            <option value="GEOGRAFI">GEOGRAFI</option>
-                            <option value="PENDIDIKAN JASMANI">PENDIDIKAN JASMANI</option>
-                            <option value="PENDIDIKAN MORAL">PENDIDIKAN MORAL</option>
-                            <option value="SENI VISUAL SSEM">SENI VISUAL SSEM</option>
-                            <option value="PSV">PSV</option>
-                            <option value="B. SEMAI">B. SEMAI</option>
-                            <option value="B. IBAN">B. IBAN</option>
-                            <option value="B. MELAYU">B. MELAYU</option>
-                            <option value="B. KADAZANDUSUN">B. KADAZANDUSUN</option>
-                            <option value="B. INGGERIS">B. INGGERIS</option>
-                            <option value="B. CINA, B. CINA KOMUNIKASI">B. CINA, B. CINA KOMUNIKASI</option>
-                            <option value="B. TAMIL">B. TAMIL</option>
-                            <option value="B. CINA SJKC">B. CINA SJKC</option>
-                            <option value="MATEMATIK SJKC">MATEMATIK SJKC</option>
-                            <option value="B. CINA SK">B. CINA SK</option>
-                            <option value="B. TAMIL SJKT">B. TAMIL SJKT</option>
-                            <option value="MATEMATIK SJKT">MATEMATIK SJKT</option>
-                            <option value="B. TAMIL SK">B. TAMIL SK</option>
-                            <option value="B. JERMAN">B. JERMAN</option>
-                            <option value="B. JEPUN">B. JEPUN</option>
-                            <option value="SAINS">SAINS</option>
-                            <option value="SAINS DLP">SAINS DLP</option>
-                            <option value="PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA">PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA</option>
-                            <option value="MATEMATIK">MATEMATIK</option>
-                            <option value="MATHEMATIC DLP">MATHEMATIC DLP</option>
-                            <option value="B. ARAB MENENGAH (BAM)">B. ARAB MENENGAH (BAM)</option>
-                            <option value="B. ARAB KOMUNIKASI (BAK)">B. ARAB KOMUNIKASI (BAK)</option>
-                            <option value="PENDIDIKAN ISLAM MEN. (PIM)">PENDIDIKAN ISLAM MEN. (PIM)</option>
-                            <option value="PENDIDIKAN ISLAM RENDAH (PIR)">PENDIDIKAN ISLAM RENDAH (PIR)</option>
-                            <option value="ASAS BACAAN AL-QURAN (ABQ)">ASAS BACAAN AL-QURAN (ABQ)</option>
-                            <option value="B. ARAB RENDAH (BAR)">B. ARAB RENDAH (BAR)</option>
-                            <option value="AL-SYARIAH">AL-SYARIAH</option>
-                            <option value="AL-LUGHAH AL-ARABIYAH AL-MUASIRAH">AL-LUGHAH AL-ARABIYAH AL-MUASIRAH</option>
-                            <option value="USUL AL-DIN">USUL AL-DIN</option>
-                            <option value="AL-QURAN WA AL-TAFSIR">AL-QURAN WA AL-TAFSIR</option>
-                            <option value="HIFZ AL-QURAN">HIFZ AL-QURAN</option>
-                            <option value="ULUM AL-QURAN">ULUM AL-QURAN</option>
-                            <option value="B. PERANCIS">B. PERANCIS</option>
-                            <option value="TEKNOLOGI DAN DIGITAL">TEKNOLOGI DAN DIGITAL</option>
-
-                            <optgroup label="──────── PENDIDIKAN KHAS ────────" disabled class="bg-indigo-50 text-indigo-700 font-bold"></optgroup>
-                            <option value="PENDIDIKAN JASMANI DAN KESIHATAN (PENDIDIKAN KHAS)">PENDIDIKAN JASMANI DAN KESIHATAN (PENDIDIKAN KHAS)</option>
-                            <option value="PENDIDIKAN SENI VISUAL (PENDIDIKAN KHAS)">PENDIDIKAN SENI VISUAL (PENDIDIKAN KHAS)</option>
-                            <option value="B. MELAYU (PENDIDIKAN KHAS)">B. MELAYU (PENDIDIKAN KHAS)</option>
-                            <option value="B. INGGERIS (PENDIDIKAN KHAS)">B. INGGERIS (PENDIDIKAN KHAS)</option>
-                            <option value="B. TAMIL (PENDIDIKAN KHAS)">B. TAMIL (PENDIDIKAN KHAS)</option>
-                            <option value="B. CINA (PENDIDIKAN KHAS)">B. CINA (PENDIDIKAN KHAS)</option>
-                            <option value="MATEMATIK (PENDIDIKAN KHAS)">MATEMATIK (PENDIDIKAN KHAS)</option>
-                            <option value="PENDIDIKAN MUZIK (PENDIDIKAN KHAS)">PENDIDIKAN MUZIK (PENDIDIKAN KHAS)</option>
-                            <option value="ALAM DAN MANUSIA (PENDIDIKAN KHAS)">ALAM DAN MANUSIA (PENDIDIKAN KHAS)</option>
-                            <option value="SEJARAH (PENDIDIKAN KHAS)">SEJARAH (PENDIDIKAN KHAS)</option>
-                            <option value="PAIKUP">PAIKUP</option>
-                            <option value="PENGURUSAN KEHIDUPAN">PENGURUSAN KEHIDUPAN</option>
-                            <option value="PEND. MORAL (PENDIDIKAN KHAS)">PEND. MORAL (PENDIDIKAN KHAS)</option>
-                            <option value="PEND. ISLAM (PENDIDIKAN KHAS)">PEND. ISLAM (PENDIDIKAN KHAS)</option>
-
-                            <optgroup label="──────── BRAILLE ────────" disabled class="bg-indigo-50 text-indigo-700 font-bold"></optgroup>
-                            <option value="SEJARAH (BRAILLE)">SEJARAH (BRAILLE)</option>
-                            <option value="PENDIDIKAN MORAL (BRAILLE)">PENDIDIKAN MORAL (BRAILLE)</option>
-                            <option value="PENDIDIKAN MUZIK (BRAILLE)">PENDIDIKAN MUZIK (BRAILLE)</option>
-                            <option value="GEOGRAFI (BRAILLE)">GEOGRAFI (BRAILLE)</option>
-                            <option value="PENDIDIKAN JASMANI (BRAILLE)">PENDIDIKAN JASMANI (BRAILLE)</option>
-                            <option value="PENDIDIKAN SENI VISUAL (BRAILLE)">PENDIDIKAN SENI VISUAL (BRAILLE)</option>
-                            <option value="B. MELAYU (BRAILLE)">B. MELAYU (BRAILLE)</option>
-                            <option value="B. INGGERIS (BRAILLE)">B. INGGERIS (BRAILLE)</option>
-                            <option value="SAINS (BRAILLE)">SAINS (BRAILLE)</option>
-                            <option value="PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA (BRAILLE)">PEMBELAJARAN BERSEPADU: ALAM DAN MANUSIA (BRAILLE)</option>
-                            <option value="MATEMATIK (BRAILLE)">MATEMATIK (BRAILLE)</option>
-                            <option value="B. ARAB MENENGAH (BAM) (BRAILLE)">B. ARAB MENENGAH (BAM) (BRAILLE)</option>
-                            <option value="PENDIDIKAN ISLAM MEN. (PIM) (BRAILLE)">PENDIDIKAN ISLAM MEN. (PIM) (BRAILLE)</option>
-                            <option value="PENDIDIKAN ISLAM RENDAH (PIR) (BRAILLE)">PENDIDIKAN ISLAM RENDAH (PIR) (BRAILLE)</option>
-                            <option value="ASAS BACAAN AL-QURAN TAHUN 1 (BRAILLE)">ASAS BACAAN AL-QURAN TAHUN 1 (BRAILLE)</option>
-                            <option value="B. ARAB RENDAH (BAR) (BRAILLE)">B. ARAB RENDAH (BAR) (BRAILLE)</option>
-                            <option value="PENDIDIKAN JASMANI KESIHATAN (BRAILLE)">PENDIDIKAN JASMANI KESIHATAN (BRAILLE)</option>
-                            <option value="TEKNOLOGI DAN DIGITAL (BRAILLE)">TEKNOLOGI DAN DIGITAL (BRAILLE)</option>
-                            <option value="PAIKUP (BRAILLE)">PAIKUP (BRAILLE)</option>
-                            <option value="MUSHAF AL-QURAN (BRAILLE)">MUSHAF AL-QURAN (BRAILLE)</option>
+                        <p class="text-xs text-slate-500 mb-2">Sila buat pilihan Penerbitan di atas untuk menyenaraikan Mata Pelajaran berkaitan.</p>
+                        <!-- Dropdown Mata Pelajaran ini akan dikawal sepenuhnya oleh JS di bawah -->
+                        <select name="matapelajaran" id="mataPelajaranSelect" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH PENERBITAN DAHULU --</option>
                         </select>
                     </div>
 
@@ -578,6 +505,7 @@
                 </div>
             </div>
 
+            <!-- BAHAGIAN C -->
             <div class="fade-up delay-300 space-y-6">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="h-8 w-2 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.4)]"></div>
@@ -679,6 +607,7 @@
                 </div>
             </div>
 
+            <!-- BAHAGIAN E -->
             <div class="fade-up delay-500 space-y-6">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="h-8 w-2 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.4)]"></div>
@@ -838,113 +767,113 @@
                 </div>
 
                 <!-- BAHAGIAN H -->
-            <div>
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="h-8 w-2 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.4)]"></div>
-                    <h2 class="text-2xl font-extrabold text-slate-800 tracking-wide">Bahagian H: Pengesahan</h2>
-                </div>
-                <div class="glass-box p-6 border-l-4 border-teal-500">
-                    <label class="form-label mb-3 text-base text-slate-800">Panel pernah terlibat dengan PENULISAN buku teks KPM/ buku rujukan (Tahun Semasa). <span class="required-asterisk">*</span></label>
-                    <select id="penulisanSelect" name="penulisan_buku" class="glass-input cursor-pointer" required>
-                        <option value="">-- SILA PILIH SATU JAWAPAN --</option>
-                        <option value="YA">YA</option>
-                        <option value="TIDAK">TIDAK</option>
-                    </select>
-                    
-                    <div id="penulisanJudulContainer" class="hidden mt-5 pt-5 border-t border-slate-200">
-                        <label class="form-label text-slate-700">Jika YA, sila nyatakan JUDUL BUKU dan PENERBIT yang terlibat (Tidak Wajib):</label>
-                        <input type="text" name="judul_buku" class="glass-input auto-uppercase" placeholder="CTH: BUKU TEKS SEJARAH TINGKATAN 2 - DBP">
+                <div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="h-8 w-2 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(45,212,191,0.4)]"></div>
+                        <h2 class="text-2xl font-extrabold text-slate-800 tracking-wide">Bahagian H: Pengesahan</h2>
+                    </div>
+                    <div class="glass-box p-6 border-l-4 border-teal-500">
+                        <label class="form-label mb-3 text-base text-slate-800">Panel pernah terlibat dengan PENULISAN buku teks KPM/ buku rujukan (Tahun Semasa). <span class="required-asterisk">*</span></label>
+                        <select id="penulisanSelect" name="penulisan_buku" class="glass-input cursor-pointer" required>
+                            <option value="">-- SILA PILIH SATU JAWAPAN --</option>
+                            <option value="YA">YA</option>
+                            <option value="TIDAK">TIDAK</option>
+                        </select>
+                        
+                        <div id="penulisanJudulContainer" class="hidden mt-5 pt-5 border-t border-slate-200">
+                            <label class="form-label text-slate-700">Jika YA, sila nyatakan JUDUL BUKU dan PENERBIT yang terlibat (Tidak Wajib):</label>
+                            <input type="text" name="judul_buku" class="glass-input auto-uppercase" placeholder="CTH: BUKU TEKS SEJARAH TINGKATAN 2 - DBP">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- BAHAGIAN I -->
-        <div class="fade-up delay-500 space-y-8 mt-10">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-white/80 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="h-12 w-3 bg-gradient-to-b from-rose-400 to-rose-600 rounded-full shadow-[0_0_12px_rgba(225,29,72,0.4)]"></div>
-                    <div>
-                        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-wide drop-shadow-sm">Bahagian I: Pengalaman Menyemak</h2>
-                        <p class="text-sm text-slate-600 mt-1 font-medium">Buku Teks Keluaran Penerbitan (KP) 2027</p>
+            <!-- BAHAGIAN I -->
+            <div class="fade-up delay-500 space-y-8 mt-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 bg-white/50 backdrop-blur-md p-6 rounded-2xl border border-white/80 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="h-12 w-3 bg-gradient-to-b from-rose-400 to-rose-600 rounded-full shadow-[0_0_12px_rgba(225,29,72,0.4)]"></div>
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-wide drop-shadow-sm">Bahagian I: Pengalaman Menyemak</h2>
+                            <p class="text-sm text-slate-600 mt-1 font-medium">Buku Teks Keluaran Penerbitan (KP) 2027</p>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center justify-center px-4 py-2 bg-rose-50 text-rose-700 text-sm font-extrabold rounded-xl border border-rose-200 shadow-inner tracking-wider">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        TAHUN SEMASA SAHAJA
                     </div>
                 </div>
-                <div class="inline-flex items-center justify-center px-4 py-2 bg-rose-50 text-rose-700 text-sm font-extrabold rounded-xl border border-rose-200 shadow-inner tracking-wider">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    TAHUN SEMASA SAHAJA
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                <!-- PMS 1 -->
-                <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(225,29,72,0.15)] hover:border-rose-300 hover:bg-white/80">
-                    <div class="absolute -top-16 -right-16 w-40 h-40 bg-rose-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                    
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-rose-50 flex items-center justify-center mb-5 shadow-md border border-rose-100 text-rose-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                    <!-- PMS 1 -->
+                    <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(225,29,72,0.15)] hover:border-rose-300 hover:bg-white/80">
+                        <div class="absolute -top-16 -right-16 w-40 h-40 bg-rose-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                        
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-rose-50 flex items-center justify-center mb-5 shadow-md border border-rose-100 text-rose-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </div>
+
+                        <label class="form-label text-rose-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 1</label>
+                        <div class="h-1 w-10 rounded-full bg-rose-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
+                        
+                        <select name="pms_1" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-rose-400 group-hover:bg-white/95 focus:ring-rose-500 transition-all">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
                     </div>
+                    
+                    <!-- PMS 2 -->
+                    <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:border-purple-300 hover:bg-white/80">
+                        <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                        
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-purple-50 flex items-center justify-center mb-5 shadow-md border border-purple-100 text-purple-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                        </div>
 
-                    <label class="form-label text-rose-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 1</label>
-                    <div class="h-1 w-10 rounded-full bg-rose-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-                    
-                    <select name="pms_1" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-rose-400 group-hover:bg-white/95 focus:ring-rose-500 transition-all">
-                        <option value="">-- TIADA / SILA PILIH --</option>
-                        <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
-                        <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
-                        <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
-                        <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
-                        <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
-                        <option value="2031 TAHUN 6">2031 TAHUN 6</option>
-                    </select>
-                </div>
-                
-                <!-- PMS 2 -->
-                <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:border-purple-300 hover:bg-white/80">
-                    <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                    
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-purple-50 flex items-center justify-center mb-5 shadow-md border border-purple-100 text-purple-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                        <label class="form-label text-purple-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 2</label>
+                        <div class="h-1 w-10 rounded-full bg-purple-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
+
+                        <select name="pms_2" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-purple-400 group-hover:bg-white/95 focus:ring-purple-500 transition-all">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
                     </div>
-
-                    <label class="form-label text-purple-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 2</label>
-                    <div class="h-1 w-10 rounded-full bg-purple-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-
-                    <select name="pms_2" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-purple-400 group-hover:bg-white/95 focus:ring-purple-500 transition-all">
-                        <option value="">-- TIADA / SILA PILIH --</option>
-                        <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
-                        <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
-                        <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
-                        <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
-                        <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
-                        <option value="2031 TAHUN 6">2031 TAHUN 6</option>
-                    </select>
-                </div>
-                
-                <!-- NSK -->
-                <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(20,184,166,0.15)] hover:border-teal-300 hover:bg-white/80">
-                    <div class="absolute -top-16 -right-16 w-40 h-40 bg-teal-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                     
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-teal-50 flex items-center justify-center mb-5 shadow-md border border-teal-100 text-teal-500 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 z-10">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    <!-- NSK -->
+                    <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(20,184,166,0.15)] hover:border-teal-300 hover:bg-white/80">
+                        <div class="absolute -top-16 -right-16 w-40 h-40 bg-teal-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                        
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-teal-50 flex items-center justify-center mb-5 shadow-md border border-teal-100 text-teal-500 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 z-10">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+
+                        <label class="form-label text-teal-700 text-xl font-black uppercase tracking-widest z-10 mb-2">NSK</label>
+                        <div class="h-1 w-10 rounded-full bg-teal-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
+
+                        <select name="nsk" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-teal-400 group-hover:bg-white/95 focus:ring-teal-500 transition-all">
+                            <option value="">-- TIADA / SILA PILIH --</option>
+                            <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
+                            <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
+                            <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
+                            <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
+                            <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
+                            <option value="2031 TAHUN 6">2031 TAHUN 6</option>
+                        </select>
                     </div>
-
-                    <label class="form-label text-teal-700 text-xl font-black uppercase tracking-widest z-10 mb-2">NSK</label>
-                    <div class="h-1 w-10 rounded-full bg-teal-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-
-                    <select name="nsk" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-teal-400 group-hover:bg-white/95 focus:ring-teal-500 transition-all">
-                        <option value="">-- TIADA / SILA PILIH --</option>
-                        <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
-                        <option value="2027 TAHUN 2/TINGKATAN 2">2027 TAHUN 2/TINGKATAN 2</option>
-                        <option value="2028 TAHUN 3/TINGKATAN 3">2028 TAHUN 3/TINGKATAN 3</option>
-                        <option value="2029 TAHUN 4/TINGKATAN 4">2029 TAHUN 4/TINGKATAN 4</option>
-                        <option value="2030 TAHUN 5/TINGKATAN 5">2030 TAHUN 5/TINGKATAN 5</option>
-                        <option value="2031 TAHUN 6">2031 TAHUN 6</option>
-                    </select>
                 </div>
-            </div>
 
-            <!-- Butang Submit (Light Mode with shadow) -->
-            <div class="pt-12 flex justify-center md:justify-end">
+                <!-- Butang Submit -->
+                <div class="pt-12 flex justify-center md:justify-end">
                     <button type="submit" class="relative inline-flex group items-center justify-center px-12 py-5 font-bold text-white transition-all duration-300 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] rounded-2xl hover:bg-right focus:outline-none focus:ring-4 focus:ring-indigo-500/50 shadow-[0_10px_20px_rgba(99,102,241,0.3)] hover:shadow-[0_15px_30px_rgba(99,102,241,0.5)] transform hover:-translate-y-1 active:scale-95 text-lg w-full md:w-auto tracking-widest">
                         HANTAR MAKLUMAT
                         <svg class="w-6 h-6 ml-3 transform transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -954,7 +883,7 @@
         </form>
     </main>
 
-    <!-- Modal Notifikasi (Light Mode) -->
+    <!-- Modal Notifikasi -->
     <div id="msgModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex justify-center items-center z-50 transition-opacity duration-300 opacity-0">
         <div class="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-[2rem] shadow-[0_20px_50px_rgba(30,41,59,0.2)] p-8 max-w-sm w-full mx-4 text-center transform scale-95 transition-all duration-300 ease-out">
             <div id="modalIcon" class="mb-4"></div>
@@ -967,6 +896,107 @@
     </div>
 
     <script>
+        // Data Mata Pelajaran berdasarkan Penerbitan
+        const senaraiMataPelajaran = {
+            "KP 2027 BRAILLE": [
+                {
+                    group: "SEKOLAH RENDAH (SK)",
+                    subjects: [
+                        "BAHASA MELAYU SK",
+                        "BAHASA INGGERIS SK",
+                        "MATEMATIK SK",
+                        "PENDIDIKAN MORAL SK",
+                        "PENDIDIKAN JASMANI SK",
+                        "PENDIDIKAN ISLAM SK",
+                        "ASAS BACAAN AL-QURAN SK",
+                        "ALAM DAN MANUSIA: PEMBELAJARAN BERSEPADU SK",
+                        "BAHASA ARAB SK",
+                        "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN (PAIKUP) SK"
+                    ]
+                },
+                {
+                    group: "SEKOLAH MENENGAH (SM)",
+                    subjects: [
+                        "BAHASA MELAYU SM",
+                        "BAHASA INGGERIS SM",
+                        "MATEMATIK SM",
+                        "SAINS SM",
+                        "SEJARAH SM",
+                        "PENDIDIKAN MORAL SM",
+                        "PENDIDIKAN ISLAM SM",
+                        "GEOGRAFI SM",
+                        "TEKNOLOGI DAN DIGITAL SM",
+                        "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN SM",
+                        "PENDIDIKAN SENI VISUAL SM",
+                        "PENDIDIKAN MUZIK SM",
+                        "BAHASA ARAB SM"
+                    ]
+                }
+            ],
+            // Masukkan list untuk penerbitan lain di dalam array (kurungan bersegi []) di bawah jika perlu
+            "KP 2027 SEKOLAH RENDAH": [], // Kosongkan dahulu 
+            "KP 2027 SEKOLAH MENENGAH": [], // Kosongkan dahulu
+            "KP 2027 PENDIDIKAN KHAS": [], // Kosongkan dahulu
+            "KP 2027 DLP": [] // Kosongkan dahulu
+        };
+
+        const dropdownPenerbitan = document.getElementById('penerbitanSelect');
+        const dropdownMataPelajaran = document.getElementById('mataPelajaranSelect');
+
+        dropdownPenerbitan.addEventListener('change', function() {
+            const penerbitanTerpilih = this.value;
+            
+            // Reset dropdown mata pelajaran setiap kali penerbitan bertukar
+            dropdownMataPelajaran.innerHTML = '<option value="">-- SILA PILIH --</option>';
+            dropdownMataPelajaran.classList.remove('input-success', 'input-error'); // Buang warna hijau/merah
+            
+            if (penerbitanTerpilih && senaraiMataPelajaran[penerbitanTerpilih]) {
+                const dataSubjek = senaraiMataPelajaran[penerbitanTerpilih];
+                
+                if (dataSubjek.length === 0) {
+                    // Jika data kosong / belum ditetapkan
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.textContent = "-- MATA PELAJARAN BELUM DITETAPKAN --";
+                    option.disabled = true;
+                    dropdownMataPelajaran.appendChild(option);
+                } else {
+                    // Loop senarai yang disediakan
+                    dataSubjek.forEach(item => {
+                        // Kalau ada struktur group (seperti yang dibuat untuk Braille)
+                        if (item.group) {
+                            const optgroup = document.createElement('optgroup');
+                            optgroup.label = `──────── ${item.group} ────────`;
+                            optgroup.className = "bg-indigo-50 text-indigo-700 font-bold";
+                            
+                            item.subjects.forEach(subjek => {
+                                const option = document.createElement('option');
+                                option.value = subjek;
+                                option.textContent = subjek;
+                                optgroup.appendChild(option);
+                            });
+                            dropdownMataPelajaran.appendChild(optgroup);
+                        } else {
+                            // Kalau tak nak group, hanya tulis list item terus
+                            const option = document.createElement('option');
+                            option.value = item;
+                            option.textContent = item;
+                            dropdownMataPelajaran.appendChild(option);
+                        }
+                    });
+                }
+            } else {
+                // Jika tiada penerbitan dipilih kembali kepada paparan asal
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "-- SILA PILIH PENERBITAN DAHULU --";
+                dropdownMataPelajaran.appendChild(option);
+            }
+        });
+
+        // Jalankan function ini sekali masa page di load jika user tersilap refresh page
+        dropdownPenerbitan.dispatchEvent(new Event('change'));
+
         // Huruf besar automatik
         document.querySelectorAll('.auto-uppercase').forEach(element => {
             element.addEventListener('input', function() {
@@ -981,7 +1011,7 @@
             });
         });
 
-        // Kawalan logik dropdown LAIN-LAIN
+        // Kawalan logik dropdown LAIN-LAIN Jawatan
         const jawatanSelect = document.getElementById('jawatanSelect');
         const lainContainer = document.getElementById('lainLainJawatanContainer');
         const lainInput = document.getElementById('jawatanLainInput');
@@ -993,6 +1023,7 @@
                 lainContainer.classList.add('hidden');
                 lainInput.removeAttribute('required');
                 lainInput.value = ''; 
+                lainInput.classList.remove('input-success', 'input-error');
             }
         });
 
@@ -1001,6 +1032,8 @@
         const fileError = document.getElementById('fileError');
         fileInput.addEventListener('change', function() {
             fileError.classList.add('hidden');
+            this.classList.remove('input-success', 'input-error');
+            
             const file = this.files[0];
             if (file) {
                 if (file.size > 256000) {
@@ -1018,17 +1051,34 @@
                     fileError.classList.remove('hidden');
                     return;
                 }
+                
+                // Jika fail sah, tambah kelas hijau
+                this.classList.add('input-success');
             }
         });
 
-        // Event listener membuang kotak ralat merah apabila pengguna mula menaip / buat pilihan baru
+        // Event listener membuang kotak ralat merah dan tambah hijau cair apabila berjaya isi
+        function kemaskiniStatusInput(elemen) {
+            elemen.classList.remove('input-error');
+            
+            if (elemen.classList.contains('glass-input') || elemen.tagName === 'SELECT' || ['text', 'number', 'email'].includes(elemen.type)) {
+                if (elemen.value.trim() !== '' && elemen.checkValidity()) {
+                    elemen.classList.add('input-success');
+                } else {
+                    elemen.classList.remove('input-success');
+                }
+            }
+        }
+
         document.querySelectorAll('input, select').forEach(element => {
-            element.addEventListener('input', function() {
-                this.classList.remove('input-error');
-            });
-            element.addEventListener('change', function() {
-                this.classList.remove('input-error');
-            });
+            element.addEventListener('input', function() { kemaskiniStatusInput(this); });
+            element.addEventListener('change', function() { kemaskiniStatusInput(this); });
+            element.addEventListener('blur', function() { kemaskiniStatusInput(this); });
+            
+            // Semak status awal jika ada maklumat yang auto-fill dari browser
+            if(element.value && !['file', 'checkbox'].includes(element.type)) {
+                setTimeout(() => kemaskiniStatusInput(element), 100);
+            }
         });
 
         document.querySelectorAll('input[name="pengiktirafan"]').forEach(cb => {
@@ -1056,9 +1106,9 @@
                 const invalidElements = this.querySelectorAll(':invalid');
                 
                 invalidElements.forEach((el) => {
-                    if (el.offsetParent !== null) { // Jika elemen kelihatan (tidak di-hide)
+                    if (el.offsetParent !== null) { // Jika elemen kelihatan
                         el.classList.add('input-error');
-                        if (!firstErrorElement) firstErrorElement = el; // Simpan elemen ralat pertama
+                        if (!firstErrorElement) firstErrorElement = el; 
                     }
                 });
             }
@@ -1071,19 +1121,16 @@
                 isFormValid = false;
                 pengiktirafanBox.classList.add('box-error');
                 
-                // Jika checkbox adalah ralat pertama
                 if (!firstErrorElement || pengiktirafanBox.getBoundingClientRect().top < firstErrorElement.getBoundingClientRect().top) {
                     firstErrorElement = pengiktirafanBox;
                 }
             }
 
-            // 4. Jika ada ralat, scroll ke elemen tersebut dan hentikan penghantaran
+            // 4. Jika ada ralat, scroll ke elemen tersebut
             if (!isFormValid) {
                 if (firstErrorElement) {
-                    // Tatal (scroll) ke bahagian tengah skrin yang ada ralat
                     firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     
-                    // Fokus kursor padanya (jika elemen tersebut input/select biasa)
                     if (typeof firstErrorElement.focus === 'function' && firstErrorElement.tagName !== 'DIV') {
                         setTimeout(() => { firstErrorElement.focus({ preventScroll: true }); }, 400);
                     }
@@ -1093,7 +1140,7 @@
                 return;
             }
 
-            // 5. Proses penghantaran jika semua sah
+            // 5. Proses penghantaran
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalBtnHtml = submitBtn.innerHTML;
             submitBtn.innerHTML = `SEDANG MENGHANTAR... <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
@@ -1103,18 +1150,17 @@
             const formData = new FormData(this);
             const dataObj = {};
             
-            // Pengenalan borang (Penting untuk dikesan di Apps Script)
             dataObj.formType = "maklumatPenilai"; 
             
             formData.forEach((value, key) => {
                 if (!dataObj[key]) {
                     dataObj[key] = value;
                 } else {
-                    dataObj[key] += `, ${value}`; // Gabungkan jika ada pelbagai pilihan checkbox
+                    dataObj[key] += `, ${value}`; 
                 }
             });
 
-            // Gantikan URL ini dengan URL Web App Apps Script anda sendiri
+            // Gantikan URL ini dengan URL Web App Apps Script anda 
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6Ml33aKh1IICewTmOZyg3oG4Cmn9ri1rQ-6X1VOfCtsoQTWJzkhh3wpFwE8SY0ZuH/exec';
 
             const sendToGoogle = (base64String = null) => {
@@ -1136,9 +1182,11 @@
                     if (result.result === 'success') {
                         showModal('Penghantaran Berjaya!', 'Maklumat anda telah berjaya disimpan ke dalam pangkalan data.', 'success');
                         form.reset(); 
+                        document.querySelectorAll('.input-success').forEach(el => el.classList.remove('input-success')); // Reset warna hijau
                         document.querySelectorAll('.hidden').forEach(el => {
                             if(el.id !== 'msgModal' && el.id !== 'fileError') el.classList.add('hidden');
                         });
+                        dropdownPenerbitan.dispatchEvent(new Event('change')); // Reset dropdown Mata Pelajaran
                     } else {
                         showModal('Ralat Sistem', 'Gagal menyimpan rekod: ' + result.message, 'error');
                     }
@@ -1174,7 +1222,6 @@
             modalTitle.textContent = title;
             modalMsg.textContent = message;
             
-            // Pengubahsuaian warna modal icon & text untuk Light Mode
             if (type === 'error') {
                 modalTitle.className = 'text-2xl font-extrabold mb-2 text-red-600 tracking-tight';
                 modalIcon.innerHTML = `<div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100"><svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>`;
@@ -1203,7 +1250,7 @@
             }, 300);
         }
 
-        // KAWALAN LOGIK LAIN-LAIN UNTUK CHECKBOX DAN DROPDOWN
+        // KAWALAN LOGIK LAIN-LAIN
         const chkLainPengiktirafan = document.getElementById('chkLainPengiktirafan');
         const lainPengiktirafanContainer = document.getElementById('lainLainPengiktirafanContainer');
         const pengiktirafanLainInput = document.getElementById('pengiktirafanLainInput');
@@ -1215,6 +1262,7 @@
                 lainPengiktirafanContainer.classList.add('hidden');
                 pengiktirafanLainInput.removeAttribute('required');
                 pengiktirafanLainInput.value = ''; 
+                pengiktirafanLainInput.classList.remove('input-success', 'input-error');
             }
         });
 
@@ -1225,7 +1273,9 @@
                 bengkelTahunContainer.classList.remove('hidden');
             } else {
                 bengkelTahunContainer.classList.add('hidden');
-                document.querySelector('input[name="tahun_bengkel"]').value = '';
+                const tbInput = document.querySelector('input[name="tahun_bengkel"]');
+                tbInput.value = '';
+                tbInput.classList.remove('input-success', 'input-error');
             }
         });
 
@@ -1236,7 +1286,9 @@
                 penulisanJudulContainer.classList.remove('hidden');
             } else {
                 penulisanJudulContainer.classList.add('hidden');
-                document.querySelector('input[name="judul_buku"]').value = '';
+                const jbInput = document.querySelector('input[name="judul_buku"]');
+                jbInput.value = '';
+                jbInput.classList.remove('input-success', 'input-error');
             }
         });
     </script>
