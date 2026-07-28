@@ -293,11 +293,15 @@
                         </select>
                     </div>
 
-                    <!-- TEMPAT BENGKEL -->
+                    <!-- TEMPAT BENGKEL (DIKEMAS KINI KE DROPDOWN) -->
                     <div class="md:col-span-2 pt-2">
                         <label class="form-label">Tempat Bengkel <span class="required-asterisk">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Nama hotel / lokasi bengkel diadakan</p>
-                        <input type="text" name="tempat_bengkel" class="glass-input auto-uppercase" placeholder="CTH: HOTEL SERI MALAYSIA, KUALA LUMPUR" required>
+                        <p class="text-xs text-slate-500 mb-2">Sila pilih nama hotel / lokasi bengkel diadakan</p>
+                        <select name="tempat_bengkel" class="glass-input auto-uppercase cursor-pointer" required>
+                            <option value="">-- SILA PILIH --</option>
+                            <option value="IBIS KUALA LUMPUR">IBIS KUALA LUMPUR</option>
+                            <option value="TAMU HOTEL KUALA LUMPUR">TAMU HOTEL KUALA LUMPUR</option>
+                        </select>
                     </div>
                 </div>
 
@@ -335,10 +339,10 @@
                         <input type="text" name="nama" class="glass-input auto-uppercase" placeholder="CONTOH: ALI BIN ABU" required>
                     </div>
 
+                    <!-- KAD PENGENALAN (DIKEMAS KINI DENGAN AUTO-FORMATTING & VALIDASI) -->
                     <div>
                         <label class="form-label">No. Kad Pengenalan <span class="required-asterisk">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Sila isi dengan tanda sempang</p>
-                        <input type="text" name="ic" class="glass-input auto-uppercase" placeholder="CTH: 800101-12-3456" required>
+                        <input type="text" name="ic" class="glass-input" placeholder="CTH: 800101-12-3456" maxlength="14" pattern="\d{6}-\d{2}-\d{4}" required>
                     </div>
 
                     <div>
@@ -358,23 +362,22 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <!-- NO TEL PEJABAT, BIMBIT (DIKEMAS KINI DENGAN PATTERN UNTUK TERIMA NOMBOR & SEMPANG SAHAJA) -->
                     <div>
                         <label class="form-label">Telefon Pejabat <span class="required-asterisk">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Format 03-23456789</p>
-                        <input type="text" name="tel_pej" class="glass-input auto-uppercase" placeholder="03-23456789" required>
+                        <input type="text" name="tel_pej" class="glass-input auto-uppercase" placeholder="CTH: 03-23456789" pattern="[\d\-]+" required>
                     </div>
                     <div>
                         <label class="form-label">Telefon Bimbit <span class="required-asterisk">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Format 012-3456789</p>
-                        <input type="text" name="tel_bimbit" class="glass-input auto-uppercase" placeholder="012-3456789" required>
+                        <input type="text" name="tel_bimbit" class="glass-input auto-uppercase" placeholder="CTH: 012-3456789" pattern="[\d\-]+" required>
                     </div>
                     <div>
                         <label class="form-label">E-mel Tempat Bertugas <span class="required-asterisk">*</span></label>
-                        <input type="email" name="emel_pejabat" class="glass-input auto-uppercase" placeholder="ali@moe.gov.my" required>
+                        <input type="email" name="emel_pejabat" class="glass-input auto-lowercase" placeholder="ali@moe.gov.my" required>
                     </div>
                     <div>
                         <label class="form-label">E-mel Peribadi <span class="required-asterisk">*</span></label>
-                        <input type="email" name="emel_peribadi" class="glass-input auto-uppercase" placeholder="ali@gmail.com" required>
+                        <input type="email" name="emel_peribadi" class="glass-input auto-lowercase" placeholder="ali@gmail.com" required>
                     </div>
                 </div>
 
@@ -498,9 +501,9 @@
                         </select>
                     </div>
                     <div>
+                        <!-- NO TEL WARIS (DIKEMAS KINI) -->
                         <label class="form-label">Telefon Bimbit Waris <span class="required-asterisk">*</span></label>
-                        <p class="text-xs text-slate-500 mb-2">Format 012-3456789</p>
-                        <input type="text" name="tel_bimbit_waris" class="glass-input auto-uppercase" placeholder="012-3456789" required>
+                        <input type="text" name="tel_bimbit_waris" class="glass-input auto-uppercase" placeholder="CTH: 012-3456789" pattern="[\d\-]+" required>
                     </div>
                 </div>
             </div>
@@ -805,7 +808,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                    <!-- PMS 1 -->
+                    <!-- PMS 1 / FB (DIKEMAS KINI LABEL) -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(225,29,72,0.15)] hover:border-rose-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-rose-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                         
@@ -813,7 +816,7 @@
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
 
-                        <label class="form-label text-rose-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 1</label>
+                        <label class="form-label text-rose-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 1/FB</label>
                         <div class="h-1 w-10 rounded-full bg-rose-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
                         
                         <select name="pms_1" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-rose-400 group-hover:bg-white/95 focus:ring-rose-500 transition-all">
@@ -827,7 +830,7 @@
                         </select>
                     </div>
                     
-                    <!-- PMS 2 -->
+                    <!-- PMS 2 / FB (DIKEMAS KINI LABEL) -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:border-purple-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                         
@@ -835,7 +838,7 @@
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                         </div>
 
-                        <label class="form-label text-purple-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 2</label>
+                        <label class="form-label text-purple-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 2/FB</label>
                         <div class="h-1 w-10 rounded-full bg-purple-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
 
                         <select name="pms_2" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-purple-400 group-hover:bg-white/95 focus:ring-purple-500 transition-all">
@@ -849,7 +852,7 @@
                         </select>
                     </div>
                     
-                    <!-- NSK -->
+                    <!-- NSK / FB (DIKEMAS KINI LABEL) -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(20,184,166,0.15)] hover:border-teal-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-teal-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
                         
@@ -857,7 +860,7 @@
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         </div>
 
-                        <label class="form-label text-teal-700 text-xl font-black uppercase tracking-widest z-10 mb-2">NSK</label>
+                        <label class="form-label text-teal-700 text-xl font-black uppercase tracking-widest z-10 mb-2">NSK/FB</label>
                         <div class="h-1 w-10 rounded-full bg-teal-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
 
                         <select name="nsk" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-teal-400 group-hover:bg-white/95 focus:ring-teal-500 transition-all">
@@ -1093,6 +1096,39 @@
         // Jalankan function ini sekali masa page di load jika user tersilap refresh page
         dropdownPenerbitan.dispatchEvent(new Event('change'));
 
+        // SCRIPT TAMBAHAN UNTUK FORMAT IC DAN NOMBOR TELEFON
+        
+        // 1. Format Nombor Kad Pengenalan
+        const icInput = document.querySelector('input[name="ic"]');
+        if(icInput) {
+            icInput.addEventListener('input', function(e) {
+                // Buang semua karektor kecuali nombor
+                let val = this.value.replace(/\D/g, ''); 
+                if (val.length > 12) val = val.slice(0, 12);
+                
+                let formatted = val;
+                // Tambah sempang pertama selepas 6 nombor
+                if (val.length > 6) {
+                    formatted = val.slice(0, 6) + '-' + val.slice(6);
+                }
+                // Tambah sempang kedua selepas 8 nombor
+                if (val.length > 8) {
+                    formatted = formatted.slice(0, 9) + '-' + val.slice(8);
+                }
+                
+                this.value = formatted;
+            });
+        }
+
+        // 2. Format Nombor Telefon (Membenarkan Nombor dan Sempang Sahaja)
+        const phoneInputs = document.querySelectorAll('input[name="tel_pej"], input[name="tel_bimbit"], input[name="tel_bimbit_waris"]');
+        phoneInputs.forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Buang semua karektor kecuali digit nombor dan simbol sempang
+                this.value = this.value.replace(/[^\d\-]/g, '');
+            });
+        });
+
         // Huruf besar automatik
         document.querySelectorAll('.auto-uppercase').forEach(element => {
             element.addEventListener('input', function() {
@@ -1103,6 +1139,20 @@
                     this.setSelectionRange(start, end);
                 } else {
                     this.value = this.value.toUpperCase();
+                }
+            });
+        });
+
+        // Huruf kecil automatik untuk e-mel
+        document.querySelectorAll('.auto-lowercase').forEach(element => {
+            element.addEventListener('input', function() {
+                if (this.tagName.toLowerCase() === 'input') {
+                    let start = this.selectionStart;
+                    let end = this.selectionEnd;
+                    this.value = this.value.toLowerCase();
+                    this.setSelectionRange(start, end);
+                } else {
+                    this.value = this.value.toLowerCase();
                 }
             });
         });
