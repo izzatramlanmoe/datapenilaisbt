@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paparan Data Live - Maklumat Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#050B14',
+                        glass: 'rgba(17, 25, 40, 0.75)',
+                        glassBorder: 'rgba(255, 255, 255, 0.125)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #050B14;
+            /* Aurora Effect Background */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.3) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Premium Glass Panel */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glassBorder);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Custom Scrollbar for better UI */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        /* Table Sticky Header */
+        .table-container { max-height: 50vh; overflow-y: auto; }
+        thead th { position: sticky; top: 0; z-index: 10; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
+
+        /* Toast Animation */
+        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        .toast-leave { animation: slideOutRight 0.3s ease-in forwards; }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-24 right-4 z-50 flex flex-col gap-3"></div>
+
+    <!-- Header Section -->
+    <header class="glass-panel m-4 rounded-3xl p-4 flex-none z-20 shadow-2xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-transparent"></div>
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center px-2 gap-4 relative z-10">
+            <!-- Title & Clock -->
+            <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-gradient-to-br from-indigo-500 to-cyan-400 p-3 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.5)] border border-white/20">
+                        <i class="fas fa-chart-pie text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-indigo-200">LIVE PANEL</h1>
+                        <p id="live-clock" class="text-xs font-medium text-cyan-300 tracking-wider flex items-center mt-1">
+                            <i class="fas fa-circle text-[8px] text-red-500 animate-pulse mr-2"></i> <span>--:--:--</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-3 w-full md:w-auto">
+                <button id="btn-export" class="hidden flex-1 md:flex-none justify-center bg-gray-800/80 hover:bg-gray-700 text-gray-200 py-2.5 px-5 rounded-xl text-sm font-bold transition-all border border-gray-600 shadow-lg hover:shadow-xl group">
+                    <i class="fas fa-download mr-2 text-gray-400 group-hover:text-white transition-colors"></i> Eksport CSV
+                </button>
+                <button id="btn-refresh" class="flex-1 md:flex-none justify-center bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white py-2.5 px-6 rounded-xl text-sm font-bold transition-all border border-blue-300/30 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
+                    <i class="fas fa-sync-alt mr-2"></i> Muat Semula Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto px-4 pb-6 flex flex-col gap-6 overflow-y-auto">
+        
+        <!-- Step 1: Location Selection -->
+        <div class="glass-panel p-6 md:p-8 rounded-[2rem] relative overflow-hidden flex-none">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] -z-10"></div>
+            
+            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <h2 class="text-xl font-bold flex items-center text-white drop-shadow-md">
+                    <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-4">1</span>
+                    Lokasi Bengkel
+                </h2>
+                <div class="w-full md:w-1/2 relative">
+                    <select id="location-select" class="w-full px-6 py-4 text-base md:text-lg bg-gray-900/60 backdrop-blur-md border border-gray-600 hover:border-indigo-400 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white font-medium transition-all cursor-pointer appearance-none shadow-inner">
+                        <option value="" disabled selected>✨ Sila Pilih Tempat Bengkel...</option>
+                        <!-- Pilihan Lokasi akan dimasukkan secara automatik dari Google Sheets -->
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-6 text-indigo-400">
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content (Hidden by default) -->
+        <div id="dashboard-content" class="hidden flex-col gap-6 fade-in h-full pb-10">
+            
+            <!-- Step 2: KPI & Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Total Card -->
+                <div class="glass-panel p-6 rounded-[2rem] lg:col-span-2 relative overflow-hidden flex items-center justify-between">
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-[50px]"></div>
+                    <div class="z-10">
+                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-1">Kehadiran Semasa</h3>
+                        <h2 class="text-2xl md:text-3xl font-black text-white" id="selected-location-title">Lokasi</h2>
+                    </div>
+                    <div class="z-10 text-right flex items-end gap-3">
+                        <span class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-lg leading-none" id="total-attendance">0</span>
+                        <span class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Orang</span>
+                    </div>
+                </div>
+
+                <!-- Status Breakdown Card -->
+                <div class="glass-panel p-6 rounded-[2rem] flex flex-col justify-center gap-4 relative overflow-hidden">
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 border border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center"><i class="fas fa-check text-emerald-400 text-sm"></i></div>
+                            <span class="text-sm font-semibold text-gray-300">Hadir</span>
+                        </div>
+                        <span class="text-xl font-bold text-emerald-400" id="stat-hadir">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 border border-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center"><i class="fas fa-hourglass-half text-amber-400 text-sm"></i></div>
+                            <span class="text-sm font-semibold text-gray-300">Dalam Proses</span>
+                        </div>
+                        <span class="text-xl font-bold text-amber-400" id="stat-proses">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Subject Breakdown -->
+            <div class="glass-panel p-6 rounded-[2rem] relative">
+                <h2 class="text-lg font-bold mb-4 flex items-center text-white">
+                    <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3">2</span>
+                    Tapis mengikut Mata Pelajaran
+                </h2>
+                <!-- Horizontal Scrollable Container for Subject Cards -->
+                <div class="flex overflow-x-auto gap-4 pb-4 pt-2 px-2 -mx-2 snap-x" id="subject-cards-container">
+                    <!-- Cards injected by JS -->
+                </div>
+            </div>
+
+            <!-- Step 4: Data Table -->
+            <div id="panel-list-section" class="glass-panel rounded-[2rem] flex flex-col flex-1 relative overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-900/30">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center drop-shadow-md" id="table-title">Senarai Panel</h2>
+                        <p class="text-sm text-gray-400 mt-1" id="table-subtitle">Memaparkan semua rekod untuk lokasi ini</p>
+                    </div>
+                    
+                    <div class="relative w-full md:w-72">
+                        <input type="text" id="filter-name" placeholder="Cari nama..." class="w-full pl-10 pr-4 py-2.5 bg-gray-900/80 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 text-white placeholder-gray-500 text-sm transition-all shadow-inner">
+                        <i class="fas fa-search absolute left-3.5 top-3 text-gray-500"></i>
+                    </div>
+                </div>
+                
+                <div class="table-container flex-1 bg-black/20">
+                    <table id="data-table" class="min-w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Bil.</th>
+                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Panel</th>
+                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Mata Pelajaran</th>
+                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Masa Daftar</th>
+                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="panel-table-body" class="divide-y divide-gray-800/50">
+                            <!-- Data Populated by JS -->
+                        </tbody>
+                    </table>
+                    
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex-col items-center justify-center p-16 text-center">
+                        <div class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-gray-700">
+                            <i class="fas fa-folder-open text-3xl text-gray-500"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-300">Tiada Rekod</h3>
+                        <p class="text-sm text-gray-500 mt-1">Sila tukar carian atau tapisan anda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // URL Pangkalan Data Google Apps Script Anda
+        const GAS_URL = "https://script.google.com/macros/s/AKfycby6Ml33aKh1IICewTmOZyg3oG4Cmn9ri1rQ-6X1VOfCtsoQTWJzkhh3wpFwE8SY0ZuH/exec";
+
+        // State variables
+        let panelData = []; // Akan diisi dari server Google
+        let activeLocation = "";
+        let activeSubject = "Keseluruhan"; 
+        let searchQuery = "";
+        let subjectsList = [];
+
+        // Konfigurasi Asas untuk Subjek (Akan ditambah secara dinamik)
+        let subjectConfig = {
+            "Bahasa Melayu": { icon: "fa-book-open", color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/30", glow: "shadow-[0_0_15px_rgba(34,211,238,0.3)]" },
+            "Matematik": { icon: "fa-calculator", color: "text-pink-400", bg: "bg-pink-500/20", border: "border-pink-500/30", glow: "shadow-[0_0_15px_rgba(244,114,182,0.3)]" },
+            "Sains": { icon: "fa-flask", color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/30", glow: "shadow-[0_0_15px_rgba(52,211,153,0.3)]" }
+        };
+        
+        // DOM Elements
+        const locationSelect = document.getElementById('location-select');
+        const dashboardContent = document.getElementById('dashboard-content');
+        const btnExport = document.getElementById('btn-export');
+        const btnRefresh = document.getElementById('btn-refresh');
+        const subjectCardsContainer = document.getElementById('subject-cards-container');
+        const tableBody = document.getElementById('panel-table-body');
+        const emptyState = document.getElementById('empty-state');
+        const dataTable = document.getElementById('data-table');
+        const filterNameInput = document.getElementById('filter-name');
+
+        
+        // --- Live Clock Logic ---
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+            document.querySelector('#live-clock span').innerText = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Custom Toast Notification ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const icon = type === 'success' ? '<i class="fas fa-check-circle text-emerald-400"></i>' : 
+                         type === 'error' ? '<i class="fas fa-exclamation-triangle text-red-400"></i>' : 
+                         '<i class="fas fa-info-circle text-blue-400"></i>';
+                         
+            const border = type === 'success' ? 'border-emerald-500/30' : 
+                           type === 'error' ? 'border-red-500/30' : 'border-blue-500/30';
+                           
+            const bg = 'bg-gray-900/90 backdrop-blur-xl';
+
+            toast.className = `toast-enter flex items-center gap-3 p-4 rounded-xl border shadow-2xl ${bg} ${border}`;
+            toast.innerHTML = `${icon} <span class="text-sm font-medium text-white">${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.replace('toast-enter', 'toast-leave');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- FETCH DATA DARI GOOGLE APPS SCRIPT ---
+        async function fetchLiveData() {
+            showToast("Sedang memuat turun data live...", "info");
+            
+            const refreshIcon = btnRefresh.querySelector('i');
+            refreshIcon.classList.add('fa-spin');
+
+            try {
+                // Penambahan: Elakkan masalah Cache & pastikan browser ikut laluan (redirect) Google
+                const urlWithCacheBuster = GAS_URL + "?t=" + new Date().getTime();
+                const response = await fetch(urlWithCacheBuster, {
+                    method: 'GET',
+                    redirect: 'follow' // Wajib diletakkan untuk Google Apps Script
+                });
+                
+                if (!response.ok) throw new Error("Gagal berhubung dengan pangkalan data.");
+                
+                const rawData = await response.json();
+                
+                // Pastikan data adalah array (bergantung cara format JSON di Apps Script)
+                const dataArray = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || []);
+                
+                panelData = dataArray.map((row, index) => {
+                    // Carian kunci (key) yang fleksibel jika nama lajur di Sheets berbeza
+                    const getVal = (possibleKeys) => {
+                        for(let key in row) {
+                            if(possibleKeys.includes(key.toLowerCase().trim())) return row[key];
+                        }
+                        return null;
+                    };
+
+                    return {
+                        id: index + 1,
+                        name: getVal(["nama", "name", "nama panel", "peserta"]) || "Tanpa Nama",
+                        location: getVal(["tempat bengkel", "tempat", "lokasi", "location", "zon"]) || "Tiada Lokasi",
+                        subject: getVal(["mata pelajaran", "subjek", "opsyen", "subject"]) || "Lain-lain",
+                        timestamp: getVal(["timestamp", "masa", "waktu", "tarikh", "date"]) || new Date().toLocaleString(),
+                        status: getVal(["status", "kehadiran"]) || "Hadir" // Andaian default
+                    };
+                });
+
+                // Susun data terbaharu di atas
+                panelData.reverse();
+
+                // Kemas kini Pilihan Lokasi & Subjek
+                populateLocations();
+                buildSubjectConfig();
+
+                showToast(`Berjaya! ${panelData.length} rekod dimuat turun.`, 'success');
+
+                // Segar semula paparan jika lokasi sedang dipilih
+                if (activeLocation) {
+                    // Semak jika lokasi aktif masih wujud dalam data baru
+                    const lokasiWujud = panelData.some(p => p.location === activeLocation);
+                    if(!lokasiWujud) {
+                        activeLocation = "";
+                        locationSelect.value = "";
+                        dashboardContent.classList.add('hidden');
+                        dashboardContent.classList.remove('flex');
+                    } else {
+                        updateDashboard();
+                    }
+                }
+
+            } catch (error) {
+                console.error("Ralat Fetch:", error);
+                showToast("Data disekat. Pastikan 'Who has access' diubah ke 'Anyone'.", "error");
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // --- PENJANAAN LOKASI DINAMIK ---
+        function populateLocations() {
+            const uniqueLocations = [...new Set(panelData.map(item => item.location))].filter(l => l !== "Tiada Lokasi" && l !== "").sort();
+            
+            // Simpan option pertama (Placeholder)
+            const placeholder = locationSelect.options[0];
+            locationSelect.innerHTML = '';
+            locationSelect.appendChild(placeholder);
+
+            uniqueLocations.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc;
+                option.textContent = loc;
+                if (loc === activeLocation) option.selected = true;
+                locationSelect.appendChild(option);
+            });
+        }
+
+        // --- PENJANAAN WARNA SUBJEK DINAMIK ---
+        function buildSubjectConfig() {
+            const uniqueSubjects = [...new Set(panelData.map(item => item.subject))].filter(s => s !== "");
+            
+            const dynamicStyles = [
+                { color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/30", glow: "shadow-[0_0_15px_rgba(251,191,36,0.3)]", icon: "fa-landmark" },
+                { color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/30", glow: "shadow-[0_0_15px_rgba(168,85,247,0.3)]", icon: "fa-atom" },
+                { color: "text-rose-400", bg: "bg-rose-500/20", border: "border-rose-500/30", glow: "shadow-[0_0_15px_rgba(244,63,94,0.3)]", icon: "fa-globe" },
+                { color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/30", glow: "shadow-[0_0_15px_rgba(99,102,241,0.3)]", icon: "fa-square-root-variable" },
+                { color: "text-orange-400", bg: "bg-orange-500/20", border: "border-orange-500/30", glow: "shadow-[0_0_15px_rgba(249,115,22,0.3)]", icon: "fa-laptop" }
+            ];
+            
+            uniqueSubjects.forEach((subj, idx) => {
+                if (!subjectConfig[subj]) {
+                    const style = dynamicStyles[idx % dynamicStyles.length];
+                    subjectConfig[subj] = { 
+                        icon: style.icon, 
+                        color: style.color, 
+                        bg: style.bg, 
+                        border: style.border, 
+                        glow: style.glow 
+                    };
+                }
+            });
+            subjectsList = uniqueSubjects.sort();
+        }
+
+        // --- Core Application Logic ---
+        locationSelect.addEventListener('change', (e) => {
+            activeLocation = e.target.value;
+            activeSubject = "Keseluruhan"; 
+            searchQuery = ""; 
+            filterNameInput.value = "";
+            
+            if(activeLocation) {
+                dashboardContent.classList.remove('hidden');
+                dashboardContent.classList.add('flex');
+                btnExport.classList.remove('hidden');
+                updateDashboard();
+            }
+        });
+
+        function updateDashboard() {
+            const locData = panelData.filter(p => p.location === activeLocation);
+            
+            // 1. Update KPI Summary
+            document.getElementById('selected-location-title').innerText = activeLocation;
+            document.getElementById('total-attendance').innerText = locData.length;
+            
+            // Mengira status (Fleksibel jika ejaan Hadir dalam sheet berbeza sikit)
+            document.getElementById('stat-hadir').innerText = locData.filter(p => p.status.toLowerCase().includes('hadir') || p.status.toLowerCase().includes('selesai')).length;
+            document.getElementById('stat-proses').innerText = locData.length - locData.filter(p => p.status.toLowerCase().includes('hadir') || p.status.toLowerCase().includes('selesai')).length;
+
+            // 2. Render Subject Cards
+            renderSubjectCards(locData);
+
+            // 3. Render Table
+            renderTableData(locData);
+        }
+
+        function renderSubjectCards(locData) {
+            subjectCardsContainer.innerHTML = '';
+            
+            const createCard = (title, count, iconObj, isAll = false) => {
+                const isSelected = activeSubject === title;
+                const card = document.createElement('div');
+                
+                let styles = `glass-card min-w-[140px] md:min-w-[160px] p-5 rounded-2xl cursor-pointer snap-start flex flex-col items-center justify-center text-center relative overflow-hidden group `;
+                
+                if (isSelected) {
+                    styles += `border-indigo-400 bg-gray-800/80 shadow-[0_0_20px_rgba(99,102,241,0.2)] transform scale-[1.02] `;
+                }
+
+                card.className = styles;
+
+                let iconHTML = '';
+                if (isAll) {
+                    iconHTML = `<div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-xl text-white mb-3 shadow-inner ${isSelected ? 'bg-indigo-500/40 text-indigo-200' : ''}">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>`;
+                } else {
+                    iconHTML = `<div class="w-12 h-12 rounded-xl ${iconObj.bg} ${iconObj.border} flex items-center justify-center text-xl ${iconObj.color} mb-3 shadow-inner ${isSelected ? iconObj.glow : ''}">
+                                    <i class="fas ${iconObj.icon}"></i>
+                                </div>`;
+                }
+
+                card.innerHTML = `
+                    ${isSelected ? '<div class="absolute top-2 right-2 text-indigo-400"><i class="fas fa-check-circle text-xs"></i></div>' : ''}
+                    ${iconHTML}
+                    <span class="text-xs font-semibold text-gray-400 uppercase mb-1">${title}</span>
+                    <span class="text-3xl font-black text-white leading-none">${count}</span>
+                `;
+
+                card.onclick = () => {
+                    activeSubject = title;
+                    updateDashboard(); 
+                    document.getElementById('panel-list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+
+                return card;
+            };
+
+            // Add "Keseluruhan" (All) Card first
+            subjectCardsContainer.appendChild(createCard("Keseluruhan", locData.length, null, true));
+
+            // Extract subjects specific to this location
+            const locSubjects = [...new Set(locData.map(p => p.subject))].sort();
+
+            locSubjects.forEach(subj => {
+                const count = locData.filter(p => p.subject === subj).length;
+                subjectCardsContainer.appendChild(createCard(subj, count, subjectConfig[subj] || subjectConfig["Lain-lain"], false));
+            });
+        }
+
+
+        function renderTableData(locData) {
+            let filtered = locData;
+            if (activeSubject !== "Keseluruhan") {
+                filtered = filtered.filter(p => p.subject === activeSubject);
+            }
+
+            if (searchQuery) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            }
+
+            const tableTitle = document.getElementById('table-title');
+            const tableSubtitle = document.getElementById('table-subtitle');
+            
+            if (activeSubject === "Keseluruhan") {
+                tableTitle.innerHTML = `<i class="fas fa-layer-group text-indigo-400 mr-2"></i> Semua Subjek`;
+            } else {
+                const config = subjectConfig[activeSubject];
+                tableTitle.innerHTML = `<i class="fas ${config.icon} ${config.color} mr-2"></i> ${activeSubject}`;
+            }
+            tableSubtitle.innerText = `Memaparkan ${filtered.length} rekod panel`;
+
+            tableBody.innerHTML = '';
+            
+            if(filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                dataTable.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+                dataTable.classList.remove('hidden');
+                
+                filtered.forEach((panel, index) => {
+                    const isHadir = panel.status.toLowerCase().includes('hadir') || panel.status.toLowerCase().includes('selesai');
+                    const statusBadge = isHadir 
+                        ? `<span class="px-2.5 py-1 inline-flex text-xs font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fas fa-check mr-1.5 mt-0.5"></i> Hadir</span>` 
+                        : `<span class="px-2.5 py-1 inline-flex text-xs font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fas fa-hourglass-half mr-1.5 mt-0.5"></i> ${panel.status || 'Proses'}</span>`;
+                    
+                    const subjConfig = subjectConfig[panel.subject] || subjectConfig["Lain-lain"];
+                    
+                    // Format Timestamp to be cleaner if it's a full ISO string
+                    let displayTime = panel.timestamp;
+                    try {
+                        const d = new Date(panel.timestamp);
+                        if(!isNaN(d.getTime())) {
+                            displayTime = d.toLocaleDateString('ms-MY') + ' ' + d.toLocaleTimeString('ms-MY', {hour: '2-digit', minute:'2-digit'});
+                        }
+                    } catch(e) {}
+
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-white/5 transition-colors duration-150 group';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-xs font-bold text-gray-300 mr-3">
+                                    ${panel.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="text-sm font-semibold text-gray-200 group-hover:text-white">${panel.name}</div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center text-sm">
+                                <i class="fas ${subjConfig.icon} ${subjConfig.color} w-5"></i>
+                                <span class="text-gray-300 ml-1">${panel.subject}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${displayTime}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${statusBadge}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+        // --- Event Listeners ---
+        
+        filterNameInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            if (activeLocation) updateDashboard();
+        });
+
+        // Trigger Fetch from button
+        btnRefresh.addEventListener('click', fetchLiveData);
+
+        // Export to CSV Logic
+        btnExport.addEventListener('click', () => {
+            if (!activeLocation) return;
+
+            let filtered = panelData.filter(p => p.location === activeLocation);
+            if (activeSubject !== "Keseluruhan") {
+                filtered = filtered.filter(p => p.subject === activeSubject);
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Bil,Nama Panel,Mata Pelajaran,Masa Daftar,Status\n"; // Header
+
+            filtered.forEach((p, index) => {
+                let row = `${index + 1},"${p.name}","${p.subject}","${p.timestamp}","${p.status}"`;
+                csvContent += row + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Data_Panel_${activeLocation.replace(/\s+/g, '_')}_${activeSubject}.csv`);
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('Fail CSV sedang dimuat turun.', 'info');
+        });
+
+        // MUAT TURUN DATA AUTOMATIK BILA WEB DIBUKA
+        window.addEventListener('DOMContentLoaded', fetchLiveData);
+
+    </script>
+</body>
+</html>
