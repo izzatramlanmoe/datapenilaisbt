@@ -3,636 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paparan Data Live - Maklumat Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Live Update Maklumat Panel</title>
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#050B14',
-                        glass: 'rgba(17, 25, 40, 0.75)',
-                        glassBorder: 'rgba(255, 255, 255, 0.125)',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap');
-        
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #050B14;
-            /* Aurora Effect Background */
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.3) 0, transparent 50%);
-            background-attachment: fixed;
-            color: #e2e8f0;
-            min-height: 100vh;
-        }
-
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Premium Glass Panel */
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid var(--glassBorder);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
         }
         
+        /* Elemen Glass (Bekas Utama) */
+        .glass {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        
+        /* Kad Glass untuk Butiran Mata Pelajaran */
         .glass-card {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
+        
         .glass-card:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.05);
+            transform: translateY(-6px);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255,255,255,1) inset;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 100%);
         }
-
-        /* Custom Scrollbar for better UI */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
-
-        /* Table Sticky Header */
-        .table-container { max-height: 50vh; overflow-y: auto; }
-        thead th { position: sticky; top: 0; z-index: 10; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); }
-
-        /* Toast Animation */
-        .toast-enter { animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
-        .toast-leave { animation: slideOutRight 0.3s ease-in forwards; }
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        
+        /* Modal Pop-up Glass */
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
+        
+        /* Skrol khas untuk jadual panjang */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.6);
         }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden relative">
+<body class="bg-gradient-to-br from-blue-50 via-teal-50 to-indigo-100 min-h-screen text-gray-800 antialiased relative">
+    
+    <!-- Latar Belakang Dekoratif Abstrak -->
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+    <div class="absolute top-[20%] right-[-10%] w-96 h-96 bg-indigo-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-96 h-96 bg-blue-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
 
-    <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed top-24 right-4 z-50 flex flex-col gap-3"></div>
-
-    <!-- Header Section -->
-    <header class="glass-panel m-4 rounded-3xl p-4 flex-none z-20 shadow-2xl relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-transparent"></div>
-        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center px-2 gap-4 relative z-10">
-            <!-- Title & Clock -->
-            <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-start">
-                <div class="flex items-center space-x-4">
-                    <div class="bg-gradient-to-br from-indigo-500 to-cyan-400 p-3 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.5)] border border-white/20">
-                        <i class="fas fa-chart-pie text-2xl text-white"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-indigo-200">LIVE PANEL</h1>
-                        <p id="live-clock" class="text-xs font-medium text-cyan-300 tracking-wider flex items-center mt-1">
-                            <i class="fas fa-circle text-[8px] text-red-500 animate-pulse mr-2"></i> <span>--:--:--</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center space-x-3 w-full md:w-auto">
-                <button id="btn-export" class="hidden flex-1 md:flex-none justify-center bg-gray-800/80 hover:bg-gray-700 text-gray-200 py-2.5 px-5 rounded-xl text-sm font-bold transition-all border border-gray-600 shadow-lg hover:shadow-xl group">
-                    <i class="fas fa-download mr-2 text-gray-400 group-hover:text-white transition-colors"></i> Eksport CSV
-                </button>
-                <button id="btn-refresh" class="flex-1 md:flex-none justify-center bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white py-2.5 px-6 rounded-xl text-sm font-bold transition-all border border-blue-300/30 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)]">
-                    <i class="fas fa-sync-alt mr-2"></i> Muat Semula Data
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 container mx-auto px-4 pb-6 flex flex-col gap-6 overflow-y-auto">
-        
-        <!-- Step 1: Location Selection -->
-        <div class="glass-panel p-6 md:p-8 rounded-[2rem] relative overflow-hidden flex-none">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[80px] -z-10"></div>
-            
-            <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <h2 class="text-xl font-bold flex items-center text-white drop-shadow-md">
-                    <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-4">1</span>
-                    Lokasi Bengkel
-                </h2>
-                <div class="w-full md:w-1/2 relative">
-                    <select id="location-select" class="w-full px-6 py-4 text-base md:text-lg bg-gray-900/60 backdrop-blur-md border border-gray-600 hover:border-indigo-400 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white font-medium transition-all cursor-pointer appearance-none shadow-inner">
-                        <option value="" disabled selected>✨ Sila Pilih Tempat Bengkel...</option>
-                        <!-- Pilihan Lokasi akan dimasukkan secara automatik dari Google Sheets -->
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-6 text-indigo-400">
-                        <i class="fas fa-chevron-down text-sm"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dashboard Content (Hidden by default) -->
-        <div id="dashboard-content" class="hidden flex-col gap-6 fade-in h-full pb-10">
-            
-            <!-- Step 2: KPI & Summary -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Total Card -->
-                <div class="glass-panel p-6 rounded-[2rem] lg:col-span-2 relative overflow-hidden flex items-center justify-between">
-                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-[50px]"></div>
-                    <div class="z-10">
-                        <h3 class="text-gray-400 text-xs font-bold uppercase tracking-[0.2em] mb-1">Kehadiran Semasa</h3>
-                        <h2 class="text-2xl md:text-3xl font-black text-white" id="selected-location-title">Lokasi</h2>
-                    </div>
-                    <div class="z-10 text-right flex items-end gap-3">
-                        <span class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 drop-shadow-lg leading-none" id="total-attendance">0</span>
-                        <span class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Orang</span>
-                    </div>
-                </div>
-
-                <!-- Status Breakdown Card -->
-                <div class="glass-panel p-6 rounded-[2rem] flex flex-col justify-center gap-4 relative overflow-hidden">
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 border border-gray-700/50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center"><i class="fas fa-check text-emerald-400 text-sm"></i></div>
-                            <span class="text-sm font-semibold text-gray-300">Hadir</span>
-                        </div>
-                        <span class="text-xl font-bold text-emerald-400" id="stat-hadir">0</span>
-                    </div>
-                    <div class="flex justify-between items-center p-3 rounded-xl bg-gray-900/50 border border-gray-700/50">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center"><i class="fas fa-hourglass-half text-amber-400 text-sm"></i></div>
-                            <span class="text-sm font-semibold text-gray-300">Dalam Proses</span>
-                        </div>
-                        <span class="text-xl font-bold text-amber-400" id="stat-proses">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Subject Breakdown -->
-            <div class="glass-panel p-6 rounded-[2rem] relative">
-                <h2 class="text-lg font-bold mb-4 flex items-center text-white">
-                    <span class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 w-8 h-8 rounded-full inline-flex items-center justify-center text-sm mr-3">2</span>
-                    Tapis mengikut Mata Pelajaran
-                </h2>
-                <!-- Horizontal Scrollable Container for Subject Cards -->
-                <div class="flex overflow-x-auto gap-4 pb-4 pt-2 px-2 -mx-2 snap-x" id="subject-cards-container">
-                    <!-- Cards injected by JS -->
-                </div>
-            </div>
-
-            <!-- Step 4: Data Table -->
-            <div id="panel-list-section" class="glass-panel rounded-[2rem] flex flex-col flex-1 relative overflow-hidden">
-                <div class="p-6 md:p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gray-900/30">
-                    <div>
-                        <h2 class="text-xl font-bold text-white flex items-center drop-shadow-md" id="table-title">Senarai Panel</h2>
-                        <p class="text-sm text-gray-400 mt-1" id="table-subtitle">Memaparkan semua rekod untuk lokasi ini</p>
-                    </div>
-                    
-                    <div class="relative w-full md:w-72">
-                        <input type="text" id="filter-name" placeholder="Cari nama..." class="w-full pl-10 pr-4 py-2.5 bg-gray-900/80 border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 text-white placeholder-gray-500 text-sm transition-all shadow-inner">
-                        <i class="fas fa-search absolute left-3.5 top-3 text-gray-500"></i>
-                    </div>
-                </div>
-                
-                <div class="table-container flex-1 bg-black/20">
-                    <table id="data-table" class="min-w-full text-left border-collapse">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Bil.</th>
-                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Panel</th>
-                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Mata Pelajaran</th>
-                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Masa Daftar</th>
-                                <th class="px-6 py-4 text-xs font-black text-gray-400 uppercase tracking-widest border-b border-gray-700/50">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="panel-table-body" class="divide-y divide-gray-800/50">
-                            <!-- Data Populated by JS -->
-                        </tbody>
-                    </table>
-                    
-                    <!-- Empty State -->
-                    <div id="empty-state" class="hidden flex-col items-center justify-center p-16 text-center">
-                        <div class="w-20 h-20 bg-gray-800/50 rounded-full flex items-center justify-center mb-4 border border-gray-700">
-                            <i class="fas fa-folder-open text-3xl text-gray-500"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-300">Tiada Rekod</h3>
-                        <p class="text-sm text-gray-500 mt-1">Sila tukar carian atau tapisan anda.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+    <!-- Kontena Utama Aplikasi -->
+    <div id="app" class="relative z-10"></div>
 
     <script>
-        // URL Pangkalan Data Google Apps Script Anda (Dikemas kini)
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzMrAxc7ZIfv7o9OHVhU_OtLd6voSuT5fc6dp8cJ8UzWgQhNCp13E0Q0F9g4QKI2Tsu/exec";
-
-        // State variables
-        let panelData = []; // Akan diisi dari server Google
-        let activeLocation = "";
-        let activeSubject = "Keseluruhan"; 
-        let searchQuery = "";
-        let subjectsList = [];
-
-        // Konfigurasi Asas untuk Subjek (Akan ditambah secara dinamik)
-        let subjectConfig = {
-            "Bahasa Melayu": { icon: "fa-book-open", color: "text-cyan-400", bg: "bg-cyan-500/20", border: "border-cyan-500/30", glow: "shadow-[0_0_15px_rgba(34,211,238,0.3)]" },
-            "Matematik": { icon: "fa-calculator", color: "text-pink-400", bg: "bg-pink-500/20", border: "border-pink-500/30", glow: "shadow-[0_0_15px_rgba(244,114,182,0.3)]" },
-            "Sains": { icon: "fa-flask", color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/30", glow: "shadow-[0_0_15px_rgba(52,211,153,0.3)]" }
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTgiKL_Mq-lMFWtuMxPIhV0JLjQbi_OhbexvewjAfLDpVn7jIWjn8qZBMUQZkioOz-8QgI-WFjjAJ53/pub?output=csv';
+        
+        let appData = {
+            records: [],
+            uniqueBengkel: [],
+            filteredRecords: [],
+            groupedBySubject: {},
+            total: 0
         };
-        
-        // DOM Elements
-        const locationSelect = document.getElementById('location-select');
-        const dashboardContent = document.getElementById('dashboard-content');
-        const btnExport = document.getElementById('btn-export');
-        const btnRefresh = document.getElementById('btn-refresh');
-        const subjectCardsContainer = document.getElementById('subject-cards-container');
-        const tableBody = document.getElementById('panel-table-body');
-        const emptyState = document.getElementById('empty-state');
-        const dataTable = document.getElementById('data-table');
-        const filterNameInput = document.getElementById('filter-name');
+        let lastUpdated = '';
+        let autoRefreshTimer;
+        let currentBengkelFilter = 'Semua';
 
-        
-        // --- Live Clock Logic ---
-        function updateClock() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
-            document.querySelector('#live-clock span').innerText = timeString;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        /* Mulakan sistem */
+        window.onload = () => {
+            initApp();
+        };
 
-        // --- Custom Toast Notification ---
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
+        async function initApp() {
+            renderLoading();
+            await fetchData(false);
+            renderDashboardShell();
+            updateDashboardData();
             
-            const icon = type === 'success' ? '<i class="fas fa-check-circle text-emerald-400"></i>' : 
-                         type === 'error' ? '<i class="fas fa-exclamation-triangle text-red-400"></i>' : 
-                         '<i class="fas fa-info-circle text-blue-400"></i>';
-                         
-            const border = type === 'success' ? 'border-emerald-500/30' : 
-                           type === 'error' ? 'border-red-500/30' : 'border-blue-500/30';
-                           
-            const bg = 'bg-gray-900/90 backdrop-blur-xl';
-
-            toast.className = `toast-enter flex items-center gap-3 p-4 rounded-xl border shadow-2xl ${bg} ${border}`;
-            toast.innerHTML = `${icon} <span class="text-sm font-medium text-white">${message}</span>`;
-            
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.replace('toast-enter', 'toast-leave');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            // Sistem Auto Refresh setiap 15 saat (Penyegaran "Live")
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+            autoRefreshTimer = setInterval(async () => {
+                await fetchData(true);
+                // Kemas kini komponen jika modal tiada atau disembunyikan
+                const modal = document.getElementById('modal');
+                if (!modal || modal.classList.contains('hidden')) {
+                    updateDashboardData();
+                }
+            }, 15000); 
         }
 
-        // --- FETCH DATA DARI GOOGLE APPS SCRIPT ---
-        async function fetchLiveData() {
-            showToast("Sedang memuat turun data live...", "info");
-            
-            const refreshIcon = btnRefresh.querySelector('i');
-            refreshIcon.classList.add('fa-spin');
-
+        async function fetchData(isSilent) {
             try {
-                // Penambahan: Elakkan masalah Cache & pastikan browser ikut laluan (redirect) Google
-                const urlWithCacheBuster = GAS_URL + "?t=" + new Date().getTime();
-                const response = await fetch(urlWithCacheBuster, {
-                    method: 'GET',
-                    redirect: 'follow' // Wajib diletakkan untuk Google Apps Script
+                const response = await fetch(CSV_URL);
+                if (!response.ok) throw new Error('Rangkaian terputus atau fail tidak wujud.');
+                
+                const csvText = await response.text();
+                
+                return new Promise((resolve, reject) => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            processData(results.data);
+                            lastUpdated = new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute:'2-digit', second:'2-digit' });
+                            resolve();
+                        },
+                        error: (err) => reject(err)
+                    });
                 });
+            } catch (err) {
+                if (!isSilent) renderError(err);
+                console.error("Fetch Data Error:", err);
+            }
+        }
+
+        function processData(data) {
+            // Format setiap rekod & seragamkan nama medan
+            let tempRecords = data.map(row => {
+                const keys = Object.keys(row);
                 
-                if (!response.ok) throw new Error("Gagal berhubung dengan pangkalan data.");
-                
-                const rawData = await response.json();
-                
-                // Pastikan data adalah array (bergantung cara format JSON di Apps Script)
-                const dataArray = Array.isArray(rawData) ? rawData : (rawData.data || rawData.items || []);
-                
-                panelData = dataArray.map((row, index) => {
-                    // Carian kunci (key) yang fleksibel jika nama lajur di Sheets berbeza
-                    const getVal = (possibleKeys) => {
-                        for(let key in row) {
-                            if(possibleKeys.includes(key.toLowerCase().trim())) return row[key];
-                        }
-                        return null;
-                    };
-
-                    return {
-                        id: index + 1,
-                        name: getVal(["nama", "name", "nama panel", "peserta"]) || "Tanpa Nama",
-                        location: getVal(["tempat bengkel", "tempat", "lokasi", "location", "zon"]) || "Tiada Lokasi",
-                        subject: getVal(["mata pelajaran", "subjek", "opsyen", "subject"]) || "Lain-lain",
-                        timestamp: getVal(["timestamp", "masa", "waktu", "tarikh", "date"]) || new Date().toLocaleString(),
-                        status: getVal(["status", "kehadiran"]) || "Hadir" // Andaian default
-                    };
-                });
-
-                // Susun data terbaharu di atas
-                panelData.reverse();
-
-                // Kemas kini Pilihan Lokasi & Subjek
-                populateLocations();
-                buildSubjectConfig();
-
-                showToast(`Berjaya! ${panelData.length} rekod dimuat turun.`, 'success');
-
-                // Segar semula paparan jika lokasi sedang dipilih
-                if (activeLocation) {
-                    // Semak jika lokasi aktif masih wujud dalam data baru
-                    const lokasiWujud = panelData.some(p => p.location === activeLocation);
-                    if(!lokasiWujud) {
-                        activeLocation = "";
-                        locationSelect.value = "";
-                        dashboardContent.classList.add('hidden');
-                        dashboardContent.classList.remove('flex');
-                    } else {
-                        updateDashboard();
+                // Cari padanan TEPAT sahaja (contoh: "NAMA")
+                const findExact = (targetNames) => {
+                    for (let t of targetNames) {
+                        let foundKey = keys.find(k => k.trim().toLowerCase() === t.toLowerCase());
+                        if (foundKey && row[foundKey] && row[foundKey].trim() !== '') return row[foundKey];
                     }
-                }
-
-            } catch (error) {
-                console.error("Ralat Fetch:", error);
-                showToast("Data disekat. Pastikan 'Who has access' diubah ke 'Anyone'.", "error");
-            } finally {
-                refreshIcon.classList.remove('fa-spin');
-            }
-        }
-
-        // --- PENJANAAN LOKASI DINAMIK ---
-        function populateLocations() {
-            const uniqueLocations = [...new Set(panelData.map(item => item.location))].filter(l => l !== "Tiada Lokasi" && l !== "").sort();
-            
-            // Simpan option pertama (Placeholder)
-            const placeholder = locationSelect.options[0];
-            locationSelect.innerHTML = '';
-            locationSelect.appendChild(placeholder);
-
-            uniqueLocations.forEach(loc => {
-                const option = document.createElement('option');
-                option.value = loc;
-                option.textContent = loc;
-                if (loc === activeLocation) option.selected = true;
-                locationSelect.appendChild(option);
-            });
-        }
-
-        // --- PENJANAAN WARNA SUBJEK DINAMIK ---
-        function buildSubjectConfig() {
-            const uniqueSubjects = [...new Set(panelData.map(item => item.subject))].filter(s => s !== "");
-            
-            const dynamicStyles = [
-                { color: "text-amber-400", bg: "bg-amber-500/20", border: "border-amber-500/30", glow: "shadow-[0_0_15px_rgba(251,191,36,0.3)]", icon: "fa-landmark" },
-                { color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/30", glow: "shadow-[0_0_15px_rgba(168,85,247,0.3)]", icon: "fa-atom" },
-                { color: "text-rose-400", bg: "bg-rose-500/20", border: "border-rose-500/30", glow: "shadow-[0_0_15px_rgba(244,63,94,0.3)]", icon: "fa-globe" },
-                { color: "text-indigo-400", bg: "bg-indigo-500/20", border: "border-indigo-500/30", glow: "shadow-[0_0_15px_rgba(99,102,241,0.3)]", icon: "fa-square-root-variable" },
-                { color: "text-orange-400", bg: "bg-orange-500/20", border: "border-orange-500/30", glow: "shadow-[0_0_15px_rgba(249,115,22,0.3)]", icon: "fa-laptop" }
-            ];
-            
-            uniqueSubjects.forEach((subj, idx) => {
-                if (!subjectConfig[subj]) {
-                    const style = dynamicStyles[idx % dynamicStyles.length];
-                    subjectConfig[subj] = { 
-                        icon: style.icon, 
-                        color: style.color, 
-                        bg: style.bg, 
-                        border: style.border, 
-                        glow: style.glow 
-                    };
-                }
-            });
-            subjectsList = uniqueSubjects.sort();
-        }
-
-        // --- Core Application Logic ---
-        locationSelect.addEventListener('change', (e) => {
-            activeLocation = e.target.value;
-            activeSubject = "Keseluruhan"; 
-            searchQuery = ""; 
-            filterNameInput.value = "";
-            
-            if(activeLocation) {
-                dashboardContent.classList.remove('hidden');
-                dashboardContent.classList.add('flex');
-                btnExport.classList.remove('hidden');
-                updateDashboard();
-            }
-        });
-
-        function updateDashboard() {
-            const locData = panelData.filter(p => p.location === activeLocation);
-            
-            // 1. Update KPI Summary
-            document.getElementById('selected-location-title').innerText = activeLocation;
-            document.getElementById('total-attendance').innerText = locData.length;
-            
-            // Mengira status (Fleksibel jika ejaan Hadir dalam sheet berbeza sikit)
-            document.getElementById('stat-hadir').innerText = locData.filter(p => p.status.toLowerCase().includes('hadir') || p.status.toLowerCase().includes('selesai')).length;
-            document.getElementById('stat-proses').innerText = locData.length - locData.filter(p => p.status.toLowerCase().includes('hadir') || p.status.toLowerCase().includes('selesai')).length;
-
-            // 2. Render Subject Cards
-            renderSubjectCards(locData);
-
-            // 3. Render Table
-            renderTableData(locData);
-        }
-
-        function renderSubjectCards(locData) {
-            subjectCardsContainer.innerHTML = '';
-            
-            const createCard = (title, count, iconObj, isAll = false) => {
-                const isSelected = activeSubject === title;
-                const card = document.createElement('div');
-                
-                let styles = `glass-card min-w-[140px] md:min-w-[160px] p-5 rounded-2xl cursor-pointer snap-start flex flex-col items-center justify-center text-center relative overflow-hidden group `;
-                
-                if (isSelected) {
-                    styles += `border-indigo-400 bg-gray-800/80 shadow-[0_0_20px_rgba(99,102,241,0.2)] transform scale-[1.02] `;
-                }
-
-                card.className = styles;
-
-                let iconHTML = '';
-                if (isAll) {
-                    iconHTML = `<div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-xl text-white mb-3 shadow-inner ${isSelected ? 'bg-indigo-500/40 text-indigo-200' : ''}">
-                                    <i class="fas fa-layer-group"></i>
-                                </div>`;
-                } else {
-                    iconHTML = `<div class="w-12 h-12 rounded-xl ${iconObj.bg} ${iconObj.border} flex items-center justify-center text-xl ${iconObj.color} mb-3 shadow-inner ${isSelected ? iconObj.glow : ''}">
-                                    <i class="fas ${iconObj.icon}"></i>
-                                </div>`;
-                }
-
-                card.innerHTML = `
-                    ${isSelected ? '<div class="absolute top-2 right-2 text-indigo-400"><i class="fas fa-check-circle text-xs"></i></div>' : ''}
-                    ${iconHTML}
-                    <span class="text-xs font-semibold text-gray-400 uppercase mb-1">${title}</span>
-                    <span class="text-3xl font-black text-white leading-none">${count}</span>
-                `;
-
-                card.onclick = () => {
-                    activeSubject = title;
-                    updateDashboard(); 
-                    document.getElementById('panel-list-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return null;
                 };
 
-                return card;
-            };
+                // Cari padanan separa, tetapi boleh dikecualikan perkataan tertentu (cth: "penyelaras")
+                const findFuzzy = (targetNames, excludeWords = []) => {
+                    for (let t of targetNames) {
+                        let foundKey = keys.find(k => {
+                            let normalizedK = k.toLowerCase().trim();
+                            let containsTarget = normalizedK.includes(t.toLowerCase());
+                            let hasExclude = excludeWords.some(ex => normalizedK.includes(ex.toLowerCase()));
+                            return containsTarget && !hasExclude;
+                        });
+                        if (foundKey && row[foundKey] && row[foundKey].trim() !== '') return row[foundKey];
+                    }
+                    return null;
+                };
 
-            // Add "Keseluruhan" (All) Card first
-            subjectCardsContainer.appendChild(createCard("Keseluruhan", locData.length, null, true));
-
-            // Extract subjects specific to this location
-            const locSubjects = [...new Set(locData.map(p => p.subject))].sort();
-
-            locSubjects.forEach(subj => {
-                const count = locData.filter(p => p.subject === subj).length;
-                subjectCardsContainer.appendChild(createCard(subj, count, subjectConfig[subj] || subjectConfig["Lain-lain"], false));
-            });
-        }
-
-
-        function renderTableData(locData) {
-            let filtered = locData;
-            if (activeSubject !== "Keseluruhan") {
-                filtered = filtered.filter(p => p.subject === activeSubject);
-            }
-
-            if (searchQuery) {
-                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-            }
-
-            const tableTitle = document.getElementById('table-title');
-            const tableSubtitle = document.getElementById('table-subtitle');
-            
-            if (activeSubject === "Keseluruhan") {
-                tableTitle.innerHTML = `<i class="fas fa-layer-group text-indigo-400 mr-2"></i> Semua Subjek`;
-            } else {
-                const config = subjectConfig[activeSubject];
-                tableTitle.innerHTML = `<i class="fas ${config.icon} ${config.color} mr-2"></i> ${activeSubject}`;
-            }
-            tableSubtitle.innerText = `Memaparkan ${filtered.length} rekod panel`;
-
-            tableBody.innerHTML = '';
-            
-            if(filtered.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-                dataTable.classList.add('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                emptyState.classList.remove('flex');
-                dataTable.classList.remove('hidden');
+                // Ekstrak data rasmi
+                const nama = findExact(['Nama', 'NAMA']) || findFuzzy(['Nama'], ['penyelaras', 'projek']) || 'Tiada Nama';
+                const subjek = findExact(['Mata Pelajaran', 'Subjek']) || findFuzzy(['Mata Pelajaran', 'Subjek', 'Kursus']) || 'Tidak Dinyatakan';
+                const bengkel = findExact(['Tempat Bengkel', 'Tempat', 'Bengkel']) || findFuzzy(['tempat', 'bengkel', 'lokasi']) || 'Tidak Dinyatakan';
+                const timestamp = findExact(['Timestamp']) || findFuzzy(['timestamp', 'masa', 'tarikh']) || '-';
                 
-                filtered.forEach((panel, index) => {
-                    const isHadir = panel.status.toLowerCase().includes('hadir') || panel.status.toLowerCase().includes('selesai');
-                    const statusBadge = isHadir 
-                        ? `<span class="px-2.5 py-1 inline-flex text-xs font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"><i class="fas fa-check mr-1.5 mt-0.5"></i> Hadir</span>` 
-                        : `<span class="px-2.5 py-1 inline-flex text-xs font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20"><i class="fas fa-hourglass-half mr-1.5 mt-0.5"></i> ${panel.status || 'Proses'}</span>`;
-                    
-                    const subjConfig = subjectConfig[panel.subject] || subjectConfig["Lain-lain"];
-                    
-                    // Format Timestamp to be cleaner if it's a full ISO string
-                    let displayTime = panel.timestamp;
-                    try {
-                        const d = new Date(panel.timestamp);
-                        if(!isNaN(d.getTime())) {
-                            displayTime = d.toLocaleDateString('ms-MY') + ' ' + d.toLocaleTimeString('ms-MY', {hour: '2-digit', minute:'2-digit'});
-                        }
-                    } catch(e) {}
+                return {
+                    nama: nama,
+                    subjek: subjek,
+                    bengkel: bengkel,
+                    timestamp: timestamp,
+                    status: 'Telah Mengisi'
+                };
+            });
 
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-white/5 transition-colors duration-150 group';
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-xs font-bold text-gray-300 mr-3">
-                                    ${panel.name.charAt(0).toUpperCase()}
+            appData.records = tempRecords;
+            
+            // Dapatkan senarai tempat bengkel yang unik untuk Dropdown Filter
+            const bengkelSet = new Set(tempRecords.map(r => r.bengkel));
+            appData.uniqueBengkel = Array.from(bengkelSet).filter(b => b && b !== 'Tidak Dinyatakan').sort();
+            
+            applyFilter(currentBengkelFilter);
+        }
+
+        function applyFilter(bengkel) {
+            currentBengkelFilter = bengkel;
+            
+            if (bengkel === 'Semua') {
+                appData.filteredRecords = [...appData.records];
+            } else {
+                appData.filteredRecords = appData.records.filter(r => r.bengkel === bengkel);
+            }
+            
+            appData.total = appData.filteredRecords.length;
+            appData.groupedBySubject = {};
+            
+            // Kumpulan rekod yang telah difilter mengikut Subjek
+            appData.filteredRecords.forEach(record => {
+                const subjek = record.subjek;
+                if (!appData.groupedBySubject[subjek]) appData.groupedBySubject[subjek] = [];
+                appData.groupedBySubject[subjek].push(record);
+            });
+        }
+
+        // Penukar tarikh/masa Google Format
+        function formatDateTime(timestamp) {
+            if(!timestamp || timestamp === '-') return '-';
+            
+            let date = new Date(timestamp);
+            
+            // Pengendalian alternatif jika format tarikh bermasalah
+            if (isNaN(date.getTime())) {
+                // Cuba handle format DD/MM/YYYY HH:MM:SS (Standard Google Forms Msia)
+                const dateParts = timestamp.split(/[\s,]+/);
+                if(dateParts.length >= 2) {
+                    const dateStr = dateParts[0];
+                    const timeStr = dateParts.slice(1).join(' ');
+                    
+                    const dParts = dateStr.split(/[\/-]/);
+                    if(dParts.length === 3) {
+                         // Andaikan format DD/MM/YYYY
+                         const day = parseInt(dParts[0], 10);
+                         const month = parseInt(dParts[1], 10) - 1; // Bulan 0-index
+                         const year = parseInt(dParts[2], 10);
+                         
+                         // cuba parse masa
+                         let hours = 0, minutes = 0;
+                         const tMatch = timeStr.match(/(\d+):(\d+)/);
+                         if(tMatch) {
+                             hours = parseInt(tMatch[1], 10);
+                             minutes = parseInt(tMatch[2], 10);
+                             if(timeStr.toLowerCase().includes('pm') && hours < 12) hours += 12;
+                             if(timeStr.toLowerCase().includes('am') && hours === 12) hours = 0;
+                         }
+                         
+                         date = new Date(year, month, day, hours, minutes);
+                    }
+                }
+            }
+            
+            // Jika masih gagal, pulangkan raw string sahaja
+            if(isNaN(date.getTime())) return `<div class="text-xs text-gray-700">${timestamp}</div>`;
+            
+            const days = ['Ahad', 'Isnin', 'Selasa', 'Rabu', 'Khamis', 'Jumaat', 'Sabtu'];
+            const dayName = days[date.getDay()];
+            const dateStr = date.toLocaleDateString('ms-MY');
+            const timeStr = date.toLocaleTimeString('ms-MY', { hour: '2-digit', minute:'2-digit' });
+
+            return `<div><span class="font-semibold text-gray-700">${dayName}</span>, ${dateStr}</div><div class="text-xs text-indigo-600 font-bold mt-0.5">${timeStr}</div>`;
+        }
+
+        function renderDashboardShell() {
+            const container = document.getElementById('app');
+            
+            // Jana pilihan HTML untuk dropdown tempat bengkel
+            let bengkelOptions = `<option value="Semua">Tapis: Semua Tempat Bengkel</option>`;
+            appData.uniqueBengkel.forEach(b => {
+                let selected = currentBengkelFilter === b ? 'selected' : '';
+                bengkelOptions += `<option value="${b}" ${selected}>${b}</option>`;
+            });
+            
+            container.innerHTML = `
+                <div class="max-w-7xl mx-auto p-4 sm:p-8 min-h-screen flex flex-col">
+                    
+                    <!-- Pengepala Utama -->
+                    <div class="text-center mb-8 pt-4">
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-700 mb-4 drop-shadow-sm pb-1">
+                            Live Update Maklumat Panel
+                        </h1>
+                        <p class="text-gray-600 font-medium text-lg max-w-2xl mx-auto mb-5">
+                            Sistem pemantauan status kehadiran / pendaftaran secara masa nyata.
+                        </p>
+                        
+                        <div class="inline-flex items-center justify-center px-4 py-2 glass rounded-full text-xs font-semibold text-indigo-700 shadow-sm border-indigo-100/50">
+                            <span class="relative flex h-2.5 w-2.5 mr-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500"></span>
+                            </span>
+                            <span id="last-updated-time">Kemas kini terakhir: Memuatkan...</span>
+                        </div>
+                    </div>
+
+                    <!-- Filter Dropdown Bengkel -->
+                    <div class="flex justify-center mb-6 z-20 relative w-full max-w-md mx-auto">
+                        <div class="relative w-full">
+                            <select id="bengkel-filter" onchange="handleFilterChange(this.value)" class="w-full glass px-6 py-3.5 rounded-full text-sm font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer appearance-none shadow-sm transition-all hover:bg-white/60 text-center text-ellipsis pr-10">
+                                ${bengkelOptions}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-6 text-indigo-500">
+                                <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kad Jumlah Keseluruhan -->
+                    <div class="glass rounded-3xl p-10 mb-10 flex flex-col items-center justify-center max-w-md mx-auto text-center relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 z-10">Jumlah Keseluruhan Borang</h2>
+                        <div id="total-count" class="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-700 to-teal-500 drop-shadow-lg z-10 transition-all duration-300">
+                            -
+                        </div>
+                    </div>
+
+                    <!-- Grid Pemilihan Mata Pelajaran -->
+                    <div id="subject-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12 flex-grow">
+                        <!-- Dimuatkan menerusi JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Modal Struktur (Tersembunyi) -->
+                <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+                    <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
+                    <div class="glass-modal rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col relative transform scale-95 transition-all duration-300" id="modal-content">
+                        <!-- Kandungan Modal Akan Dimuatkan Di Sini -->
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleFilterChange(value) {
+            applyFilter(value);
+            updateDashboardData();
+        }
+
+        function updateDashboardData() {
+            // Update total
+            const totalEl = document.getElementById('total-count');
+            if(totalEl) totalEl.innerText = appData.total;
+            
+            // Update timestamp
+            const timeEl = document.getElementById('last-updated-time');
+            if(timeEl) timeEl.innerText = 'Kemas kini terakhir: ' + lastUpdated;
+            
+            // Update Cards Grid
+            const gridEl = document.getElementById('subject-grid');
+            if(gridEl) {
+                let html = '';
+                const activeData = appData.groupedBySubject;
+                const keys = Object.keys(activeData).sort();
+                
+                if(keys.length === 0) {
+                    html = `<div class="col-span-full text-center py-10 text-gray-500 glass rounded-xl">Tiada rekod data dijumpai untuk pilihan ini.</div>`;
+                } else {
+                    keys.forEach(key => {
+                        const count = activeData[key].length;
+                        html += `
+                            <div class="glass-card rounded-2xl p-6 cursor-pointer flex flex-col h-full group relative overflow-hidden" onclick="showGroupDetails('${key}')">
+                                <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-teal-200/40 to-indigo-200/40 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+                                <h3 class="text-xl font-bold text-gray-800 mb-6 group-hover:text-indigo-700 transition-colors leading-tight relative z-10 pr-4">${key}</h3>
+                                <div class="flex items-end justify-between mt-auto relative z-10 border-t border-gray-200/50 pt-4">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Telah Mengisi</span>
+                                    <span class="text-4xl font-black text-teal-600 group-hover:scale-110 transition-transform origin-bottom-right">${count}</span>
                                 </div>
-                                <div class="text-sm font-semibold text-gray-200 group-hover:text-white">${panel.name}</div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center text-sm">
-                                <i class="fas ${subjConfig.icon} ${subjConfig.color} w-5"></i>
-                                <span class="text-gray-300 ml-1">${panel.subject}</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${displayTime}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            ${statusBadge}
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
+                        `;
+                    });
+                }
+                gridEl.innerHTML = html;
+            }
+            
+            // Update pilihan pada dropdown tanpa re-render keseluruhan shell (jika data ter-update di belakang)
+            const filterEl = document.getElementById('bengkel-filter');
+            if(filterEl) {
+                let bengkelOptions = `<option value="Semua">Tapis: Semua Tempat Bengkel</option>`;
+                appData.uniqueBengkel.forEach(b => {
+                    let selected = currentBengkelFilter === b ? 'selected' : '';
+                    bengkelOptions += `<option value="${b}" ${selected}>${b}</option>`;
                 });
+                
+                if (filterEl.innerHTML !== bengkelOptions) {
+                    filterEl.innerHTML = bengkelOptions;
+                }
             }
         }
 
-        // --- Event Listeners ---
-        
-        filterNameInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            if (activeLocation) updateDashboard();
-        });
-
-        // Trigger Fetch from button
-        btnRefresh.addEventListener('click', fetchLiveData);
-
-        // Export to CSV Logic
-        btnExport.addEventListener('click', () => {
-            if (!activeLocation) return;
-
-            let filtered = panelData.filter(p => p.location === activeLocation);
-            if (activeSubject !== "Keseluruhan") {
-                filtered = filtered.filter(p => p.subject === activeSubject);
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Bil,Nama Panel,Mata Pelajaran,Masa Daftar,Status\n"; // Header
-
-            filtered.forEach((p, index) => {
-                let row = `${index + 1},"${p.name}","${p.subject}","${p.timestamp}","${p.status}"`;
-                csvContent += row + "\r\n";
+        function showGroupDetails(groupName) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            const records = appData.groupedBySubject[groupName] || [];
+            
+            let rowsHTML = '';
+            records.forEach((rec, index) => {
+                const combinedDateTime = formatDateTime(rec.timestamp);
+                
+                rowsHTML += `
+                    <tr class="border-b border-white/50 hover:bg-white/60 transition-colors">
+                        <td class="py-4 px-4 text-sm text-gray-500 font-medium align-top">${index + 1}</td>
+                        <td class="py-4 px-4 text-sm text-gray-900 font-bold align-top uppercase">${rec.nama}</td>
+                        <td class="py-4 px-4 text-sm align-top leading-tight">${combinedDateTime}</td>
+                        <td class="py-4 px-4 text-sm align-top">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border border-emerald-200 shadow-sm whitespace-nowrap">
+                                ${rec.status}
+                            </span>
+                        </td>
+                    </tr>
+                `;
             });
 
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Data_Panel_${activeLocation.replace(/\s+/g, '_')}_${activeSubject}.csv`);
-            document.body.appendChild(link);
+            modalContent.innerHTML = `
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-6 sm:px-8 border-b border-white/60 bg-white/40 rounded-t-3xl backdrop-blur-md shrink-0">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-1">
+                            Senarai Mata Pelajaran
+                        </p>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 leading-tight">${groupName}</h2>
+                        ${currentBengkelFilter !== 'Semua' ? `<p class="text-sm font-medium text-teal-600 mt-1"><span class="text-gray-500">Kumpulan Bengkel:</span> ${currentBengkelFilter}</p>` : ''}
+                    </div>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-red-500 bg-white/50 hover:bg-white transition-colors p-2 sm:p-3 rounded-full shadow-sm focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Modal Body (Table) -->
+                <div class="p-0 overflow-y-auto flex-1 custom-scrollbar relative">
+                    <table class="min-w-full text-left border-collapse">
+                        <thead>
+                            <tr class="shadow-[0_1px_2px_rgba(0,0,0,0.05)] z-10 relative">
+                                <th class="py-4 px-4 font-bold text-xs text-gray-500 uppercase tracking-wider text-left bg-white/50 sticky top-0 backdrop-blur-xl w-16">No.</th>
+                                <th class="py-4 px-4 font-bold text-xs text-gray-500 uppercase tracking-wider text-left bg-white/50 sticky top-0 backdrop-blur-xl min-w-[150px]">NAMA</th>
+                                <th class="py-4 px-4 font-bold text-xs text-gray-500 uppercase tracking-wider text-left bg-white/50 sticky top-0 backdrop-blur-xl min-w-[130px]">Tarikh & Masa</th>
+                                <th class="py-4 px-4 font-bold text-xs text-gray-500 uppercase tracking-wider text-left bg-white/50 sticky top-0 backdrop-blur-xl w-32">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/40 bg-white/10">
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="p-4 sm:px-8 border-t border-white/60 bg-white/40 rounded-b-3xl shrink-0 flex justify-between items-center backdrop-blur-md">
+                    <span class="text-xs text-gray-500 font-semibold uppercase tracking-wider">Jana Auto</span>
+                    <p class="text-sm text-gray-800 font-bold bg-white/60 px-4 py-2 rounded-full shadow-sm">Jumlah: <span class="text-indigo-600 text-lg">${records.length}</span> orang</p>
+                </div>
+            `;
+
+            // Buka Modal & Animasi
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
             
-            link.click();
-            document.body.removeChild(link);
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
 
-            showToast('Fail CSV sedang dimuat turun.', 'info');
-        });
+        function renderLoading() {
+            const container = document.getElementById('app');
+            container.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen">
+                    <div class="flex flex-col items-center p-10 glass rounded-3xl shadow-xl shadow-indigo-100/50">
+                        <div class="w-16 h-16 border-4 border-indigo-100 border-t-teal-500 rounded-full animate-spin mb-6"></div>
+                        <p class="text-indigo-800 font-bold text-lg animate-pulse tracking-wide">Menyegerak Data...</p>
+                    </div>
+                </div>
+            `;
+        }
 
-        // MUAT TURUN DATA AUTOMATIK BILA WEB DIBUKA
-        window.addEventListener('DOMContentLoaded', fetchLiveData);
-
+        function renderError(err) {
+            const container = document.getElementById('app');
+            container.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen p-4">
+                    <div class="glass rounded-3xl p-8 max-w-lg w-full text-center border-t-4 border-red-400 bg-red-50/40 relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 text-red-100 opacity-20">
+                            <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <div class="text-red-500 mb-6 flex justify-center relative z-10">
+                            <div class="bg-red-100 p-4 rounded-full shadow-inner">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                        </div>
+                        <h2 class="text-2xl font-bold text-red-700 mb-3 relative z-10">Ralat Rangkaian</h2>
+                        <p class="text-red-600 mb-8 font-medium text-sm relative z-10">${err.message || 'Gagal memuat turun CSV.'}</p>
+                        <button onclick="initApp()" class="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold rounded-full transition-all shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:-translate-y-1 relative z-10">Cuba Semula Sekali Lagi</button>
+                    </div>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
