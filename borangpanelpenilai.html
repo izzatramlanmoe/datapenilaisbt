@@ -896,7 +896,7 @@
     </div>
 
     <script>
-        // Data Mata Pelajaran berdasarkan Penerbitan
+        // Data Mata Pelajaran berdasarkan Penerbitan (Telah Dikemas Kini)
         const senaraiMataPelajaran = {
             "KP 2027 BRAILLE": [
                 {
@@ -933,11 +933,107 @@
                     ]
                 }
             ],
-            // Masukkan list untuk penerbitan lain di dalam array (kurungan bersegi []) di bawah jika perlu
-            "KP 2027 SEKOLAH RENDAH": [], // Kosongkan dahulu 
-            "KP 2027 SEKOLAH MENENGAH": [], // Kosongkan dahulu
-            "KP 2027 PENDIDIKAN KHAS": [], // Kosongkan dahulu
-            "KP 2027 DLP": [] // Kosongkan dahulu
+            
+            // Rekod baharu: KP 2027 SEKOLAH RENDAH
+            "KP 2027 SEKOLAH RENDAH": [
+                "PENDIDIKAN MORAL TAHUN 1 (SJKT)",
+                "PENDIDIKAN JASMANI TAHUN 1 (SJKT)",
+                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKT)",
+                "PENDIDIKAN MORAL TAHUN 1 (SJKC)",
+                "PENDIDIKAN JASMANI TAHUN 1 (SJKC)",
+                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKC)",
+                "BAHASA CINA TAHUN 1 (SJKC)",
+                "MATEMATIK TAHUN 1 (SJKC)",
+                "BAHASA TAMIL TAHUN 1 (SJKT)",
+                "MATEMATIK TAHUN 1 (SJKT)",
+                "PENDIDIKAN JASMANI TAHUN 1 (SK)",
+                "PENDIDIKAN MORAL TAHUN 1 (SK)",
+                "BAHASA SEMAI TAHUN 1",
+                "BAHASA IBAN TAHUN 1",
+                "BAHASA MELAYU TAHUN 1 (SK)",
+                "BAHASA MELAYU TAHUN 1 (SJK)",
+                "BAHASA KADAZAN DUSUN TAHUN 1",
+                "BAHASA INGGERIS TAHUN 1",
+                "BAHASA CINA TAHUN 1 (SK)",
+                "BAHASA TAMIL TAHUN 1 (SK)",
+                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SK)",
+                "MATEMATIK TAHUN 1",
+                "MATHEMATICS YEAR 1 (DLP)",
+                "PENDIDIKAN ISLAM RENDAH (PIR)",
+                "BAHASA ARAB RENDAH (BAR)"
+            ],
+
+            // Rekod baharu: KP 2027 SEKOLAH MENENGAH
+            "KP 2027 SEKOLAH MENENGAH": [
+                "SEJARAH TINGKATAN 1",
+                "PENDIDIKAN MORAL TINGKATAN 1",
+                "BAHASA SEMAI TINGKATAN 1",
+                "BAHASA MELAYU TINGKATAN 1",
+                "BAHASA IBAN TINGKATAN 1",
+                "BAHASA KADAZAN DUSUN TINGKATAN 1",
+                "PENDIDIKAN ISLAM MENENGAH (PIM)",
+                "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1",
+                "SENI TARI TINGKATAN 1",
+                "SENI TEATER TINGKATAN 1",
+                "PENDIDIKAN MUZIK TINGKATAN 1",
+                "SENI MUZIK TINGKATAN 1",
+                "GEOGRAFI TINGKATAN 1",
+                "PENDIDIKAN SENI VISUAL TINGKATAN 1",
+                "BAHASA INGGERIS TINGKATAN 1",
+                "BAHASA CINA TINGKATAN 1",
+                "BAHASA CINA KOMUNIKASI TINGKATAN 1",
+                "BAHASA TAMIL TINGKATAN 1",
+                "BAHASA JERMAN TINGKATAN 1",
+                "BAHASA JEPUN TINGKATAN 1",
+                "SAINS TINGKATAN 1",
+                "SCIENCE FORM 1 (DLP)",
+                "BAHASA KOREA TINGKATAN 1",
+                "MATEMATIK TINGKATAN 1",
+                "MATHEMATICS FORM 1 (DLP)",
+                "BAHASA ARAB MENENGAH (BAM)",
+                "BAHASA ARAB KOMUNIKASI (BAK)",
+                "AL-SYARIAH TINGKATAN 1",
+                "AL-LUGHAH AL-ARABIYAH AL-MUASIRAH TINGKATAN 1",
+                "USUL AL-DIN TINGKATAN 1",
+                "AL-QURAN WA AL-TAFSIR TINGKATAN 1",
+                "HIFZ AL-QURAN TINGKATAN 1",
+                "ULUM AL-QURAN TINGKATAN 1",
+                "BAHASA PERANCIS TINGKATAN 1",
+                "TEKNOLOGI DAN DIGITAL TINGKATAN 1"
+            ],
+
+            // Rekod baharu: KP 2027 PENDIDIKAN KHAS (Berstruktur mengikut kumpulan tahap pendidikan)
+            "KP 2027 PENDIDIKAN KHAS": [
+                {
+                    group: "SEKOLAH RENDAH",
+                    subjects: [
+                        "PENDIDIKAN JASMANI TAHUN 1 (PK)",
+                        "BAHASA INGGERIS TAHUN 1 (PK)",
+                        "BAHASA TAMIL TAHUN 1 (PK)",
+                        "BAHASA CINA TAHUN 1 (PK)",
+                        "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (PK)",
+                        "MATEMATIK TAHUN 1 (PK)",
+                        "BAHASA MELAYU TAHUN 1 (PK)",
+                        "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN TAHUN 1",
+                        "PENGURUSAN KEHIDUPAN TAHUN 1",
+                        "PENDIDIKAN MORAL TAHUN 1 (PK)",
+                        "PENDIDIKAN ISLAM TAHUN 1 (PK)"
+                    ]
+                },
+                {
+                    group: "SEKOLAH MENENGAH",
+                    subjects: [
+                        "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1 (PK)",
+                        "PENDIDIKAN SENI VISUAL TINGKATAN 1 (PK)",
+                        "BAHASA INGGERIS TINGKATAN 1 (PK)",
+                        "MATEMATIK TINGKATAN 1 (PK)",
+                        "PENDIDIKAN MUZIK TINGKATAN 1 (PK)",
+                        "PENGURUSAN KEHIDUPAN TINGKATAN 1"
+                    ]
+                }
+            ],
+
+            "KP 2027 DLP": [] // Dibiarkan kosong sekiranya mata pelajaran DLP akan diselaraskan di masa akan datang
         };
 
         const dropdownPenerbitan = document.getElementById('penerbitanSelect');
@@ -963,7 +1059,7 @@
                 } else {
                     // Loop senarai yang disediakan
                     dataSubjek.forEach(item => {
-                        // Kalau ada struktur group (seperti yang dibuat untuk Braille)
+                        // Kalau ada struktur group (seperti yang dibuat untuk Braille & Pendidikan Khas)
                         if (item.group) {
                             const optgroup = document.createElement('optgroup');
                             optgroup.label = `──────── ${item.group} ────────`;
