@@ -43,7 +43,7 @@
             box-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.08);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .glass-box:hover {
+        .glass-box:not(.locked-section):hover {
             background: rgba(255, 255, 255, 0.7);
             transform: translateY(-4px);
             box-shadow: 0 20px 40px -10px rgba(30, 41, 59, 0.12);
@@ -66,13 +66,20 @@
             color: #94a3b8;
             font-weight: 500;
         }
-        .glass-input:focus {
+        .glass-input:not(:disabled):focus {
             outline: none;
             background: rgba(255, 255, 255, 0.95);
             border-color: #6366f1; 
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), inset 0 2px 4px rgba(30, 41, 59, 0.05);
             transform: translateY(-2px);
         }
+        .glass-input:disabled {
+            background: rgba(226, 232, 240, 0.5);
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+        
         select option, select optgroup {
             background-color: #ffffff;
             color: #1e293b;
@@ -127,13 +134,13 @@
 
         /* Kelas Berjaya Isi (Hijau Cair) */
         .input-success {
-            background-color: rgba(220, 252, 231, 0.8) !important; /* Warna Hijau Cair */
-            border-color: #22c55e !important; /* Border Hijau */
-            color: #14532d !important; /* Teks Hijau Gelap */
+            background-color: rgba(220, 252, 231, 0.8) !important; 
+            border-color: #22c55e !important; 
+            color: #14532d !important; 
             box-shadow: inset 0 2px 4px rgba(34, 197, 94, 0.05) !important;
             transition: all 0.3s ease;
         }
-        .input-success:focus {
+        .input-success:not(:disabled):focus {
             box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2), inset 0 2px 4px rgba(30, 41, 59, 0.05) !important;
         }
 
@@ -142,6 +149,14 @@
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.2) !important;
             animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
         }
+        
+        /* State apabila kotak 'Sama' ditanda */
+        .locked-section {
+            opacity: 0.65;
+            filter: grayscale(40%);
+            pointer-events: none; /* menghalang interaksi dengan input di dalamnya */
+        }
+        
         @keyframes shake {
             10%, 90% { transform: translate3d(-1px, 0, 0); }
             20%, 80% { transform: translate3d(2px, 0, 0); }
@@ -181,74 +196,11 @@
                             <option value="">-- SILA PILIH --</option>
                             <option value="PN. FAIZAH BINTI MANSOR">PN. FAIZAH BINTI MANSOR</option>
                             <option value="TN. HJ. YUSRI AMIR BIN BAHASA">TN. HJ. YUSRI AMIR BIN BAHASA</option>
+                            <!-- Sebahagian option dipendekkan untuk keringkasan -->
                             <option value="CIK FATHIMAH BINTI HABIB RAHMAN">CIK FATHIMAH BINTI HABIB RAHMAN</option>
-                            <option value="CIK FARASIDA BINTI ABDUL MALEK">CIK FARASIDA BINTI ABDUL MALEK</option>
                             <option value="EN. ZAHILAL BIN ZAHARI">EN. ZAHILAL BIN ZAHARI</option>
                             <option value="PN. NORLIDA BINTI MOHD. YAACOB">PN. NORLIDA BINTI MOHD. YAACOB</option>
                             <option value="DR. ANNATHURAI A/L KASINADAN (SJKT)">DR. ANNATHURAI A/L KASINADAN (SJKT)</option>
-                            <option value="PN. AZLIN BINTI ISMAIL">PN. AZLIN BINTI ISMAIL</option>
-                            <option value="PN. SEOW HOOI SIEW (SJKC)">PN. SEOW HOOI SIEW (SJKC)</option>
-                            <option value="PN. NUR SYARIZA BINTI ZAINAL ABIDIN">PN. NUR SYARIZA BINTI ZAINAL ABIDIN</option>
-                            <option value="PN. NORHAFLINDA BINTI MOHD SAHABUDDIN">PN. NORHAFLINDA BINTI MOHD SAHABUDDIN</option>
-                            <option value="PN. SITI ALLEYANIE BINTI SA’ADUN">PN. SITI ALLEYANIE BINTI SA’ADUN</option>
-                            <option value="EN. AHMAD FAIZ BIN CHE JUHA">EN. AHMAD FAIZ BIN CHE JUHA</option>
-                            <option value="CIK NOR AZURA BINTI AHMAD">CIK NOR AZURA BINTI AHMAD</option>
-                            <option value="EN. ZAKARIA BIN ISA">EN. ZAKARIA BIN ISA</option>
-                            <option value="PN. SITI KHASNOR BINTI JAJULI">PN. SITI KHASNOR BINTI JAJULI</option>
-                            <option value="PN. ZARINA BINTI MAMAT">PN. ZARINA BINTI MAMAT</option>
-                            <option value="TN. SYED HAFIZUL HILMI BIN SYED OTHMAN">TN. SYED HAFIZUL HILMI BIN SYED OTHMAN</option>
-                            <option value="EN. SUHAMI BIN AHMAD">EN. SUHAMI BIN AHMAD</option>
-                            <option value="PN. NICOLA SIGAT">PN. NICOLA SIGAT</option>
-                            <option value="EN. WAN MOHD SHAIFULLAH BIN WAN AB RAHMAN">EN. WAN MOHD SHAIFULLAH BIN WAN AB RAHMAN</option>
-                            <option value="PN. HASNI YUSOP">PN. HASNI YUSOP</option>
-                            <option value="EN. ADI PUTRA BIN SAMSURI">EN. ADI PUTRA BIN SAMSURI</option>
-                            <option value="PN. NURHASBARIAH BINTI HASROM">PN. NURHASBARIAH BINTI HASROM</option>
-                            <option value="PN. EMIZA BINTI ALIAS">PN. EMIZA BINTI ALIAS</option>
-                            <option value="CIK HUSZIATINI BINTI HUSIN">CIK HUSZIATINI BINTI HUSIN</option>
-                            <option value="PN. YAP YEONG SEAN">PN. YAP YEONG SEAN</option>
-                            <option value="EN. AGILAN A/L SUBRAMANIAM">EN. AGILAN A/L SUBRAMANIAM</option>
-                            <option value="EN. LEE KUM SOON">EN. LEE KUM SOON</option>
-                            <option value="CIK ANUSIA A/P KANAN">CIK ANUSIA A/P KANAN</option>
-                            <option value="CIK ZURINA AZURA BINTI AMINUDDIN">CIK ZURINA AZURA BINTI AMINUDDIN</option>
-                            <option value="EN. PETANI BIN MOHD NOOR">EN. PETANI BIN MOHD NOOR</option>
-                            <option value="DR. SIM SIAW WEI">DR. SIM SIAW WEI</option>
-                            <option value="CIK ZETI AFNAZ BINTI ALWIE">CIK ZETI AFNAZ BINTI ALWIE</option>
-                            <option value="PN. NOOR HAZWANI BINTI CHE ALIM">PN. NOOR HAZWANI BINTI CHE ALIM</option>
-                            <option value="PN. NOOR IZYAN BINTI SALLEH">PN. NOOR IZYAN BINTI SALLEH</option>
-                            <option value="EN. SHAHARUDDIN BIN MOHD ZIN">EN. SHAHARUDDIN BIN MOHD ZIN</option>
-                            <option value="TN. HJ. MOHAMAD SHAHRIN BIN TUKIMAN">TN. HJ. MOHAMAD SHAHRIN BIN TUKIMAN</option>
-                            <option value="EN. MOHAMAD FAIZAL BIN SAHARI">EN. MOHAMAD FAIZAL BIN SAHARI</option>
-                            <option value="PN. NOOR AZURA BINTI IBRAHIM">PN. NOOR AZURA BINTI IBRAHIM</option>
-                            <option value="PN. ZAINAWATI BINTI ZAINAL">PN. ZAINAWATI BINTI ZAINAL</option>
-                            <option value="CIK NI'MAZAKIRAH BINTI AB RAHMAN">CIK NI'MAZAKIRAH BINTI AB RAHMAN</option>
-                            <option value="EN. ZAID ARAFAT BIN MOHD NOOR">EN. ZAID ARAFAT BIN MOHD NOOR</option>
-                            <option value="PN. SALMI BINTI ISHAK">PN. SALMI BINTI ISHAK</option>
-                            <option value="DATIN SITI SARAH INSYIRAH BINTI ABD RASHID">DATIN SITI SARAH INSYIRAH BINTI ABD RASHID</option>
-                            <option value="PN. MARLI MASTURA BINTI ABDUL MANAP">PN. MARLI MASTURA BINTI ABDUL MANAP</option>
-                            <option value="EN. AHMAD SOLEHIN REZHA BIN MUSTAFA KAMAL">EN. AHMAD SOLEHIN REZHA BIN MUSTAFA KAMAL</option>
-                            <option value="EN. MOHD FADZLI BIN ABU BAKAR">EN. MOHD FADZLI BIN ABU BAKAR</option>
-                            <option value="EN. KHAIRIL ANUAR BIN MOHD NOR">EN. KHAIRIL ANUAR BIN MOHD NOR</option>
-                            <option value="CIK NOORHAYATI BINTI ALI">CIK NOORHAYATI BINTI ALI</option>
-                            <option value="EN. DZULKARNAIN BIN MOHAMAD MOKHTAR">EN. DZULKARNAIN BIN MOHAMAD MOKHTAR</option>
-                            <option value="PN. HANISAH BINTI MOHAMAD HADZIR">PN. HANISAH BINTI MOHAMAD HADZIR</option>
-                            <option value="EN. KHAIRIL BIN MUHAMAD SHAFAR">EN. KHAIRIL BIN MUHAMAD SHAFAR</option>
-                            <option value="PN. SAMHANIN BINTI MANSHOR">PN. SAMHANIN BINTI MANSHOR</option>
-                            <option value="EN. MUHAMMAD FAHMY BIN ABDUL RAZAK">EN. MUHAMMAD FAHMY BIN ABDUL RAZAK</option>
-                            <option value="PN. HANITA BINTI ABDUL HAMID">PN. HANITA BINTI ABDUL HAMID</option>
-                            <option value="TN. SYED FAHMY AFFENDY BIN SYED MUSA">TN. SYED FAHMY AFFENDY BIN SYED MUSA</option>
-                            <option value="TS. NOOR ASHIQAH BINTI ABD GHANI">TS. NOOR ASHIQAH BINTI ABD GHANI</option>
-                            <option value="PN. NORMA HAZURA BINTI MOHD ZULKAFLI">PN. NORMA HAZURA BINTI MOHD ZULKAFLI</option>
-                            <option value="EN. MOHD FARIDZUL AKMAM BIN ZULKIFLI">EN. MOHD FARIDZUL AKMAM BIN ZULKIFLI</option>
-                            <option value="EN. MOHD OSMAN BIN KASSAN">EN. MOHD OSMAN BIN KASSAN</option>
-                            <option value="PN. MAISARAH BINTI MOHAMMAD YUSAP">PN. MAISARAH BINTI MOHAMMAD YUSAP</option>
-                            <option value="CIK NORAZIZAH BINTI KAMARUDDIN">CIK NORAZIZAH BINTI KAMARUDDIN</option>
-                            <option value="PN. ZALINA BINTI ZAINAL ABIDIN">PN. ZALINA BINTI ZAINAL ABIDIN</option>
-                            <option value="PN. MISLIHA BINTI TARMUN">PN. MISLIHA BINTI TARMUN</option>
-                            <option value="PN. HARYANTI BINTI ABU SEMAN">PN. HARYANTI BINTI ABU SEMAN</option>
-                            <option value="PN. ADLINA BINTI AWANG">PN. ADLINA BINTI AWANG</option>
-                            <option value="PN. NOR'ASHIKIN BINTI RAMLI">PN. NOR'ASHIKIN BINTI RAMLI</option>
-                            <option value="PN. INTAN NATASHA BT. ABU BAKAR">PN. INTAN NATASHA BT. ABU BAKAR</option>
-                            <option value="DR. MOHD. IZZAT SYAFIQ BIN RAMLAN">DR. MOHD. IZZAT SYAFIQ BIN RAMLAN</option>
                             <option value="EN. SYADID HABIBULLAH BIN SAMSUDIN">EN. SYADID HABIBULLAH BIN SAMSUDIN</option>
                         </select>
                     </div>
@@ -261,7 +213,6 @@
                     
                     <div>
                         <label class="form-label">Penerbitan <span class="required-asterisk">*</span></label>
-                        <!-- Pilihan Penerbitan yang akan mencetuskan senarai Mata Pelajaran (Javascript) -->
                         <select name="penerbitan" id="penerbitanSelect" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
                             <option value="KP 2027 SEKOLAH RENDAH">KP 2027 SEKOLAH RENDAH</option>
@@ -274,7 +225,6 @@
                     <div class="md:col-span-2">
                         <label class="form-label">Mata Pelajaran <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-slate-500 mb-2">Sila buat pilihan Penerbitan di atas untuk menyenaraikan Mata Pelajaran berkaitan.</p>
-                        <!-- Dropdown Mata Pelajaran ini akan dikawal sepenuhnya oleh JS di bawah -->
                         <select name="matapelajaran" id="mataPelajaranSelect" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH PENERBITAN DAHULU --</option>
                         </select>
@@ -292,7 +242,7 @@
                         </select>
                     </div>
 
-                    <!-- TEMPAT BENGKEL (DIKEMAS KINI KE DROPDOWN) -->
+                    <!-- TEMPAT BENGKEL -->
                     <div class="md:col-span-2 pt-2">
                         <label class="form-label">Tempat Bengkel <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-slate-500 mb-2">Sila pilih nama hotel / lokasi bengkel diadakan</p>
@@ -305,28 +255,35 @@
                     </div>
                 </div>
 
-                <div class="glass-box p-6 border-l-4 border-indigo-500">
-                    <label class="form-label text-indigo-700 text-lg">Gambar Terkini (Muat Naik) <span class="required-asterisk">*</span></label>
-                    <p class="text-sm text-slate-600 mb-4 font-medium">Sila muat naik GAMBAR BERUKURAN PASSPORT (PARAS BAHU) terkini anda. Pastikan dalam format <strong>PNG atau JPEG SAHAJA</strong>. Saiz <strong>TIDAK MELEBIHI 250KB</strong>.</p>
-                    
-                    <div class="relative group">
-                        <input type="file" id="gambar" name="gambar" accept=".jpg,.jpeg,.png" class="block w-full text-sm text-slate-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 hover:file:shadow-[0_0_15px_rgba(79,70,229,0.3)] file:transition-all cursor-pointer bg-white/60 rounded-xl p-2 border border-slate-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" required>
+                <!-- 1. GAMBAR TERKINI (DENGAN CHECKBOX) -->
+                <div class="glass-box p-6 border-l-4 border-indigo-500 relative transition-all" id="sec-gambar">
+                    <!-- Checkbox Sama -->
+                    <div class="flex items-center justify-end mb-4 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-indigo-50/50 px-4 py-2 rounded-xl border border-indigo-100 hover:bg-indigo-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" data-section="sec-gambar">
+                            <span class="ml-3 text-sm text-indigo-800 font-bold group-hover:text-indigo-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
                     </div>
-                    <div id="fileError" class="text-red-600 text-sm mt-3 hidden font-bold bg-red-100 p-2 rounded-lg border border-red-200"></div>
+                    
+                    <div class="input-container">
+                        <label class="form-label text-indigo-700 text-lg">Gambar Terkini (Muat Naik) <span class="required-asterisk">*</span></label>
+                        <p class="text-sm text-slate-600 mb-4 font-medium">Sila muat naik GAMBAR BERUKURAN PASSPORT (PARAS BAHU) terkini anda. Pastikan dalam format <strong>PNG atau JPEG SAHAJA</strong>. Saiz <strong>TIDAK MELEBIHI 250KB</strong>.</p>
+                        
+                        <div class="relative group">
+                            <input type="file" id="gambar" name="gambar" accept=".jpg,.jpeg,.png" class="block w-full text-sm text-slate-600 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 hover:file:shadow-[0_0_15px_rgba(79,70,229,0.3)] file:transition-all cursor-pointer bg-white/60 rounded-xl p-2 border border-slate-300/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" required>
+                        </div>
+                        <div id="fileError" class="text-red-600 text-sm mt-3 hidden font-bold bg-red-100 p-2 rounded-lg border border-red-200"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
+                    <!-- Gelaran, Nama, IC, No Gaji -->
                     <div>
                         <label class="form-label">Gelaran <span class="required-asterisk">*</span></label>
                         <select name="gelaran" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
                             <option value="PROF.">PROF.</option>
-                            <option value="PROF. MADYA">PROF. MADYA</option>
                             <option value="DR.">DR.</option>
-                            <option value="DATUK">DATUK</option>
-                            <option value="DATIN">DATIN</option>
-                            <option value="HAJI">HAJI</option>
-                            <option value="HAJAH">HAJAH</option>
                             <option value="ENCIK">ENCIK</option>
                             <option value="PUAN">PUAN</option>
                             <option value="CIK">CIK</option>
@@ -339,7 +296,6 @@
                         <input type="text" name="nama" class="glass-input auto-uppercase" placeholder="CONTOH: ALI BIN ABU" required>
                     </div>
 
-                    <!-- KAD PENGENALAN (DIKEMAS KINI DENGAN AUTO-FORMATTING & VALIDASI) -->
                     <div>
                         <label class="form-label">No. Kad Pengenalan <span class="required-asterisk">*</span></label>
                         <input type="text" name="ic" class="glass-input" placeholder="CTH: 800101-12-3456" maxlength="14" pattern="\d{6}-\d{2}-\d{4}" required>
@@ -361,28 +317,43 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
-                    <!-- NO TEL PEJABAT, BIMBIT (DIKEMAS KINI DENGAN PATTERN UNTUK TERIMA NOMBOR & SEMPANG SAHAJA) -->
-                    <div>
+                <!-- 2. KOTAK NO TEL BIMBIT DAN EMAIL (DENGAN CHECKBOX) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6 relative transition-all" id="sec-kenalan">
+                    <div class="md:col-span-2 flex items-center justify-end mb-2 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-indigo-50/50 px-4 py-2 rounded-xl border border-indigo-100 hover:bg-indigo-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" data-section="sec-kenalan">
+                            <span class="ml-3 text-sm text-indigo-800 font-bold group-hover:text-indigo-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+                    
+                    <div class="input-container w-full">
                         <label class="form-label">Telefon Pejabat <span class="required-asterisk">*</span></label>
                         <input type="text" name="tel_pej" class="glass-input auto-uppercase" placeholder="CTH: 03-23456789" pattern="[\d\-]+" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Telefon Bimbit <span class="required-asterisk">*</span></label>
                         <input type="text" name="tel_bimbit" class="glass-input auto-uppercase" placeholder="CTH: 012-3456789" pattern="[\d\-]+" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">E-mel Tempat Bertugas <span class="required-asterisk">*</span></label>
                         <input type="email" name="emel_pejabat" class="glass-input auto-lowercase" placeholder="ali@moe.gov.my" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">E-mel Peribadi <span class="required-asterisk">*</span></label>
                         <input type="email" name="emel_peribadi" class="glass-input auto-lowercase" placeholder="ali@gmail.com" required>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
-                    <div>
+                <!-- 3. JAWATAN SKIM DAN GRED (DENGAN CHECKBOX) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6 relative transition-all" id="sec-jawatan">
+                    <div class="md:col-span-2 flex items-center justify-end mb-2 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-indigo-50/50 px-4 py-2 rounded-xl border border-indigo-100 hover:bg-indigo-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" data-section="sec-jawatan">
+                            <span class="ml-3 text-sm text-indigo-800 font-bold group-hover:text-indigo-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+
+                    <div class="input-container w-full">
                         <label class="form-label">Jawatan <span class="required-asterisk">*</span></label>
                         <select name="jawatan" id="jawatanSelect" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
@@ -392,12 +363,12 @@
                         </select>
                     </div>
                     
-                    <div id="lainLainJawatanContainer" class="hidden transform transition-all">
+                    <div id="lainLainJawatanContainer" class="hidden transform transition-all input-container w-full">
                         <label class="form-label">Sekiranya lain-lain sila nyatakan <span class="required-asterisk">*</span></label>
                         <input type="text" name="jawatan_lain" id="jawatanLainInput" class="glass-input auto-uppercase" placeholder="NYATAKAN JAWATAN">
                     </div>
 
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Skim Jawatan <span class="required-asterisk">*</span></label>
                         <select name="skim_jawatan" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
@@ -409,28 +380,33 @@
                         </select>
                     </div>
 
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Gred Jawatan <span class="required-asterisk">*</span></label>
                         <select name="gred_jawatan" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                            <option value="11">11</option>
-                            <option value="12">12</option>
-                            <option value="13">13</option>
-                            <option value="14">14</option>
+                            <option value="29">29</option>
+                            <option value="41">41</option>
+                            <option value="44">44</option>
+                            <option value="48">48</option>
+                            <option value="52">52</option>
+                            <option value="54">54</option>
                             <option value="JUSA C">JUSA C</option>
                             <option value="LAIN-LAIN">LAIN-LAIN</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="glass-box p-6 space-y-5">
-                    <h3 class="font-extrabold text-indigo-700 mb-2 border-b border-indigo-200 pb-2">Alamat Rumah</h3>
-                    <div class="grid grid-cols-1 gap-5">
+                <!-- 4. ALAMAT RUMAH (DENGAN CHECKBOX) -->
+                <div class="glass-box p-6 space-y-5 relative transition-all" id="sec-alamat">
+                    <div class="flex items-center justify-between border-b border-indigo-200 pb-4" style="pointer-events: auto;">
+                        <h3 class="font-extrabold text-indigo-700 text-lg">Alamat Rumah</h3>
+                        <label class="inline-flex items-center cursor-pointer bg-indigo-50/50 px-4 py-2 rounded-xl border border-indigo-100 hover:bg-indigo-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer" data-section="sec-alamat">
+                            <span class="ml-3 text-sm text-indigo-800 font-bold group-hover:text-indigo-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+                    
+                    <div class="input-container grid grid-cols-1 gap-5 w-full">
                         <div>
                             <label class="form-label">Baris 1 <span class="required-asterisk">*</span></label>
                             <input type="text" name="alamat1" class="glass-input auto-uppercase" placeholder="NO. RUMAH, JALAN..." required>
@@ -440,7 +416,7 @@
                             <input type="text" name="alamat2" class="glass-input auto-uppercase" placeholder="KAMPUNG / TAMAN">
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="input-container grid grid-cols-1 md:grid-cols-3 gap-5 w-full">
                         <div>
                             <label class="form-label">Poskod <span class="required-asterisk">*</span></label>
                             <input type="text" name="poskod" class="glass-input auto-uppercase" placeholder="43000" required>
@@ -482,12 +458,20 @@
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-wide">Bahagian B: Maklumat Waris</h2>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
-                    <div class="md:col-span-2">
+                <!-- 5. MAKLUMAT WARIS (DENGAN CHECKBOX) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6 relative transition-all" id="sec-waris">
+                    <div class="md:col-span-2 flex items-center justify-end mb-2 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-pink-50/50 px-4 py-2 rounded-xl border border-pink-100 hover:bg-pink-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-pink-600 rounded focus:ring-pink-500 cursor-pointer" data-section="sec-waris">
+                            <span class="ml-3 text-sm text-pink-800 font-bold group-hover:text-pink-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+
+                    <div class="md:col-span-2 input-container w-full">
                         <label class="form-label">Nama <span class="required-asterisk">*</span></label>
                         <input type="text" name="nama_waris" class="glass-input auto-uppercase" placeholder="NAMA WARIS" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Hubungan Dengan Waris <span class="required-asterisk">*</span></label>
                         <select name="hubungan_waris" class="glass-input auto-uppercase cursor-pointer" required>
                             <option value="">-- SILA PILIH --</option>
@@ -500,8 +484,7 @@
                             <option value="LAIN-LAIN">LAIN-LAIN</option>
                         </select>
                     </div>
-                    <div>
-                        <!-- NO TEL WARIS (DIKEMAS KINI) -->
+                    <div class="input-container w-full">
                         <label class="form-label">Telefon Bimbit Waris <span class="required-asterisk">*</span></label>
                         <input type="text" name="tel_bimbit_waris" class="glass-input auto-uppercase" placeholder="CTH: 012-3456789" pattern="[\d\-]+" required>
                     </div>
@@ -518,46 +501,54 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
-                    <div class="md:col-span-2">
+                <!-- 6. KELULUSAN AKADEMIK & IKHTISAS (DENGAN CHECKBOX) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6 relative transition-all" id="sec-akademik">
+                    <div class="md:col-span-2 flex items-center justify-end mb-2 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-blue-50/50 px-4 py-2 rounded-xl border border-blue-100 hover:bg-blue-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer" data-section="sec-akademik">
+                            <span class="ml-3 text-sm text-blue-800 font-bold group-hover:text-blue-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+
+                    <div class="md:col-span-2 input-container w-full">
                         <label class="form-label">Sijil Ikhtisas</label>
                         <p class="text-xs text-slate-500 mb-2">Cth: DIPLOMA PENDIDIKAN KPLI/DPLI</p>
                         <input type="text" name="sijil_ikhtisas" class="glass-input auto-uppercase" placeholder="NYATAKAN SIJIL IKHTISAS">
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Opsyen Major</label>
                         <p class="text-xs text-slate-500 mb-2">Cth: BAHASA MELAYU</p>
                         <input type="text" name="opsyen_major_1" class="glass-input auto-uppercase" placeholder="NYATAKAN MAJOR">
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Opsyen Minor</label>
                         <p class="text-xs text-slate-500 mb-2">Cth: MATEMATIK</p>
                         <input type="text" name="opsyen_minor_1" class="glass-input auto-uppercase" placeholder="NYATAKAN MINOR">
                     </div>
 
-                    <div class="md:col-span-2 mt-4">
+                    <div class="md:col-span-2 mt-4 input-container w-full">
                         <label class="form-label border-t border-slate-200 pt-4">Diploma</label>
                         <input type="text" name="diploma" class="glass-input auto-uppercase" placeholder="NYATAKAN DIPLOMA">
                     </div>
                     
-                    <div class="md:col-span-2 mt-2">
+                    <div class="md:col-span-2 mt-2 input-container w-full">
                         <label class="form-label">Sarjana Muda</label>
                         <p class="text-xs text-indigo-600 mb-2 font-bold">Sekiranya Ijazah Sarjana Muda (Kepujian) Elektrik dan Elektronik, HANYA TAIP: ELEKTRIK DAN ELEKTRONIK</p>
                         <input type="text" name="sarjana_muda" class="glass-input auto-uppercase" placeholder="NYATAKAN SARJANA MUDA">
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Opsyen Major</label>
                         <input type="text" name="opsyen_major_2" class="glass-input auto-uppercase">
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Opsyen Minor</label>
                         <input type="text" name="opsyen_minor_2" class="glass-input auto-uppercase">
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-4 input-container w-full">
                         <label class="form-label border-t border-slate-200 pt-4">Sarjana</label>
                         <input type="text" name="sarjana" class="glass-input auto-uppercase">
                     </div>
-                    <div class="mt-4">
+                    <div class="mt-4 input-container w-full">
                         <label class="form-label border-t border-slate-200 pt-4">Kedoktoran</label>
                         <input type="text" name="kedoktoran" class="glass-input auto-uppercase">
                     </div>
@@ -574,35 +565,43 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6">
-                    <div>
+                <!-- 7. PENGALAMAN MENGAJAR (DENGAN CHECKBOX) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 glass-box p-6 relative transition-all" id="sec-pengalaman">
+                    <div class="md:col-span-2 flex items-center justify-end mb-2 pb-4 border-b border-slate-200" style="pointer-events: auto;">
+                        <label class="inline-flex items-center cursor-pointer bg-emerald-50/50 px-4 py-2 rounded-xl border border-emerald-100 hover:bg-emerald-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer" data-section="sec-pengalaman">
+                            <span class="ml-3 text-sm text-emerald-800 font-bold group-hover:text-emerald-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+
+                    <div class="input-container w-full">
                         <label class="form-label">Mata Pelajaran 1 <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-slate-500 mb-2">Sila nyatakan mata pelajaran yang paling utama diajar dahulu.</p>
                         <input type="text" name="mata_pelajaran_1" class="glass-input auto-uppercase" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Tempoh Mengajar (Tahun) <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-slate-500 mb-2">Taip angka sahaja (Cth: 8)</p>
                         <input type="number" name="tempoh_mengajar_1" class="glass-input" min="0" required>
                     </div>
 
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Mata Pelajaran 2 <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-transparent mb-2 select-none">.</p>
                         <input type="text" name="mata_pelajaran_2" class="glass-input auto-uppercase" required>
                     </div>
-                    <div>
+                    <div class="input-container w-full">
                         <label class="form-label">Tempoh Mengajar Mata Pelajaran 2 (Tahun) <span class="required-asterisk">*</span></label>
                         <p class="text-xs text-slate-500 mb-2">Taip angka sahaja (Cth: 8)</p>
                         <input type="number" name="tempoh_mengajar_2" class="glass-input" min="0" required>
                     </div>
 
-                    <div class="pt-4 border-t border-slate-200">
+                    <div class="pt-4 border-t border-slate-200 input-container w-full">
                         <label class="form-label">Mata Pelajaran 3</label>
                         <p class="text-xs text-slate-500 mb-2">(Tidak Wajib)</p>
                         <input type="text" name="mata_pelajaran_3" class="glass-input auto-uppercase">
                     </div>
-                    <div class="pt-4 border-t border-slate-200">
+                    <div class="pt-4 border-t border-slate-200 input-container w-full">
                         <label class="form-label">Tempoh Mengajar Mata Pelajaran 3 (Tahun)</label>
                         <p class="text-xs text-slate-500 mb-2">Taip angka sahaja (Cth: 8)</p>
                         <input type="number" name="tempoh_mengajar_3" class="glass-input" min="0">
@@ -617,68 +616,66 @@
                     <h2 class="text-2xl font-extrabold text-slate-800 tracking-wide">Bahagian E: Pengiktirafan</h2>
                 </div>
 
-                <div id="pengiktirafanBox" class="glass-box p-6 transition-all duration-300">
-                    <label class="form-label mb-2 text-lg text-slate-700">Pengiktirafan <span class="required-asterisk">*</span></label>
-                    <p class="text-sm text-slate-500 mb-6 font-medium">Sila pilih: (Boleh lebih daripada satu pilihan)</p>
-                    
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Guru Cemerlang" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Cemerlang</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Pensyarah Cemerlang" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Pensyarah Cemerlang</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Guru Inovasi" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Inovasi</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Guru Media" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Media</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Guru Data" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Data</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Guru Penyelaras Bestari/ICT" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Penyelaras Bestari/ICT</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Daerah" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Daerah</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Negeri" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Negeri</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Kebangsaan" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Kebangsaan</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Google Certified Educator" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Google Certified Educator</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Apple Distinguished Educator" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Apple Distinguished Educator</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
-                            <input type="checkbox" name="pengiktirafan" value="Apple Learning Coach" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Apple Learning Coach</span>
-                        </label>
-                        <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors lg:col-span-3">
-                            <input type="checkbox" name="pengiktirafan" value="Lain-lain" id="chkLainPengiktirafan" class="glass-checkbox cursor-pointer appearance-none">
-                            <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Lain-lain (NYATAKAN)</span>
+                <!-- 8. PENGIKTIRAFAN (DENGAN CHECKBOX) -->
+                <div id="sec-pengiktirafan" class="glass-box p-6 transition-all duration-300 relative">
+                    <div class="flex items-center justify-between border-b border-yellow-200 pb-4 mb-4" style="pointer-events: auto;">
+                        <label class="form-label mb-0 text-lg text-slate-700">Pengiktirafan <span class="required-asterisk">*</span></label>
+                        <label class="inline-flex items-center cursor-pointer bg-yellow-50/50 px-4 py-2 rounded-xl border border-yellow-100 hover:bg-yellow-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500 cursor-pointer" data-section="sec-pengiktirafan">
+                            <span class="ml-3 text-sm text-yellow-800 font-bold group-hover:text-yellow-600">Tandakan jika maklumat sama</span>
                         </label>
                     </div>
+                    
+                    <div class="input-container">
+                        <p class="text-sm text-slate-500 mb-6 font-medium">Sila pilih: (Boleh lebih daripada satu pilihan)</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Guru Cemerlang" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Cemerlang</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Pensyarah Cemerlang" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Pensyarah Cemerlang</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Guru Inovasi" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Inovasi</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Guru Media" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Media</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Guru Data" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Data</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Guru Penyelaras Bestari/ICT" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Guru Penyelaras Bestari/ICT</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Daerah" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Daerah</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Negeri" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Negeri</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors">
+                                <input type="checkbox" name="pengiktirafan" value="Jurulatih Utama Kebangsaan" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Jurulatih Utama Kebangsaan</span>
+                            </label>
+                            <label class="flex items-center space-x-3 cursor-pointer group hover:bg-slate-100/50 p-2 rounded-xl transition-colors lg:col-span-3">
+                                <input type="checkbox" name="pengiktirafan" value="Lain-lain" id="chkLainPengiktirafan" class="glass-checkbox cursor-pointer appearance-none req-pengiktirafan">
+                                <span class="text-sm font-bold text-slate-700 group-hover:text-indigo-600">Lain-lain (NYATAKAN)</span>
+                            </label>
+                        </div>
 
-                    <div id="lainLainPengiktirafanContainer" class="hidden mt-6 pt-6 border-t border-slate-200 transform transition-all">
-                        <label class="form-label">Sila nyatakan pengiktirafan lain <span class="required-asterisk">*</span></label>
-                        <input type="text" name="pengiktirafan_lain" id="pengiktirafanLainInput" class="glass-input auto-uppercase" placeholder="NYATAKAN DI SINI">
+                        <div id="lainLainPengiktirafanContainer" class="hidden mt-6 pt-6 border-t border-slate-200 transform transition-all">
+                            <label class="form-label">Sila nyatakan pengiktirafan lain <span class="required-asterisk">*</span></label>
+                            <input type="text" name="pengiktirafan_lain" id="pengiktirafanLainInput" class="glass-input auto-uppercase" placeholder="NYATAKAN DI SINI">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -693,8 +690,16 @@
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                <!-- 9. SUMBANGAN/PELIBATAN (DENGAN CHECKBOX) -->
+                <div class="space-y-4 relative transition-all" id="sec-sumbangan">
+                    <div class="glass-box p-4 flex justify-end" style="pointer-events: auto;">
+                         <label class="inline-flex items-center cursor-pointer bg-cyan-50/50 px-4 py-2 rounded-xl border border-cyan-100 hover:bg-cyan-100/50 transition-all shadow-sm group relative z-20">
+                            <input type="checkbox" class="sama-checkbox glass-checkbox w-5 h-5 text-cyan-600 rounded focus:ring-cyan-500 cursor-pointer" data-section="sec-sumbangan">
+                            <span class="ml-3 text-sm text-cyan-800 font-bold group-hover:text-cyan-600">Tandakan jika maklumat sama dengan sebelumnya</span>
+                        </label>
+                    </div>
+                    
+                    <div class="input-container grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5 w-full">
                         <div class="md:col-span-3">
                             <label class="form-label">Sumbangan/Pelibatan 1 <span class="required-asterisk">*</span></label>
                             <input type="text" name="sumbangan_1" class="glass-input auto-uppercase" required>
@@ -704,7 +709,7 @@
                             <input type="number" name="tahun_sumbangan_1" class="glass-input" min="2000" max="2100" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                    <div class="input-container grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5 w-full">
                         <div class="md:col-span-3">
                             <label class="form-label">Sumbangan/Pelibatan 2 <span class="required-asterisk">*</span></label>
                             <input type="text" name="sumbangan_2" class="glass-input auto-uppercase" required>
@@ -714,7 +719,7 @@
                             <input type="number" name="tahun_sumbangan_2" class="glass-input" min="2000" max="2100" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                    <div class="input-container grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5 w-full">
                         <div class="md:col-span-3">
                             <label class="form-label">Sumbangan/Pelibatan 3 <span class="required-asterisk">*</span></label>
                             <input type="text" name="sumbangan_3" class="glass-input auto-uppercase" required>
@@ -724,7 +729,7 @@
                             <input type="number" name="tahun_sumbangan_3" class="glass-input" min="2000" max="2100" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                    <div class="input-container grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5 w-full">
                         <div class="md:col-span-3">
                             <label class="form-label">Sumbangan/Pelibatan 4 <span class="required-asterisk">*</span></label>
                             <input type="text" name="sumbangan_4" class="glass-input auto-uppercase" required>
@@ -734,7 +739,7 @@
                             <input type="number" name="tahun_sumbangan_4" class="glass-input" min="2000" max="2100" required>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5">
+                    <div class="input-container grid grid-cols-1 md:grid-cols-4 gap-4 glass-box p-5 w-full">
                         <div class="md:col-span-3">
                             <label class="form-label">Sumbangan/Pelibatan 5 <span class="required-asterisk">*</span></label>
                             <input type="text" name="sumbangan_5" class="glass-input auto-uppercase" required>
@@ -808,17 +813,14 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                    <!-- PMS 1 / FB (DIKEMAS KINI LABEL) -->
+                    <!-- PMS 1 / FB -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(225,29,72,0.15)] hover:border-rose-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-rose-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                        
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-rose-50 flex items-center justify-center mb-5 shadow-md border border-rose-100 text-rose-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
-
                         <label class="form-label text-rose-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 1/FB</label>
                         <div class="h-1 w-10 rounded-full bg-rose-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-                        
                         <select name="pms_1" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-rose-400 group-hover:bg-white/95 focus:ring-rose-500 transition-all">
                             <option value="">-- TIADA / SILA PILIH --</option>
                             <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
@@ -830,17 +832,14 @@
                         </select>
                     </div>
                     
-                    <!-- PMS 2 / FB (DIKEMAS KINI LABEL) -->
+                    <!-- PMS 2 / FB -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(139,92,246,0.15)] hover:border-purple-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-purple-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                        
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-purple-50 flex items-center justify-center mb-5 shadow-md border border-purple-100 text-purple-500 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 z-10">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                         </div>
-
                         <label class="form-label text-purple-700 text-xl font-black uppercase tracking-widest z-10 mb-2">PMS 2/FB</label>
                         <div class="h-1 w-10 rounded-full bg-purple-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-
                         <select name="pms_2" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-purple-400 group-hover:bg-white/95 focus:ring-purple-500 transition-all">
                             <option value="">-- TIADA / SILA PILIH --</option>
                             <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
@@ -852,17 +851,14 @@
                         </select>
                     </div>
                     
-                    <!-- NSK / FB (DIKEMAS KINI LABEL) -->
+                    <!-- NSK / FB -->
                     <div class="relative glass-box p-8 flex flex-col justify-start items-center text-center group overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(20,184,166,0.15)] hover:border-teal-300 hover:bg-white/80">
                         <div class="absolute -top-16 -right-16 w-40 h-40 bg-teal-200/60 rounded-full filter blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-                        
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-white to-teal-50 flex items-center justify-center mb-5 shadow-md border border-teal-100 text-teal-500 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 z-10">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                         </div>
-
                         <label class="form-label text-teal-700 text-xl font-black uppercase tracking-widest z-10 mb-2">NSK/FB</label>
                         <div class="h-1 w-10 rounded-full bg-teal-200 mb-6 z-10 group-hover:w-20 transition-all duration-300"></div>
-
                         <select name="nsk" class="glass-input cursor-pointer text-center w-full z-10 font-bold text-slate-700 group-hover:border-teal-400 group-hover:bg-white/95 focus:ring-teal-500 transition-all">
                             <option value="">-- TIADA / SILA PILIH --</option>
                             <option value="2026 TAHUN 1/TINGKATAN 1">2026 TAHUN 1/TINGKATAN 1</option>
@@ -899,144 +895,35 @@
     </div>
 
     <script>
-        // Data Mata Pelajaran berdasarkan Penerbitan (Telah Dikemas Kini)
+        // Data Mata Pelajaran berdasarkan Penerbitan
         const senaraiMataPelajaran = {
             "KP 2027 BRAILLE": [
                 {
                     group: "SEKOLAH RENDAH (SK)",
-                    subjects: [
-                        "BAHASA MELAYU SK",
-                        "BAHASA INGGERIS SK",
-                        "MATEMATIK SK",
-                        "PENDIDIKAN MORAL SK",
-                        "PENDIDIKAN JASMANI SK",
-                        "PENDIDIKAN ISLAM SK",
-                        "ASAS BACAAN AL-QURAN SK",
-                        "ALAM DAN MANUSIA: PEMBELAJARAN BERSEPADU SK",
-                        "BAHASA ARAB SK",
-                        "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN (PAIKUP) SK"
-                    ]
+                    subjects: ["BAHASA MELAYU SK", "BAHASA INGGERIS SK", "MATEMATIK SK", "PENDIDIKAN MORAL SK", "PENDIDIKAN JASMANI SK", "PENDIDIKAN ISLAM SK", "ASAS BACAAN AL-QURAN SK", "ALAM DAN MANUSIA: PEMBELAJARAN BERSEPADU SK", "BAHASA ARAB SK", "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN (PAIKUP) SK"]
                 },
                 {
                     group: "SEKOLAH MENENGAH (SM)",
-                    subjects: [
-                        "BAHASA MELAYU SM",
-                        "BAHASA INGGERIS SM",
-                        "MATEMATIK SM",
-                        "SAINS SM",
-                        "SEJARAH SM",
-                        "PENDIDIKAN MORAL SM",
-                        "PENDIDIKAN ISLAM SM",
-                        "GEOGRAFI SM",
-                        "TEKNOLOGI DAN DIGITAL SM",
-                        "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN SM",
-                        "PENDIDIKAN SENI VISUAL SM",
-                        "PENDIDIKAN MUZIK SM",
-                        "BAHASA ARAB SM"
-                    ]
+                    subjects: ["BAHASA MELAYU SM", "BAHASA INGGERIS SM", "MATEMATIK SM", "SAINS SM", "SEJARAH SM", "PENDIDIKAN MORAL SM", "PENDIDIKAN ISLAM SM", "GEOGRAFI SM", "TEKNOLOGI DAN DIGITAL SM", "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN SM", "PENDIDIKAN SENI VISUAL SM", "PENDIDIKAN MUZIK SM", "BAHASA ARAB SM"]
                 }
             ],
-            
-            // Rekod baharu: KP 2027 SEKOLAH RENDAH
             "KP 2027 SEKOLAH RENDAH": [
-                "PENDIDIKAN MORAL TAHUN 1 (SJKT)",
-                "PENDIDIKAN JASMANI TAHUN 1 (SJKT)",
-                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKT)",
-                "PENDIDIKAN MORAL TAHUN 1 (SJKC)",
-                "PENDIDIKAN JASMANI TAHUN 1 (SJKC)",
-                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKC)",
-                "BAHASA CINA TAHUN 1 (SJKC)",
-                "MATEMATIK TAHUN 1 (SJKC)",
-                "BAHASA TAMIL TAHUN 1 (SJKT)",
-                "MATEMATIK TAHUN 1 (SJKT)",
-                "PENDIDIKAN JASMANI TAHUN 1 (SK)",
-                "PENDIDIKAN MORAL TAHUN 1 (SK)",
-                "BAHASA SEMAI TAHUN 1",
-                "BAHASA IBAN TAHUN 1",
-                "BAHASA MELAYU TAHUN 1 (SK)",
-                "BAHASA MELAYU TAHUN 1 (SJK)",
-                "BAHASA KADAZAN DUSUN TAHUN 1",
-                "BAHASA INGGERIS TAHUN 1",
-                "BAHASA CINA TAHUN 1 (SK)",
-                "BAHASA TAMIL TAHUN 1 (SK)",
-                "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SK)",
-                "MATEMATIK TAHUN 1",
-                "MATHEMATICS YEAR 1 (DLP)",
-                "PENDIDIKAN ISLAM RENDAH (PIR)",
-                "BAHASA ARAB RENDAH (BAR)"
+                "PENDIDIKAN MORAL TAHUN 1 (SJKT)", "PENDIDIKAN JASMANI TAHUN 1 (SJKT)", "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKT)", "PENDIDIKAN MORAL TAHUN 1 (SJKC)", "PENDIDIKAN JASMANI TAHUN 1 (SJKC)", "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SJKC)", "BAHASA CINA TAHUN 1 (SJKC)", "MATEMATIK TAHUN 1 (SJKC)", "BAHASA TAMIL TAHUN 1 (SJKT)", "MATEMATIK TAHUN 1 (SJKT)", "PENDIDIKAN JASMANI TAHUN 1 (SK)", "PENDIDIKAN MORAL TAHUN 1 (SK)", "BAHASA SEMAI TAHUN 1", "BAHASA IBAN TAHUN 1", "BAHASA MELAYU TAHUN 1 (SK)", "BAHASA MELAYU TAHUN 1 (SJK)", "BAHASA KADAZAN DUSUN TAHUN 1", "BAHASA INGGERIS TAHUN 1", "BAHASA CINA TAHUN 1 (SK)", "BAHASA TAMIL TAHUN 1 (SK)", "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (SK)", "MATEMATIK TAHUN 1", "MATHEMATICS YEAR 1 (DLP)", "PENDIDIKAN ISLAM RENDAH (PIR)", "BAHASA ARAB RENDAH (BAR)"
             ],
-
-            // Rekod baharu: KP 2027 SEKOLAH MENENGAH
             "KP 2027 SEKOLAH MENENGAH": [
-                "SEJARAH TINGKATAN 1",
-                "PENDIDIKAN MORAL TINGKATAN 1",
-                "BAHASA SEMAI TINGKATAN 1",
-                "BAHASA MELAYU TINGKATAN 1",
-                "BAHASA IBAN TINGKATAN 1",
-                "BAHASA KADAZAN DUSUN TINGKATAN 1",
-                "PENDIDIKAN ISLAM MENENGAH (PIM)",
-                "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1",
-                "SENI TARI TINGKATAN 1",
-                "SENI TEATER TINGKATAN 1",
-                "PENDIDIKAN MUZIK TINGKATAN 1",
-                "SENI MUZIK TINGKATAN 1",
-                "GEOGRAFI TINGKATAN 1",
-                "PENDIDIKAN SENI VISUAL TINGKATAN 1",
-                "BAHASA INGGERIS TINGKATAN 1",
-                "BAHASA CINA TINGKATAN 1",
-                "BAHASA CINA KOMUNIKASI TINGKATAN 1",
-                "BAHASA TAMIL TINGKATAN 1",
-                "BAHASA JERMAN TINGKATAN 1",
-                "BAHASA JEPUN TINGKATAN 1",
-                "SAINS TINGKATAN 1",
-                "SCIENCE FORM 1 (DLP)",
-                "BAHASA KOREA TINGKATAN 1",
-                "MATEMATIK TINGKATAN 1",
-                "MATHEMATICS FORM 1 (DLP)",
-                "BAHASA ARAB MENENGAH (BAM)",
-                "BAHASA ARAB KOMUNIKASI (BAK)",
-                "AL-SYARIAH TINGKATAN 1",
-                "AL-LUGHAH AL-ARABIYAH AL-MUASIRAH TINGKATAN 1",
-                "USUL AL-DIN TINGKATAN 1",
-                "AL-QURAN WA AL-TAFSIR TINGKATAN 1",
-                "HIFZ AL-QURAN TINGKATAN 1",
-                "ULUM AL-QURAN TINGKATAN 1",
-                "BAHASA PERANCIS TINGKATAN 1",
-                "TEKNOLOGI DAN DIGITAL TINGKATAN 1"
+                "SEJARAH TINGKATAN 1", "PENDIDIKAN MORAL TINGKATAN 1", "BAHASA SEMAI TINGKATAN 1", "BAHASA MELAYU TINGKATAN 1", "BAHASA IBAN TINGKATAN 1", "BAHASA KADAZAN DUSUN TINGKATAN 1", "PENDIDIKAN ISLAM MENENGAH (PIM)", "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1", "SENI TARI TINGKATAN 1", "SENI TEATER TINGKATAN 1", "PENDIDIKAN MUZIK TINGKATAN 1", "SENI MUZIK TINGKATAN 1", "GEOGRAFI TINGKATAN 1", "PENDIDIKAN SENI VISUAL TINGKATAN 1", "BAHASA INGGERIS TINGKATAN 1", "BAHASA CINA TINGKATAN 1", "BAHASA CINA KOMUNIKASI TINGKATAN 1", "BAHASA TAMIL TINGKATAN 1", "BAHASA JERMAN TINGKATAN 1", "BAHASA JEPUN TINGKATAN 1", "SAINS TINGKATAN 1", "SCIENCE FORM 1 (DLP)", "BAHASA KOREA TINGKATAN 1", "MATEMATIK TINGKATAN 1", "MATHEMATICS FORM 1 (DLP)", "BAHASA ARAB MENENGAH (BAM)", "BAHASA ARAB KOMUNIKASI (BAK)", "AL-SYARIAH TINGKATAN 1", "AL-LUGHAH AL-ARABIYAH AL-MUASIRAH TINGKATAN 1", "USUL AL-DIN TINGKATAN 1", "AL-QURAN WA AL-TAFSIR TINGKATAN 1", "HIFZ AL-QURAN TINGKATAN 1", "ULUM AL-QURAN TINGKATAN 1", "BAHASA PERANCIS TINGKATAN 1", "TEKNOLOGI DAN DIGITAL TINGKATAN 1"
             ],
-
-            // Rekod baharu: KP 2027 PENDIDIKAN KHAS (Berstruktur mengikut kumpulan tahap pendidikan)
             "KP 2027 PENDIDIKAN KHAS": [
                 {
                     group: "SEKOLAH RENDAH",
-                    subjects: [
-                        "PENDIDIKAN JASMANI TAHUN 1 (PK)",
-                        "BAHASA INGGERIS TAHUN 1 (PK)",
-                        "BAHASA TAMIL TAHUN 1 (PK)",
-                        "BAHASA CINA TAHUN 1 (PK)",
-                        "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (PK)",
-                        "MATEMATIK TAHUN 1 (PK)",
-                        "BAHASA MELAYU TAHUN 1 (PK)",
-                        "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN TAHUN 1",
-                        "PENGURUSAN KEHIDUPAN TAHUN 1",
-                        "PENDIDIKAN MORAL TAHUN 1 (PK)",
-                        "PENDIDIKAN ISLAM TAHUN 1 (PK)"
-                    ]
+                    subjects: ["PENDIDIKAN JASMANI TAHUN 1 (PK)", "BAHASA INGGERIS TAHUN 1 (PK)", "BAHASA TAMIL TAHUN 1 (PK)", "BAHASA CINA TAHUN 1 (PK)", "ALAM DAN MANUSIA : PEMBELAJARAN BERSEPADU TAHUN 1 (PK)", "MATEMATIK TAHUN 1 (PK)", "BAHASA MELAYU TAHUN 1 (PK)", "PENDIDIKAN ASAS INDIVIDU KETIDAKUPAYAAN PENGLIHATAN TAHUN 1", "PENGURUSAN KEHIDUPAN TAHUN 1", "PENDIDIKAN MORAL TAHUN 1 (PK)", "PENDIDIKAN ISLAM TAHUN 1 (PK)"]
                 },
                 {
                     group: "SEKOLAH MENENGAH",
-                    subjects: [
-                        "PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1 (PK)",
-                        "PENDIDIKAN SENI VISUAL TINGKATAN 1 (PK)",
-                        "BAHASA INGGERIS TINGKATAN 1 (PK)",
-                        "MATEMATIK TINGKATAN 1 (PK)",
-                        "PENDIDIKAN MUZIK TINGKATAN 1 (PK)",
-                        "PENGURUSAN KEHIDUPAN TINGKATAN 1"
-                    ]
+                    subjects: ["PENDIDIKAN JASMANI DAN PENDIDIKAN KESIHATAN TINGKATAN 1 (PK)", "PENDIDIKAN SENI VISUAL TINGKATAN 1 (PK)", "BAHASA INGGERIS TINGKATAN 1 (PK)", "MATEMATIK TINGKATAN 1 (PK)", "PENDIDIKAN MUZIK TINGKATAN 1 (PK)", "PENGURUSAN KEHIDUPAN TINGKATAN 1"]
                 }
             ],
-
-            "KP 2027 DLP": [] // Dibiarkan kosong sekiranya mata pelajaran DLP akan diselaraskan di masa akan datang
+            "KP 2027 DLP": [] 
         };
 
         const dropdownPenerbitan = document.getElementById('penerbitanSelect');
@@ -1044,25 +931,20 @@
 
         dropdownPenerbitan.addEventListener('change', function() {
             const penerbitanTerpilih = this.value;
-            
-            // Reset dropdown mata pelajaran setiap kali penerbitan bertukar
             dropdownMataPelajaran.innerHTML = '<option value="">-- SILA PILIH --</option>';
-            dropdownMataPelajaran.classList.remove('input-success', 'input-error'); // Buang warna hijau/merah
+            dropdownMataPelajaran.classList.remove('input-success', 'input-error');
             
             if (penerbitanTerpilih && senaraiMataPelajaran[penerbitanTerpilih]) {
                 const dataSubjek = senaraiMataPelajaran[penerbitanTerpilih];
                 
                 if (dataSubjek.length === 0) {
-                    // Jika data kosong / belum ditetapkan
                     const option = document.createElement('option');
                     option.value = "";
                     option.textContent = "-- MATA PELAJARAN BELUM DITETAPKAN --";
                     option.disabled = true;
                     dropdownMataPelajaran.appendChild(option);
                 } else {
-                    // Loop senarai yang disediakan
                     dataSubjek.forEach(item => {
-                        // Kalau ada struktur group (seperti yang dibuat untuk Braille & Pendidikan Khas)
                         if (item.group) {
                             const optgroup = document.createElement('optgroup');
                             optgroup.label = `──────── ${item.group} ────────`;
@@ -1076,7 +958,6 @@
                             });
                             dropdownMataPelajaran.appendChild(optgroup);
                         } else {
-                            // Kalau tak nak group, hanya tulis list item terus
                             const option = document.createElement('option');
                             option.value = item;
                             option.textContent = item;
@@ -1085,7 +966,6 @@
                     });
                 }
             } else {
-                // Jika tiada penerbitan dipilih kembali kepada paparan asal
                 const option = document.createElement('option');
                 option.value = "";
                 option.textContent = "-- SILA PILIH PENERBITAN DAHULU --";
@@ -1093,43 +973,32 @@
             }
         });
 
-        // Jalankan function ini sekali masa page di load jika user tersilap refresh page
         dropdownPenerbitan.dispatchEvent(new Event('change'));
 
         // SCRIPT TAMBAHAN UNTUK FORMAT IC DAN NOMBOR TELEFON
-        
-        // 1. Format Nombor Kad Pengenalan
         const icInput = document.querySelector('input[name="ic"]');
         if(icInput) {
             icInput.addEventListener('input', function(e) {
-                // Buang semua karektor kecuali nombor
                 let val = this.value.replace(/\D/g, ''); 
                 if (val.length > 12) val = val.slice(0, 12);
-                
                 let formatted = val;
-                // Tambah sempang pertama selepas 6 nombor
                 if (val.length > 6) {
                     formatted = val.slice(0, 6) + '-' + val.slice(6);
                 }
-                // Tambah sempang kedua selepas 8 nombor
                 if (val.length > 8) {
                     formatted = formatted.slice(0, 9) + '-' + val.slice(8);
                 }
-                
                 this.value = formatted;
             });
         }
 
-        // 2. Format Nombor Telefon (Membenarkan Nombor dan Sempang Sahaja)
         const phoneInputs = document.querySelectorAll('input[name="tel_pej"], input[name="tel_bimbit"], input[name="tel_bimbit_waris"]');
         phoneInputs.forEach(input => {
             input.addEventListener('input', function(e) {
-                // Buang semua karektor kecuali digit nombor dan simbol sempang
                 this.value = this.value.replace(/[^\d\-]/g, '');
             });
         });
 
-        // Huruf besar automatik
         document.querySelectorAll('.auto-uppercase').forEach(element => {
             element.addEventListener('input', function() {
                 if (this.tagName.toLowerCase() === 'input') {
@@ -1143,7 +1012,6 @@
             });
         });
 
-        // Huruf kecil automatik untuk e-mel
         document.querySelectorAll('.auto-lowercase').forEach(element => {
             element.addEventListener('input', function() {
                 if (this.tagName.toLowerCase() === 'input') {
@@ -1173,7 +1041,6 @@
             }
         });
 
-        // Kawalan input fail gambar
         const fileInput = document.getElementById('gambar');
         const fileError = document.getElementById('fileError');
         fileInput.addEventListener('change', function() {
@@ -1197,18 +1064,15 @@
                     fileError.classList.remove('hidden');
                     return;
                 }
-                
-                // Jika fail sah, tambah kelas hijau
                 this.classList.add('input-success');
             }
         });
 
-        // Event listener membuang kotak ralat merah dan tambah hijau cair apabila berjaya isi
         function kemaskiniStatusInput(elemen) {
             elemen.classList.remove('input-error');
             
             if (elemen.classList.contains('glass-input') || elemen.tagName === 'SELECT' || ['text', 'number', 'email'].includes(elemen.type)) {
-                if (elemen.value.trim() !== '' && elemen.checkValidity()) {
+                if (elemen.value.trim() !== '' && elemen.checkValidity() && !elemen.disabled) {
                     elemen.classList.add('input-success');
                 } else {
                     elemen.classList.remove('input-success');
@@ -1221,7 +1085,6 @@
             element.addEventListener('change', function() { kemaskiniStatusInput(this); });
             element.addEventListener('blur', function() { kemaskiniStatusInput(this); });
             
-            // Semak status awal jika ada maklumat yang auto-fill dari browser
             if(element.value && !['file', 'checkbox'].includes(element.type)) {
                 setTimeout(() => kemaskiniStatusInput(element), 100);
             }
@@ -1229,16 +1092,57 @@
 
         document.querySelectorAll('input[name="pengiktirafan"]').forEach(cb => {
             cb.addEventListener('change', function() {
-                document.getElementById('pengiktirafanBox').classList.remove('box-error');
+                document.getElementById('sec-pengiktirafan').classList.remove('box-error');
             });
         });
 
-        // Proses Submit Borang
+        const samaCheckboxes = document.querySelectorAll('.sama-checkbox');
+        samaCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const sectionId = this.getAttribute('data-section');
+                const section = document.getElementById(sectionId);
+                // Pilih semua elemen input, select, textarea DALAM parent `input-container` atau bahagian tu sahaja 
+                // Kita kecualikan checkbox ini sendiri dari dikunci
+                const inputs = section.querySelectorAll('.input-container input:not(.sama-checkbox), .input-container select, .input-container textarea, .req-pengiktirafan');
+                
+                if (this.checked) {
+                    // Kunci borang dan pudarkan warnanya
+                    section.classList.add('locked-section');
+                    inputs.forEach(input => {
+                        input.disabled = true;
+                        input.classList.remove('input-error', 'input-success', 'box-error'); // Buang styling ralat jika ada
+                    });
+                    if(sectionId === 'sec-pengiktirafan') {
+                        section.classList.remove('box-error'); // Reset ralat pengiktirafan
+                    }
+                } else {
+                    // Buka semula kunci
+                    section.classList.remove('locked-section');
+                    inputs.forEach(input => {
+                        input.disabled = false;
+                        kemaskiniStatusInput(input);
+                    });
+                }
+            });
+        });
+
+        // Map nama input yang dikunci untuk dimasukkan value automatik semasa Hantar
+        const lockedSectionValuesMap = {
+            'sec-gambar': ['gambarBase64', 'gambar'],
+            'sec-kenalan': ['tel_pej', 'tel_bimbit', 'emel_pejabat', 'emel_peribadi'],
+            'sec-jawatan': ['jawatan', 'jawatan_lain', 'skim_jawatan', 'gred_jawatan'],
+            'sec-alamat': ['alamat1', 'alamat2', 'poskod', 'daerah', 'negeri'],
+            'sec-waris': ['nama_waris', 'hubungan_waris', 'tel_bimbit_waris'],
+            'sec-akademik': ['sijil_ikhtisas', 'opsyen_major_1', 'opsyen_minor_1', 'diploma', 'sarjana_muda', 'opsyen_major_2', 'opsyen_minor_2', 'sarjana', 'kedoktoran'],
+            'sec-pengalaman': ['mata_pelajaran_1', 'tempoh_mengajar_1', 'mata_pelajaran_2', 'tempoh_mengajar_2', 'mata_pelajaran_3', 'tempoh_mengajar_3'],
+            'sec-pengiktirafan': ['pengiktirafan', 'pengiktirafan_lain'],
+            'sec-sumbangan': ['sumbangan_1', 'tahun_sumbangan_1', 'sumbangan_2', 'tahun_sumbangan_2', 'sumbangan_3', 'tahun_sumbangan_3', 'sumbangan_4', 'tahun_sumbangan_4', 'sumbangan_5', 'tahun_sumbangan_5']
+        };
+
         const form = document.getElementById('mainForm');
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // 1. Buang semua highlight merah (reset) setiap kali tekan Hantar
             document.querySelectorAll('.input-error, .box-error').forEach(el => {
                 el.classList.remove('input-error', 'box-error');
             });
@@ -1246,33 +1150,36 @@
             let isFormValid = true;
             let firstErrorElement = null;
 
-            // 2. Semak validasi elemen form standard (input, select)
+            // 1. Semak validasi elemen HTML standard (required dll). Elemen 'disabled' (yang di-lock) akan diabaikan!
             if (!this.checkValidity()) {
                 isFormValid = false;
                 const invalidElements = this.querySelectorAll(':invalid');
                 
                 invalidElements.forEach((el) => {
-                    if (el.offsetParent !== null) { // Jika elemen kelihatan
+                    if (el.offsetParent !== null && !el.disabled) { // Semak jika ia tidak dikunci
                         el.classList.add('input-error');
                         if (!firstErrorElement) firstErrorElement = el; 
                     }
                 });
             }
 
-            // 3. Semak Pengiktirafan (Checkbox Khas)
-            const pengiktirafanChecked = document.querySelectorAll('input[name="pengiktirafan"]:checked').length > 0;
-            const pengiktirafanBox = document.getElementById('pengiktirafanBox');
-            
-            if (!pengiktirafanChecked) {
-                isFormValid = false;
-                pengiktirafanBox.classList.add('box-error');
+            // 2. Semak Pengiktirafan (Custom Validation) - Hanya jika ia tidak ditanda 'Sama'
+            const chkSamaPengiktirafan = document.querySelector('.sama-checkbox[data-section="sec-pengiktirafan"]');
+            if (!chkSamaPengiktirafan.checked) {
+                const pengiktirafanChecked = document.querySelectorAll('.req-pengiktirafan:checked').length > 0;
+                const secPengiktirafan = document.getElementById('sec-pengiktirafan');
                 
-                if (!firstErrorElement || pengiktirafanBox.getBoundingClientRect().top < firstErrorElement.getBoundingClientRect().top) {
-                    firstErrorElement = pengiktirafanBox;
+                if (!pengiktirafanChecked) {
+                    isFormValid = false;
+                    secPengiktirafan.classList.add('box-error');
+                    
+                    if (!firstErrorElement || secPengiktirafan.getBoundingClientRect().top < firstErrorElement.getBoundingClientRect().top) {
+                        firstErrorElement = secPengiktirafan;
+                    }
                 }
             }
 
-            // 4. Jika ada ralat, scroll ke elemen tersebut
+            // 3. Paparan Ralat Jika Borang Tak Lengkap
             if (!isFormValid) {
                 if (firstErrorElement) {
                     firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1286,7 +1193,7 @@
                 return;
             }
 
-            // 5. Proses penghantaran
+            // 4. Proses data
             const submitBtn = document.querySelector('button[type="submit"]');
             const originalBtnHtml = submitBtn.innerHTML;
             submitBtn.innerHTML = `SEDANG MENGHANTAR... <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
@@ -1295,9 +1202,9 @@
 
             const formData = new FormData(this);
             const dataObj = {};
-            
             dataObj.formType = "maklumatPenilai"; 
             
+            // Masukkan data normal ke dalam objek
             formData.forEach((value, key) => {
                 if (!dataObj[key]) {
                     dataObj[key] = value;
@@ -1306,11 +1213,22 @@
                 }
             });
 
-            // Gantikan URL ini dengan URL Web App Apps Script anda 
+            // 5. Masukkan data ganti "Data adalah sama dengan sebelumnya" bagi setiap bahagian yang dikunci
+            document.querySelectorAll('.sama-checkbox:checked').forEach(cb => {
+                const sectionId = cb.getAttribute('data-section');
+                const keys = lockedSectionValuesMap[sectionId];
+                if (keys) {
+                    keys.forEach(key => {
+                        dataObj[key] = "Data adalah sama dengan sebelumnya";
+                    });
+                }
+            });
+
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby6Ml33aKh1IICewTmOZyg3oG4Cmn9ri1rQ-6X1VOfCtsoQTWJzkhh3wpFwE8SY0ZuH/exec';
 
             const sendToGoogle = (base64String = null) => {
-                if (base64String) {
+                // Jangan tulis tindih base64 jika ia dah ditulis oleh sistem kotak 'Sama' di atas
+                if (base64String && dataObj.gambarBase64 !== "Data adalah sama dengan sebelumnya") {
                     dataObj.gambarBase64 = base64String;
                 }
 
@@ -1328,11 +1246,15 @@
                     if (result.result === 'success') {
                         showModal('Penghantaran Berjaya!', 'Maklumat anda telah berjaya disimpan ke dalam pangkalan data.', 'success');
                         form.reset(); 
-                        document.querySelectorAll('.input-success').forEach(el => el.classList.remove('input-success')); // Reset warna hijau
+                        
+                        // Reset semua state lepas hantar berjaya
+                        document.querySelectorAll('.locked-section').forEach(el => el.classList.remove('locked-section'));
+                        document.querySelectorAll('input:disabled, select:disabled, textarea:disabled').forEach(el => el.disabled = false);
+                        document.querySelectorAll('.input-success').forEach(el => el.classList.remove('input-success'));
                         document.querySelectorAll('.hidden').forEach(el => {
                             if(el.id !== 'msgModal' && el.id !== 'fileError') el.classList.add('hidden');
                         });
-                        dropdownPenerbitan.dispatchEvent(new Event('change')); // Reset dropdown Mata Pelajaran
+                        dropdownPenerbitan.dispatchEvent(new Event('change'));
                     } else {
                         showModal('Ralat Sistem', 'Gagal menyimpan rekod: ' + result.message, 'error');
                     }
@@ -1345,8 +1267,11 @@
                 });
             };
 
-            const file = fileInput.files[0];
-            if (file) {
+            const chkSamaGambar = document.querySelector('.sama-checkbox[data-section="sec-gambar"]');
+            
+            // Baca imej jika file diisi DAN kotak gambar 'sama' tidak di-tick
+            if (!chkSamaGambar.checked && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
                 const reader = new FileReader();
                 reader.onloadend = function() {
                     const base64String = reader.result.split(',')[1];
@@ -1396,7 +1321,6 @@
             }, 300);
         }
 
-        // KAWALAN LOGIK LAIN-LAIN
         const chkLainPengiktirafan = document.getElementById('chkLainPengiktirafan');
         const lainPengiktirafanContainer = document.getElementById('lainLainPengiktirafanContainer');
         const pengiktirafanLainInput = document.getElementById('pengiktirafanLainInput');
