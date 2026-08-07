@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pendaftaran Mata Pelajaran (Dark Glass)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Tema asas gelap */
+        body {
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Latar belakang abstrak (Orbs) untuk menaikkan efek Glassmorphism */
+        .bg-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { top: -10%; left: -10%; width: 40vw; height: 40vw; background-color: #3b82f6; }
+        .orb-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background-color: #8b5cf6; }
+        .orb-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background-color: #06b6d4; opacity: 0.3; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Kelas utiliti Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-header {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-modal {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* Animasi Loading */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #60a5fa; /* Blue 400 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Ubah warna dropdown option */
+        select option {
+            background-color: #1e293b; /* Slate 800 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Elemen latar belakang Glassmorphism -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+
+    <!-- Header -->
+    <header class="glass-header sticky top-0 z-40 p-4 sm:p-6 mb-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400">LIVE UPDATE PENGISIAN BORANG MAKLUMAT BAKAL PENILAI BUKU TEKS KPM</h1>
+                <div id="last-updated" class="text-sm text-slate-400 mt-1 flex items-center">
+                    <svg class="w-4 h-4 mr-1 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Menyambung ke pangkalan data...
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <!-- Butang Kemaskini (Manual) -->
+                <button id="refresh-btn" class="glass-panel hover:bg-white/10 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 flex items-center shadow-lg w-full sm:w-auto justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Kemaskini Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 pb-20 relative z-10">
+        
+        <!-- Status Loading -->
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-32 glass-panel rounded-2xl">
+            <div class="loader mb-4"></div>
+            <p class="text-blue-300 font-medium">Sedang menyegerak data terkini...</p>
+        </div>
+
+        <!-- Kawasan Data -->
+        <div id="data-container" class="hidden animate-[fadeIn_0.5s_ease-out]">
+            
+            <!-- Kawasan Kawalan (Filter & Ringkasan) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                
+                <!-- Filter Dropdown -->
+                <div id="location-filter-container" class="md:col-span-1 glass-panel rounded-2xl p-6 hidden">
+                    <label for="location-filter" class="block text-sm font-medium text-slate-300 mb-2 uppercase tracking-wider">Tapis Mengikut Tempat/Bengkel</label>
+                    <select id="location-filter" class="w-full bg-slate-800/50 border border-slate-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-3 outline-none transition-all">
+                        <option value="all">Semua Tempat / Lokasi</option>
+                        <!-- Pilihan akan dimasukkan melalui JS -->
+                    </select>
+                </div>
+
+                <!-- Kad Jumlah -->
+                <div class="md:col-span-2 glass-panel rounded-2xl p-6 flex items-center justify-between relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h2 class="text-sm font-medium text-slate-300 uppercase tracking-wider mb-1">Jumlah Keseluruhan Pendaftaran</h2>
+                        <div id="total-count" class="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">0</div>
+                    </div>
+                    <div class="relative z-10 opacity-20">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold mb-6 text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                Pecahan Mata Pelajaran
+            </h2>
+            
+            <div id="subjects-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Kad subjek akan diisi oleh JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-modal rounded-2xl w-full max-w-5xl max-h-[95vh] flex flex-col transform scale-95 transition-transform duration-300 shadow-2xl" id="modal-content">
+            
+            <!-- Header Modal -->
+            <div class="p-5 sm:p-6 border-b border-white/10 flex justify-between items-start sm:items-center">
+                <div>
+                    <h3 class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">Senarai Panel</h3>
+                    <h2 id="modal-title" class="text-xl sm:text-2xl font-bold text-white leading-tight">Mata Pelajaran</h2>
+                </div>
+                <button id="close-modal" class="text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full transition-all focus:outline-none ml-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Kandungan Modal (Jadual) -->
+            <div class="p-0 overflow-auto flex-grow rounded-b-2xl sm:rounded-none">
+                <table class="min-w-full w-full text-left border-collapse">
+                    <thead class="bg-white/5 sticky top-0 z-10 backdrop-blur-md">
+                        <tr>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10">Bil</th>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10">Nama</th>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10">Tarikh / Masa</th>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10">Nama Waris</th>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10">No Tel</th>
+                            <th class="py-4 px-4 sm:px-6 text-xs font-semibold text-slate-300 uppercase tracking-wider border-b border-white/10 text-center">Pengesahan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-table-body" class="divide-y divide-white/5 text-sm">
+                        <!-- Baris jadual akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Footer Modal -->
+            <div class="p-4 sm:p-5 border-t border-white/10 bg-black/20 rounded-b-2xl flex justify-end">
+                <button id="close-modal-btn" class="glass-panel hover:bg-white/10 text-white font-medium py-2 px-6 rounded-lg transition-all focus:outline-none">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL CSV yang telah disediakan oleh pengguna (versi pub?output=csv)
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQW7wCKSHCh8PY_DoeGYUbtOkZnz501idkoMHVkVEpNMh0XnGp6N9VYe_ZyFvPhdJl_vnak2cos0pDQ/pub?output=csv';
+
+        // Simpan data global
+        let globalData = [];
+        let groupedData = {};
+        
+        // Pembolehubah untuk mengenalpasti nama lajur
+        let subjectCol, nameCol, timeCol, verifyCol, guardianCol, phoneCol, locationCol;
+
+        // DOM Elements
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const dataContainer = document.getElementById('data-container');
+        const totalCountEl = document.getElementById('total-count');
+        const subjectsGridEl = document.getElementById('subjects-grid');
+        const lastUpdatedEl = document.getElementById('last-updated');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const locationFilterContainer = document.getElementById('location-filter-container');
+        const locationFilter = document.getElementById('location-filter');
+        
+        // Modal Elements
+        const modalContainer = document.getElementById('modal-container');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTableBody = document.getElementById('modal-table-body');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeModalBtnBottom = document.getElementById('close-modal-btn');
+
+        // Fungsi mengambil data
+        function fetchData() {
+            // Animasi butang kemaskini
+            refreshBtn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyemak...`;
+            refreshBtn.disabled = true;
+
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processData(results.data);
+                    
+                    // Kemaskini masa
+                    const now = new Date();
+                    lastUpdatedEl.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-green-400 mr-2 shadow-[0_0_8px_#4ade80]"></span> Dikemaskini: ${now.toLocaleTimeString('ms-MY')}`;
+                    
+                    // Reset butang kemaskini
+                    refreshBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Kemaskini Data`;
+                    refreshBtn.disabled = false;
+
+                    // Sembunyi loading, tunjuk data
+                    loadingIndicator.classList.add('hidden');
+                    dataContainer.classList.remove('hidden');
+                },
+                error: function(error) {
+                    console.error("Ralat mengambil data:", error);
+                    loadingIndicator.innerHTML = `<div class="text-red-400 bg-red-900/20 p-4 rounded-lg border border-red-500/30 font-medium">Gagal mengambil data. Sila semak pautan CSV anda.</div>`;
+                    refreshBtn.innerHTML = `Cuba Lagi`;
+                    refreshBtn.disabled = false;
+                }
+            });
+        }
+
+        function processData(data) {
+            if (data.length === 0) return;
+            globalData = data;
+            const columns = Object.keys(data[0]);
+            
+            subjectCol = columns.find(c => c.toLowerCase().includes('mata pelajaran') || c.toLowerCase().includes('subjek')) || columns[3] || columns[0];
+            nameCol = columns.find(c => c.trim().toLowerCase() === 'nama' || c.toLowerCase().includes('nama penuh') || c.toLowerCase().includes('nama panel') || c.toLowerCase().includes('nama pelajar')) || columns[1];
+            timeCol = columns.find(c => c.toLowerCase().includes('timestamp') || c.toLowerCase().includes('tarikh')) || columns[0];
+            verifyCol = columns.find(c => c.toLowerCase().includes('pengesahan') || c.toLowerCase().includes('setuju') || c.toLowerCase().includes('status'));
+            guardianCol = columns.find(c => c.toLowerCase().includes('nama ibu') || c.toLowerCase().includes('nama bapa') || c.toLowerCase().includes('nama waris'));
+            phoneCol = columns.find(c => c.toLowerCase().includes('no tel') || c.toLowerCase().includes('telefon'));
+            
+            // Menetapkan lajur tempat/bengkel spesifik kepada Column E (indeks 4) atau bertajuk tepat "Tempat Bengkel"
+            locationCol = columns.find(c => c.trim().toLowerCase() === 'tempat bengkel') || columns[4];
+
+            // Setup Dropdown Lokasi jika lajur wujud
+            if (locationCol) {
+                setupLocationFilter(data, locationCol);
+            } else {
+                locationFilterContainer.classList.add('hidden');
+            }
+
+            // Terapkan penapisan dan paparan
+            applyFilterAndRender();
+        }
+
+        function setupLocationFilter(data, locCol) {
+            // Ambil semua tempat yang unik dan bukan kosong
+            const uniqueLocations = [...new Set(data.map(row => row[locCol]).filter(l => l && l.trim() !== ''))].sort();
+            
+            const currentSelection = locationFilter.value; // Simpan pilihan semasa
+            
+            // Bina semula pilihan
+            locationFilter.innerHTML = '<option value="all">Semua Tempat / Lokasi</option>';
+            uniqueLocations.forEach(loc => {
+                const option = document.createElement('option');
+                option.value = loc;
+                option.textContent = loc;
+                locationFilter.appendChild(option);
+            });
+
+            // Kekalkan pilihan lama jika ia masih wujud
+            if (['all', ...uniqueLocations].includes(currentSelection)) {
+                locationFilter.value = currentSelection;
+            }
+
+            locationFilterContainer.classList.remove('hidden');
+        }
+
+        function applyFilterAndRender() {
+            groupedData = {};
+            let validEntries = 0;
+            const selectedLocation = locationFilter.value;
+
+            globalData.forEach(row => {
+                // Pastikan ada nama
+                if (row[nameCol] && row[nameCol].trim() !== '') {
+                    
+                    // Tapis berdasarkan tempat (jika lajur wujud dan pengguna tidak pilih 'all')
+                    if (locationCol && selectedLocation !== 'all') {
+                        const rowLoc = row[locationCol] ? row[locationCol].trim() : '';
+                        if (rowLoc !== selectedLocation) return; // Skip baris ini jika tak sepadan
+                    }
+
+                    validEntries++;
+                    
+                    let subject = row[subjectCol] ? row[subjectCol].trim() : "Tiada Subjek Dinyatakan";
+                    const subjectsList = subject.split(',').map(s => s.trim());
+                    
+                    subjectsList.forEach(subj => {
+                        if (subj) {
+                            if (!groupedData[subj]) {
+                                groupedData[subj] = [];
+                            }
+                            // Struktur data untuk setiap rekod panel
+                            groupedData[subj].push({
+                                masa: row[timeCol] || '-',
+                                nama: row[nameCol] || '-',
+                                pengesahan: verifyCol ? (row[verifyCol] || '-') : '-',
+                                namaWaris: guardianCol ? (row[guardianCol] || '-') : '-',
+                                noTel: phoneCol ? (row[phoneCol] || '-') : '-'
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Animasi nombor jumlah
+            animateValue(totalCountEl, parseInt(totalCountEl.textContent) || 0, validEntries, 500);
+            
+            renderSubjects();
+        }
+
+        // Fungsi bantuan untuk animasi nombor bertambah
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function renderSubjects() {
+            subjectsGridEl.innerHTML = ''; 
+
+            const subjectArray = Object.keys(groupedData).map(key => ({
+                name: key,
+                count: groupedData[key].length,
+                students: groupedData[key] // data
+            }));
+
+            // Susun dari tertinggi ke terendah
+            subjectArray.sort((a, b) => b.count - a.count);
+
+            if (subjectArray.length === 0) {
+                subjectsGridEl.innerHTML = `<div class="col-span-full text-center py-12 glass-panel rounded-xl text-slate-400">Tiada data dijumpai untuk pilihan ini.</div>`;
+                return;
+            }
+
+            subjectArray.forEach((subject, index) => {
+                // Hasilkan sempadan atas yang berwarna-warni sikit
+                const borderColors = ['border-t-blue-500', 'border-t-purple-500', 'border-t-cyan-500', 'border-t-emerald-500', 'border-t-pink-500', 'border-t-amber-500'];
+                const borderColor = borderColors[index % borderColors.length];
+
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-xl p-5 cursor-pointer hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex flex-col justify-between h-full border-t-4 ${borderColor}`;
+                
+                card.innerHTML = `
+                    <div>
+                        <h3 class="font-bold text-white text-lg mb-1 leading-snug break-words">${subject.name}</h3>
+                    </div>
+                    <div class="mt-5 flex items-end justify-between">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider">Jumlah:</span>
+                        <span class="text-3xl font-black text-white">${subject.count}</span>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center group">
+                        <span class="group-hover:text-blue-300 transition-colors">Lihat Senarai Panel</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 group-hover:text-blue-300 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => openModal(subject.name, subject.students));
+                subjectsGridEl.appendChild(card);
+            });
+        }
+
+        function openModal(subjectName, entries) {
+            modalTitle.textContent = subjectName;
+            modalTableBody.innerHTML = ''; 
+
+            if (entries.length === 0) {
+                modalTableBody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Tiada rekod.</td></tr>`;
+            } else {
+                entries.forEach((entry, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-white/5 transition-colors';
+                    
+                    let badgePengesahan = entry.pengesahan;
+                    const val = badgePengesahan.toLowerCase().trim();
+                    if(val.includes('ya') || val.includes('setuju') || val.includes('hadir') || val.includes('selesai') || val.includes('hantar') || val.includes('dihantar') || val !== '-' && val !== '') {
+                        badgePengesahan = `<span class="px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${entry.pengesahan}</span>`;
+                    } else if (val.includes('tidak') || val.includes('bukan') || val.includes('gagal')) {
+                        badgePengesahan = `<span class="px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full bg-red-500/20 text-red-300 border border-red-500/30">${entry.pengesahan}</span>`;
+                    } else {
+                         badgePengesahan = `<span class="text-slate-300">${entry.pengesahan}</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-slate-400">${index + 1}</td>
+                        <td class="py-4 px-4 sm:px-6 font-medium text-white">${entry.nama}</td>
+                        <td class="py-4 px-4 sm:px-6 whitespace-nowrap text-slate-300 text-xs">${entry.masa}</td>
+                        <td class="py-4 px-4 sm:px-6 text-slate-300">${entry.namaWaris}</td>
+                        <td class="py-4 px-4 sm:px-6 text-slate-300">${entry.noTel}</td>
+                        <td class="py-4 px-4 sm:px-6 text-center">${badgePengesahan}</td>
+                    `;
+                    modalTableBody.appendChild(tr);
+                });
+            }
+
+            // Paparkan modal dengan animasi
+            modalContainer.classList.remove('hidden');
+            // Sedikit delay untuk membolehkan CSS transition berfungsi
+            setTimeout(() => {
+                modalContainer.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modalContainer.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            
+            // Tunggu animasi tamat baru letak hidden
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+        
+        // Event Listeners
+        closeModalBtn.addEventListener('click', closeModal);
+        closeModalBtnBottom.addEventListener('click', closeModal);
+        
+        modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer) closeModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modalContainer.classList.contains('hidden')) closeModal();
+        });
+
+        // Event listener untuk Filter Dropdown (Jika pengguna tukar tempat)
+        locationFilter.addEventListener('change', applyFilterAndRender);
+
+        // Event listener untuk Butang Kemaskini (Manual refresh)
+        refreshBtn.addEventListener('click', fetchData);
+
+        // Mula aplikasi
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+            
+            // Live update automatik setiap 1 minit (60000 ms)
+            setInterval(fetchData, 60000); 
+        });
+
+    </script>
+</body>
+</html>
