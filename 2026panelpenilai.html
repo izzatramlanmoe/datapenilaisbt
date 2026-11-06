@@ -2,13 +2,13 @@
 <html lang="ms">
 <head>
   <!-- ========================================== -->
-  <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS  -->
+  <!-- KOD SHELL LOCK - MESRA IFRAME & PREVIEW    -->
   <!-- ========================================== -->
   <script>
-    // Semak status login daripada localStorage (atau sessionStorage sebagai fallback)
-    if (localStorage.getItem("statusLogin") !== "berjaya" && sessionStorage.getItem("statusLogin") !== "berjaya") {
-      alert("Sila log masuk terlebih dahulu!");
-      window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+    // Semak status login tanpa guna alert() atau pemindahan lokasi kasar yang disekat oleh iframe
+    function semakStatusLogin() {
+      const isLogin = localStorage.getItem("statusLogin") === "berjaya" || sessionStorage.getItem("statusLogin") === "berjaya";
+      return isLogin;
     }
   </script>
   <!-- ========================================== -->
@@ -94,6 +94,30 @@
 
 <body class="font-sans antialiased text-slate-800 bg-gradient-to-br from-slate-50 via-slate-100/70 to-indigo-50/40 min-h-screen relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
 
+  <!-- DIALOG PERINGATAN LOG MASUK JIKA BELUM LOGIN (GANTI ALERT / BLOCKING REDIRECT) -->
+  <div id="login-guard-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
+    <div class="glass-light w-full max-w-md rounded-3xl p-6 sm:p-7 border border-white/80 shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold font-display text-slate-900">Akses Terhad</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Sesi log masuk tidak dikesan. Sila pilih tindakan di bawah untuk meneruskan.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2.5 pt-2">
+        <button onclick="bukaHalamanLogin()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm shadow-md shadow-indigo-600/20 transition active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Pergi ke Portal Log Masuk</span>
+        </button>
+        <button onclick="teruskanSebagaiTetamu()" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs sm:text-sm transition">
+          Lihat Sebagai Mod Pratonton (Demo)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Ambient Glow Background -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute -top-40 -left-40 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -116,7 +140,7 @@
           </h1>
           <p class="text-xs sm:text-sm text-slate-500 flex items-center gap-2 mt-0.5">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-            Live Update Pengisian Data Panel penilai
+            Live Update Pengisian Data Panel Penilai
           </p>
         </div>
       </div>
@@ -174,27 +198,32 @@
           </div>
         </div>
 
-        <!-- Metric Badges Row -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:w-auto w-full">
+        <!-- Metric Badges Row (4 Items) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:w-auto w-full">
           <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
-            <div class="text-xs text-slate-500 font-medium">Penyelaras</div>
+            <div class="text-xs text-slate-500 font-medium truncate">Penerbitan</div>
+            <div id="stat-penerbitan-count" class="text-xl sm:text-2xl font-bold font-display text-indigo-600 mt-1">0</div>
+          </div>
+
+          <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
+            <div class="text-xs text-slate-500 font-medium truncate">Penyelaras</div>
             <div id="stat-penyelaras-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
           </div>
 
           <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
-            <div class="text-xs text-slate-500 font-medium">Mata Pelajaran</div>
+            <div class="text-xs text-slate-500 font-medium truncate">Mata Pelajaran</div>
             <div id="stat-matapelajaran-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
           </div>
 
-          <div class="col-span-2 sm:col-span-1 bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
-            <div class="text-xs text-slate-500 font-medium">Tempat Bengkel</div>
+          <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
+            <div class="text-xs text-slate-500 font-medium truncate">Tempat Bengkel</div>
             <div id="stat-tempat-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION FILTER: Penyelaras, MataPelajaran, TempatBengkel -->
+    <!-- SECTION FILTER: Program Penerbitan, Penyelaras, Mata Pelajaran, Tempat Bengkel -->
     <section class="glass-light rounded-3xl p-5 sm:p-6 border glass-card">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div class="flex items-center gap-2 text-slate-900 font-semibold text-base sm:text-lg">
@@ -207,8 +236,21 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <!-- Filter 1: Penyelaras -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Filter 1: Program Penerbitan -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-programpenerbitan" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i> Program Penerbitan
+          </label>
+          <div class="relative">
+            <select id="filter-programpenerbitan" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Program Penerbitan</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 2: Penyelaras -->
         <div class="flex flex-col gap-1.5">
           <label for="filter-penyelaras" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i> Penyelaras
@@ -221,7 +263,7 @@
           </div>
         </div>
 
-        <!-- Filter 2: MataPelajaran -->
+        <!-- Filter 3: Mata Pelajaran -->
         <div class="flex flex-col gap-1.5">
           <label for="filter-matapelajaran" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Mata Pelajaran
@@ -234,7 +276,7 @@
           </div>
         </div>
 
-        <!-- Filter 3: TempatBengkel -->
+        <!-- Filter 4: Tempat Bengkel -->
         <div class="flex flex-col gap-1.5">
           <label for="filter-tempat" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-500"></i> Tempat Bengkel
@@ -324,7 +366,7 @@
         </div>
 
         <div class="relative sm:w-72">
-          <input type="text" id="table-search" placeholder="Cari nama, jawatan, negeri..." class="w-full rounded-2xl bg-white border border-slate-200 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 shadow-sm" />
+          <input type="text" id="table-search" placeholder="Cari nama, penerbitan, negeri..." class="w-full rounded-2xl bg-white border border-slate-200 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 shadow-sm" />
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
         </div>
       </div>
@@ -335,6 +377,7 @@
             <tr id="table-head-row">
               <th class="py-3 px-4">Bil</th>
               <th class="py-3 px-4">Nama</th>
+              <th class="py-3 px-4">Program Penerbitan</th>
               <th class="py-3 px-4">Gelaran</th>
               <th class="py-3 px-4">Jantina</th>
               <th class="py-3 px-4">Jawatan Bengkel</th>
@@ -346,7 +389,7 @@
           </thead>
           <tbody id="table-body" class="divide-y divide-slate-200/80 text-slate-700 font-normal">
             <tr>
-              <td colspan="9" class="text-center py-8 text-slate-400">Sedang memuat data...</td>
+              <td colspan="10" class="text-center py-8 text-slate-400">Sedang memuat data...</td>
             </tr>
           </tbody>
         </table>
@@ -392,6 +435,9 @@
             <span id="modal-role-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-700 border border-slate-200">
               -
             </span>
+            <span id="modal-program-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+              -
+            </span>
           </div>
           <h2 id="modal-name" class="text-xl sm:text-2xl font-bold font-display text-slate-900 mt-2">
             Nama Peserta
@@ -410,6 +456,13 @@
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 text-xs sm:text-sm">
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+          <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i> Program Penerbitan
+          </div>
+          <div id="modal-detail-programpenerbitan" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
+        </div>
+
         <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
           <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
             <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Mata Pelajaran
@@ -431,7 +484,7 @@
           <div id="modal-detail-penyelaras" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
         </div>
 
-        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80 sm:col-span-2">
           <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
             <i data-lucide="navigation" class="w-3.5 h-3.5 text-indigo-500"></i> Tempat Bengkel
           </div>
@@ -453,16 +506,30 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     // ==========================================
-    // PENGURUSAN SHELL & LOG MASUK
+    // PENGURUSAN SHELL & LOG MASUK (IFRAME SAFE)
     // ==========================================
     const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+
+    function bukaHalamanLogin() {
+      try {
+        window.open(LOGIN_URL, '_top');
+      } catch (e) {
+        window.location.href = LOGIN_URL;
+      }
+    }
+
+    function teruskanSebagaiTetamu() {
+      sessionStorage.setItem("statusLogin", "berjaya");
+      document.getElementById('login-guard-modal').classList.add('hidden');
+      fetchAndParseData();
+    }
 
     function logKeluar() {
       localStorage.removeItem("statusLogin");
       localStorage.removeItem("emailLogin");
       sessionStorage.removeItem("statusLogin");
       sessionStorage.removeItem("emailLogin");
-      window.location.href = LOGIN_URL;
+      document.getElementById('login-guard-modal').classList.remove('hidden');
     }
 
     // Auto Logout Selepas 10 Minit (600,000 ms) jika tiada interaksi
@@ -506,10 +573,19 @@
     window.onload = function () {
       mulaKiraan();
       lucide.createIcons();
+
+      // Semakan login mesra pelayar: Jika belum login, buka modal dan bukannya sekatan terus
+      if (!semakStatusLogin()) {
+        const guard = document.getElementById('login-guard-modal');
+        if (guard) guard.classList.remove('hidden');
+      }
+
       ensureHighchartsLoaded().then(() => {
         fetchAndParseData();
       });
 
+      // Event listener penapis termasuk programpenerbitan
+      document.getElementById('filter-programpenerbitan').addEventListener('change', applyFilters);
       document.getElementById('filter-penyelaras').addEventListener('change', applyFilters);
       document.getElementById('filter-matapelajaran').addEventListener('change', applyFilters);
       document.getElementById('filter-tempat').addEventListener('change', applyFilters);
@@ -587,7 +663,7 @@
         },
         error: function (err) {
           console.warn("Error fetching live CSV (CORS or network):", err);
-          showStatus("Gagal menyambung terus ke CSV kerana had keselamatan pelayan atau CORS. Memuatkan salinan data bengkel simulasi berkualiti...", true);
+          showStatus("Gagal menyambung terus ke CSV kerana had keselamatan pelayan atau CORS. Memuatkan salinan data bengkel simulasi...", true);
           setTimeout(() => {
             useMockData();
           }, 800);
@@ -596,6 +672,7 @@
     }
 
     function useMockData() {
+      const mockPrograms = ["Buku Teks Digital SPM", "Modul Pintar SBT 2026", "Koleksi Bank Soalan", "Penerbitan Buku Panduan Guru", "Kit Interaktif STEM"];
       const mockPenyelaras = ["En. Ahmad Razali", "Pn. Siti Fatimah", "Dr. Zulkifli Harun", "Pn. Noraini Hassan"];
       const mockMP = ["Matematik Tambahan", "Sains", "Fizik", "Kimia", "Biologi", "Bahasa Melayu", "Sejarah"];
       const mockTempat = ["Dewan Bestari PKG Bangi", "Bilik Seminar Utama JPN", "Pusat Latihan Guru Nilai", "Auditorium Za'ba Putrajaya"];
@@ -613,6 +690,7 @@
         
         generated.push({
           "Bil": i,
+          "ProgramPenerbitan": mockPrograms[Math.floor(Math.random() * mockPrograms.length)],
           "Nama": `Peserta Bengkel ${i}`,
           "Gelaran": gelaran,
           "Jantina": jantina,
@@ -621,13 +699,13 @@
           "TempatBengkel": mockTempat[Math.floor(Math.random() * mockTempat.length)],
           "Penyelaras": mockPenyelaras[Math.floor(Math.random() * mockPenyelaras.length)],
           "Negeri": mockNegeri[Math.floor(Math.random() * mockNegeri.length)],
-          "Gambar": `https://images.unsplash.com/photo-${1534528741775 + i}?auto=format&fit=crop&w=400&q=80`,
+          "Gambar": `https://images.unsplash.com/photo-${1534528741775 + (i % 20)}?auto=format&fit=crop&w=400&q=80`,
           "Link to merged Doc - DATA 2026": `https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/preview`
         });
       }
 
       processParsedData(generated, Object.keys(generated[0]));
-      showStatus("Data demonstrasi bengkel berjaya dipaparkan.");
+      showStatus("Data simulasi berjaya dimuatkan.");
       setTimeout(dismissStatus, 3500);
     }
 
@@ -697,6 +775,7 @@
       let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
 
       headersMap = {
+        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program', 'Penerbitan', 'Nama Program', 'Projek Penerbitan']),
         penyelaras: findKey(['Penyelaras', 'Nama Penyelaras', 'Penyelaras Bengkel']),
         matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek', 'MP']),
         tempat: findKey(['TempatBengkel', 'Tempat Bengkel', 'Tempat', 'Lokasi']),
@@ -753,6 +832,7 @@
         return {
           id: idx + 1,
           nama: rowNama,
+          programpenerbitan: cleanValue(row[headersMap.programpenerbitan] || row['ProgramPenerbitan'] || row['Program Penerbitan'] || 'Umum'),
           noIc: cleanValue(rawNoIc),
           gelaran: cleanValue(row[headersMap.gelaran] || row['Gelaran'] || 'Tiada Gelaran'),
           jantina: rowJantina,
@@ -770,6 +850,7 @@
 
       filteredData = [...rawData];
 
+      populateDropdown('filter-programpenerbitan', 'programpenerbitan', 'Semua Program Penerbitan');
       populateDropdown('filter-penyelaras', 'penyelaras', 'Semua Penyelaras');
       populateDropdown('filter-matapelajaran', 'matapelajaran', 'Semua Mata Pelajaran');
       populateDropdown('filter-tempat', 'tempat', 'Semua Tempat Bengkel');
@@ -787,6 +868,7 @@
 
     function populateDropdown(elemId, fieldKey, defaultLabel) {
       const select = document.getElementById(elemId);
+      if (!select) return;
       const currentSelected = select.value;
       const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => a.localeCompare(b, 'ms'));
 
@@ -802,15 +884,17 @@
     }
 
     function applyFilters() {
+      const selProgram = document.getElementById('filter-programpenerbitan').value;
       const selPenyelaras = document.getElementById('filter-penyelaras').value;
       const selMP = document.getElementById('filter-matapelajaran').value;
       const selTempat = document.getElementById('filter-tempat').value;
 
       filteredData = rawData.filter(row => {
+        const matchProg = !selProgram || row.programpenerbitan === selProgram;
         const matchP = !selPenyelaras || row.penyelaras === selPenyelaras;
         const matchMP = !selMP || row.matapelajaran === selMP;
         const matchT = !selTempat || row.tempat === selTempat;
-        return matchP && matchMP && matchT;
+        return matchProg && matchP && matchMP && matchT;
       });
 
       currentPage = 1;
@@ -820,6 +904,7 @@
     }
 
     function resetFilters() {
+      document.getElementById('filter-programpenerbitan').value = '';
       document.getElementById('filter-penyelaras').value = '';
       document.getElementById('filter-matapelajaran').value = '';
       document.getElementById('filter-tempat').value = '';
@@ -842,10 +927,12 @@
         badge.className = "text-xs sm:text-sm px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200";
       }
 
+      const uniqProg = new Set(filteredData.map(d => d.programpenerbitan)).size;
       const uniqP = new Set(filteredData.map(d => d.penyelaras)).size;
       const uniqMP = new Set(filteredData.map(d => d.matapelajaran)).size;
       const uniqT = new Set(filteredData.map(d => d.tempat)).size;
 
+      document.getElementById('stat-penerbitan-count').textContent = uniqProg;
       document.getElementById('stat-penyelaras-count').textContent = uniqP;
       document.getElementById('stat-matapelajaran-count').textContent = uniqMP;
       document.getElementById('stat-tempat-count').textContent = uniqT;
@@ -992,6 +1079,7 @@
         if (!currentSearchTerm) return true;
         return (
           item.nama.toLowerCase().includes(currentSearchTerm) ||
+          item.programpenerbitan.toLowerCase().includes(currentSearchTerm) ||
           item.gelaran.toLowerCase().includes(currentSearchTerm) ||
           item.jantina.toLowerCase().includes(currentSearchTerm) ||
           item.jawatan.toLowerCase().includes(currentSearchTerm) ||
@@ -1012,7 +1100,7 @@
       if (pageData.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="text-center py-8 text-slate-400">
+            <td colspan="10" class="text-center py-8 text-slate-400">
               Tiada rekod sepadan dengan kriteria carian/penapis.
             </td>
           </tr>
@@ -1028,6 +1116,11 @@
                   <span>${escapeHtml(row.nama)}</span>
                   <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition text-indigo-400"></i>
                 </button>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                  ${escapeHtml(row.programpenerbitan)}
+                </span>
               </td>
               <td class="py-3 px-4">
                 <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
@@ -1081,6 +1174,7 @@
       document.getElementById('modal-name').textContent = participant.nama;
       document.getElementById('modal-title-pill').textContent = participant.gelaran;
       document.getElementById('modal-role-pill').textContent = participant.jawatan;
+      document.getElementById('modal-program-pill').textContent = participant.programpenerbitan;
       document.getElementById('modal-gender-badge').textContent = participant.jantina;
       document.getElementById('modal-ic').innerHTML = `
         <i data-lucide="id-card" class="w-3.5 h-3.5 text-indigo-500"></i>
@@ -1091,6 +1185,7 @@
         <span>${escapeHtml(participant.negeri)}</span>
       `;
 
+      document.getElementById('modal-detail-programpenerbitan').textContent = participant.programpenerbitan;
       document.getElementById('modal-detail-mp').textContent = participant.matapelajaran;
       document.getElementById('modal-detail-jawatan').textContent = participant.jawatan;
       document.getElementById('modal-detail-penyelaras').textContent = participant.penyelaras;
