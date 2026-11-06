@@ -1,612 +1,1152 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <!-- ========================================== -->
-    <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
-    <!-- ========================================== -->
-    <script>
-        // Semak status login daripada localStorage (atau sessionStorage sebagai fallback)
-        if (localStorage.getItem("statusLogin") !== "berjaya" && sessionStorage.getItem("statusLogin") !== "berjaya") {
-            alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
-        }
-    </script>
-    <!-- ========================================== -->
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Data Penilai Buku Teks 2026</title>
-    
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js for pie charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse for easy CSV parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-        }
+  <!-- ========================================== -->
+  <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS  -->
+  <!-- ========================================== -->
+  <script>
+    // Semak status login daripada localStorage (atau sessionStorage sebagai fallback)
+    if (localStorage.getItem("statusLogin") !== "berjaya" && sessionStorage.getItem("statusLogin") !== "berjaya") {
+      alert("Sila log masuk terlebih dahulu!");
+      window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+    }
+  </script>
+  <!-- ========================================== -->
 
-        .liquid-card {
-            background: linear-gradient(145deg, #ffffff, #f0f0f0);
-            border-radius: 1.5rem;
-            box-shadow: 8px 8px 16px #e6e6e6, -8px -8px 16px #ffffff;
-            transition: all 0.3s ease;
-        }
-        
-        .liquid-card:hover {
-            box-shadow: 12px 12px 20px #e6e6e6, -12px -12px 20px #ffffff;
-            transform: translateY(-2px);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analisis Bengkel & Peserta</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- Highcharts & Highcharts 3D via reliable CDNJS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-3d.js"></script>
 
-        .table-container::-webkit-scrollbar {
-            height: 8px;
-            width: 8px;
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
         }
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 10px;
-        }
-        .table-container::-webkit-scrollbar-thumb {
-            background: #c1c1c1; 
-            border-radius: 10px;
-        }
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8; 
-        }
+      }
+    }
+  </script>
 
-        #loader {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+  <style>
+    /* Glassmorphism Styles (Light Mode) */
+    .glass-light {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04);
+    }
+    .glass-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.08);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.35);
+      border-radius: 9999px;
+    }
+
+    /* Highcharts container transparent */
+    .chart-box .highcharts-background {
+      fill: transparent !important;
+    }
+  </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen p-4 md:p-8">
 
-    <div id="loader">
-        <div class="relative flex justify-center items-center mb-6 h-24 w-24 rounded-full bg-white border-4 border-blue-50 shadow-lg">
-            <i class="fas fa-file-signature text-blue-500 text-4xl animate-pulse"></i>
-            <div class="absolute inset-0 border-4 border-transparent border-t-blue-600 border-b-purple-600 rounded-full animate-spin"></div>
+<body class="font-sans antialiased text-slate-800 bg-gradient-to-br from-slate-50 via-slate-100/70 to-indigo-50/40 min-h-screen relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Background -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-[30rem] h-[30rem] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute top-1/3 -right-40 w-[28rem] h-[28rem] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute -bottom-40 left-1/4 w-[32rem] h-[32rem] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Top Navigation / Header -->
+    <header class="glass-light rounded-3xl p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 glass-card">
+      <div class="flex items-center gap-3.5">
+        <div class="p-3 bg-gradient-to-tr from-indigo-600 to-violet-500 text-white rounded-2xl shadow-lg shadow-indigo-500/25 ring-1 ring-white/20">
+          <i data-lucide="layout-dashboard" class="w-6 h-6 sm:w-7 sm:h-7"></i>
         </div>
-        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Menyemak Data Penilai...</h2>
-        <p class="text-sm text-gray-500 mt-2 font-medium">kemaskini pangkalan data terkini</p>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold font-display tracking-tight text-slate-900">
+            Sistem Maklumat Data Panel Penilai 2026
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-500 flex items-center gap-2 mt-0.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+            Live Update Pengisian Data Panel penilai
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5">
+        <!-- Refresh Button -->
+        <button id="btn-refresh" title="Muat Semula Data" class="px-3.5 py-2.5 rounded-2xl bg-white/90 border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm font-medium">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-indigo-500"></i>
+          <span>Kemaskini</span>
+        </button>
+
+        <!-- Logout Button (Shell) -->
+        <button onclick="logKeluar()" title="Log Keluar" class="px-3.5 py-2.5 rounded-2xl bg-red-500 hover:bg-red-600 text-white shadow-sm shadow-red-500/20 transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm font-medium">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Log Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- STATUS & TOAST BAR -->
+    <div id="status-bar" class="hidden rounded-2xl p-4 glass-light border border-amber-300/60 text-amber-900 text-sm flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-2.5">
+        <i data-lucide="info" class="w-5 h-5 text-amber-500"></i>
+        <span id="status-text">Memuat turun data Google Sheets...</span>
+      </div>
+      <button onclick="dismissStatus()" class="hover:opacity-75"><i data-lucide="x" class="w-4 h-4"></i></button>
     </div>
 
-    <div class="max-w-7xl mx-auto relative" id="main-content" style="display: none;">
+    <!-- PANEL BESAR: BILANGAN PENUH & RINGKASAN UTAMA -->
+    <section class="glass-light rounded-3xl p-6 sm:p-8 border glass-card relative overflow-hidden">
+      <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+        <!-- Big Number Hero -->
+        <div class="flex items-center gap-5 sm:gap-6">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-xl shadow-indigo-600/30 ring-1 ring-white/20 flex-shrink-0">
+            <i data-lucide="users" class="w-10 h-10 sm:w-11 sm:h-11"></i>
+          </div>
+          <div>
+            <div class="text-xs sm:text-sm font-semibold tracking-wide uppercase text-indigo-600">
+              Bilangan Keseluruhan Peserta
+            </div>
+            <div class="flex flex-wrap items-baseline gap-3 mt-1">
+              <span id="total-count-display" class="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-slate-900">
+                0
+              </span>
+              <span id="filtered-badge" class="text-xs sm:text-sm px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-700 font-semibold border border-emerald-500/30">
+                Semua Rekod
+              </span>
+            </div>
+            <p id="total-subtitle" class="text-xs sm:text-sm text-slate-500 mt-1.5">
+              Jumlah data aktif selepas tapisan penapis
+            </p>
+          </div>
+        </div>
+
+        <!-- Metric Badges Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 lg:w-auto w-full">
+          <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
+            <div class="text-xs text-slate-500 font-medium">Penyelaras</div>
+            <div id="stat-penyelaras-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
+          </div>
+
+          <div class="bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
+            <div class="text-xs text-slate-500 font-medium">Mata Pelajaran</div>
+            <div id="stat-matapelajaran-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1 bg-white/80 border border-slate-200/90 rounded-2xl p-4 text-center shadow-sm">
+            <div class="text-xs text-slate-500 font-medium">Tempat Bengkel</div>
+            <div id="stat-tempat-count" class="text-xl sm:text-2xl font-bold font-display text-slate-800 mt-1">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION FILTER: Penyelaras, MataPelajaran, TempatBengkel -->
+    <section class="glass-light rounded-3xl p-5 sm:p-6 border glass-card">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-2 text-slate-900 font-semibold text-base sm:text-lg">
+          <i data-lucide="filter" class="w-5 h-5 text-indigo-500"></i>
+          <span>Penapis Data Bengkel</span>
+        </div>
+        <button id="btn-reset-filters" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition py-1.5 px-3 rounded-xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Tetapkan Semula Penapis</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Filter 1: Penyelaras -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-penyelaras" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i> Penyelaras
+          </label>
+          <div class="relative">
+            <select id="filter-penyelaras" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Penyelaras</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 2: MataPelajaran -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-matapelajaran" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Mata Pelajaran
+          </label>
+          <div class="relative">
+            <select id="filter-matapelajaran" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Mata Pelajaran</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 3: TempatBengkel -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-tempat" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-indigo-500"></i> Tempat Bengkel
+          </label>
+          <div class="relative">
+            <select id="filter-tempat" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Tempat Bengkel</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 PIE CHART 3D -->
+    <section>
+      <div class="flex items-center justify-between mb-4 px-1">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold font-display text-slate-900 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-500"></i>
+            Analisis Demografi 3D
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500">Carta Pai 3D berasaskan Jawatan Bengkel, Gelaran, Jantina & Negeri</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Chart 1: JawatanBengkel -->
+        <div class="glass-light rounded-3xl p-5 sm:p-6 border flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-indigo-500/30"></span>
+              Jawatan Bengkel
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-jawatan" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 2: Gelaran -->
+        <div class="glass-light rounded-3xl p-5 sm:p-6 border flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30"></span>
+              Gelaran
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-gelaran" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 3: Jantina -->
+        <div class="glass-light rounded-3xl p-5 sm:p-6 border flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-pink-500 ring-2 ring-pink-500/30"></span>
+              Jantina
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-jantina" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 4: Negeri -->
+        <div class="glass-light rounded-3xl p-5 sm:p-6 border flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-amber-500/30"></span>
+              Negeri
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-negeri" class="w-full h-80 chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DATA TABLE -->
+    <section class="glass-light rounded-3xl p-5 sm:p-6 border glass-card">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold font-display text-slate-900 flex items-center gap-2">
+            <i data-lucide="table" class="w-5 h-5 text-indigo-500"></i>
+            Senarai Terperinci Rekod
+          </h3>
+          <p class="text-xs text-slate-500">Jadual interaktif mengikut tapisan semasa</p>
+        </div>
+
+        <div class="relative sm:w-72">
+          <input type="text" id="table-search" placeholder="Cari nama, jawatan, negeri..." class="w-full rounded-2xl bg-white border border-slate-200 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 shadow-sm" />
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white/70">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-100/90 text-slate-600 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200">
+            <tr id="table-head-row">
+              <th class="py-3 px-4">Bil</th>
+              <th class="py-3 px-4">Nama</th>
+              <th class="py-3 px-4">Gelaran</th>
+              <th class="py-3 px-4">Jantina</th>
+              <th class="py-3 px-4">Jawatan Bengkel</th>
+              <th class="py-3 px-4">Mata Pelajaran</th>
+              <th class="py-3 px-4">Tempat Bengkel</th>
+              <th class="py-3 px-4">Penyelaras</th>
+              <th class="py-3 px-4">Negeri</th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-200/80 text-slate-700 font-normal">
+            <tr>
+              <td colspan="9" class="text-center py-8 text-slate-400">Sedang memuat data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500 mt-4 px-1">
+        <span id="table-entries-info">Menunjukkan 0 rekod</span>
+        <div class="flex gap-2">
+          <button id="btn-prev-page" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition disabled:opacity-40 font-medium">Sebelum</button>
+          <span id="page-indicator" class="px-3 py-1.5 font-semibold text-slate-700">1 / 1</span>
+          <button id="btn-next-page" class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition disabled:opacity-40 font-medium">Seterusnya</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-400 py-4">
+      Sistem Dashboard Analisis Bengkel &copy; 2026. Diperkasakan dengan Glassmorphism & Highcharts 3D.
+    </footer>
+
+  </div>
+
+  <!-- MODAL POPUP DETAIL PESERTA -->
+  <div id="participant-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div id="modal-container" class="glass-light w-full max-w-2xl rounded-3xl p-6 sm:p-8 border border-white/80 shadow-2xl transform scale-95 transition-all duration-300 relative max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="closeParticipantModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b border-slate-200/80 pb-6">
+        <div class="relative flex-shrink-0">
+          <img id="modal-avatar" src="" alt="Gambar Peserta" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-white shadow-xl ring-2 ring-indigo-500/20 bg-slate-100" />
+          <span id="modal-gender-badge" class="absolute -bottom-2 -right-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-md bg-white border border-slate-200 text-slate-700">
+            -
+          </span>
+        </div>
+        <div class="text-center sm:text-left flex-1">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span id="modal-title-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              -
+            </span>
+            <span id="modal-role-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+              -
+            </span>
+          </div>
+          <h2 id="modal-name" class="text-xl sm:text-2xl font-bold font-display text-slate-900 mt-2">
+            Nama Peserta
+          </h2>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1.5">
+            <p id="modal-ic" class="text-xs sm:text-sm font-mono text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
+              <i data-lucide="id-card" class="w-3.5 h-3.5 text-indigo-500"></i>
+              <span>-</span>
+            </p>
+            <p id="modal-state" class="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i>
+              <span>-</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 text-xs sm:text-sm">
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+          <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-indigo-500"></i> Mata Pelajaran
+          </div>
+          <div id="modal-detail-mp" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+          <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5 text-indigo-500"></i> Jawatan Bengkel
+          </div>
+          <div id="modal-detail-jawatan" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+          <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i> Penyelaras Bengkel
+          </div>
+          <div id="modal-detail-penyelaras" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/80">
+          <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="navigation" class="w-3.5 h-3.5 text-indigo-500"></i> Tempat Bengkel
+          </div>
+          <div id="modal-detail-tempat" class="font-semibold text-slate-800 text-sm sm:text-base">-</div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-xs text-slate-500 text-center sm:text-left">
+          Dokumen OPR: <span id="modal-opr-filename" class="font-semibold text-slate-700">Link to merged Doc - DATA 2026</span>
+        </div>
         
-        <header class="mb-8 glass-panel p-6 relative">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="text-center md:text-left">
-                    <h1 class="text-2xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
-                        Sistem Data Penilai Buku Teks Tahun 2026
-                    </h1>
-                    <p class="text-gray-500 font-medium">Paparan Analitik Profesional</p>
-                </div>
-                
-                <!-- Live Update & Logout Section -->
-                <div class="flex flex-wrap items-center justify-center md:justify-end gap-3">
-                    <button id="btnLiveUpdate" class="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 px-5 py-2.5 rounded-full shadow-sm border border-blue-200/60 transition-all font-bold text-sm active:scale-95">
-                        <i class="fas fa-sync-alt" id="syncIcon"></i> Muat Semula (Live)
-                    </button>
-                    <button onclick="logKeluar()" class="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-full shadow-sm transition-all font-bold text-sm active:scale-95">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                    <div class="w-full text-center md:text-right text-xs text-gray-500 font-medium bg-gray-100/50 px-3 py-1 rounded-full border border-gray-200/50 mt-1">
-                        <i class="far fa-clock mr-1 text-gray-400"></i> <span id="lastUpdateTime">Dikemas kini: -</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <section class="glass-panel p-6 mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-700"><i class="fas fa-filter text-blue-500 mr-2"></i>Tapis Data</h2>
-                <button id="resetFilters" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-4 rounded-full transition-colors duration-200 shadow-sm">
-                    Set Semula
-                </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                
-                <div class="flex flex-col">
-                    <label for="filterMataPelajaran" class="text-xs font-semibold text-gray-500 uppercase mb-1 ml-2">Mata Pelajaran</label>
-                    <select id="filterMataPelajaran" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition duration-150 ease-in-out hover:bg-white">
-                        <option value="">Semua Mata Pelajaran</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="filterTempatBengkel" class="text-xs font-semibold text-gray-500 uppercase mb-1 ml-2">Tempat Bengkel</label>
-                    <select id="filterTempatBengkel" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition duration-150 ease-in-out hover:bg-white">
-                        <option value="">Semua Tempat</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="filterKategori" class="text-xs font-semibold text-gray-500 uppercase mb-1 ml-2">Kategori</label>
-                    <select id="filterKategori" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition duration-150 ease-in-out hover:bg-white">
-                        <option value="">Semua Kategori</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="filterPenyelaras" class="text-xs font-semibold text-gray-500 uppercase mb-1 ml-2">Nama Penyelaras Projek</label>
-                    <select id="filterPenyelaras" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition duration-150 ease-in-out hover:bg-white">
-                        <option value="">Semua Penyelaras</option>
-                    </select>
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="filterJawatanBengkel" class="text-xs font-semibold text-gray-500 uppercase mb-1 ml-2">Jawatan Bengkel</label>
-                    <select id="filterJawatanBengkel" class="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-2xl focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition duration-150 ease-in-out hover:bg-white">
-                        <option value="">Semua Jawatan</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="mt-4 text-right">
-                <span id="recordCount" class="inline-block bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-semibold">
-                    Menunjukkan 0 rekod
-                </span>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            
-            <!-- Chart 1: JANTINA -->
-            <div class="liquid-card p-5 flex flex-col items-center">
-                <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4 border-b pb-2 w-full text-center">Jantina</h3>
-                <div class="relative w-full h-48 flex justify-center items-center">
-                    <canvas id="chartJantina"></canvas>
-                </div>
-            </div>
-
-            <!-- Chart 2: GELARAN -->
-            <div class="liquid-card p-5 flex flex-col items-center">
-                <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4 border-b pb-2 w-full text-center">Gelaran</h3>
-                <div class="relative w-full h-48 flex justify-center items-center">
-                    <canvas id="chartGelaran"></canvas>
-                </div>
-            </div>
-
-            <!-- Chart 3: JAWATAN -->
-            <div class="liquid-card p-5 flex flex-col items-center">
-                <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4 border-b pb-2 w-full text-center">Jawatan (Hakiki)</h3>
-                <div class="relative w-full h-48 flex justify-center items-center">
-                    <canvas id="chartJawatan"></canvas>
-                </div>
-            </div>
-
-            <!-- Chart 4: GRED JAWATAN -->
-            <div class="liquid-card p-5 flex flex-col items-center">
-                <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4 border-b pb-2 w-full text-center">Gred Jawatan</h3>
-                <div class="relative w-full h-48 flex justify-center items-center">
-                    <canvas id="chartGred"></canvas>
-                </div>
-            </div>
-
-        </section>
-
-        <section class="glass-panel p-6 overflow-hidden flex flex-col h-[600px]">
-            <h2 class="text-xl font-bold text-gray-700 mb-4 flex-shrink-0"><i class="fas fa-list text-purple-500 mr-2"></i>Senarai Data</h2>
-            
-            <div class="table-container overflow-x-auto overflow-y-auto flex-grow rounded-xl border border-gray-100 bg-white shadow-inner">
-                <table class="min-w-full text-sm text-left text-gray-500 whitespace-nowrap">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 sticky top-0 z-10 shadow-sm">
-                        <tr>
-                            <th scope="col" class="px-3 py-2 rounded-tl-xl w-10">No.</th>
-                            <th scope="col" class="px-3 py-2">Nama</th>
-                            <th scope="col" class="px-3 py-2">Mata Pelajaran</th>
-                            <th scope="col" class="px-3 py-2">Kategori</th>
-                            <th scope="col" class="px-3 py-2">Tempat Bengkel</th>
-                            <th scope="col" class="px-3 py-2">Penyelaras</th>
-                            <th scope="col" class="px-3 py-2 text-center rounded-tr-xl">Tindakan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTableBody" class="divide-y divide-gray-100">
-                        <!-- Data dikemas kini secara dinamik -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div id="noDataMessage" class="hidden text-center py-8 text-gray-500">
-                <i class="fas fa-search fa-2x mb-3 text-gray-300"></i>
-                <p>Tiada data dijumpai berdasarkan tapisan anda.</p>
-            </div>
-        </section>
-        
-        <footer class="mt-8 text-center text-sm text-gray-400">
-            team data SBT.bstp.kpm &copy; <span id="currentYear"></span>
-        </footer>
+        <div id="modal-opr-container" class="w-full sm:w-auto"></div>
+      </div>
 
     </div>
+  </div>
 
-    <!-- SKRIP UTAMA APLIKASI -->
-    <script>
-        const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQEeqFr3PqdIrXLFfIxDsBRCOChr_BVcDbJqZrgADsq4PTtUfa4DJ_v1Sqju2kVR3trniZeBd-Pa08z/pub?output=csv';
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ==========================================
+    // PENGURUSAN SHELL & LOG MASUK
+    // ==========================================
+    const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
 
-        // Global state
-        let globalData = [];
-        let filteredData = [];
-        let chartInstances = {};
+    function logKeluar() {
+      localStorage.removeItem("statusLogin");
+      localStorage.removeItem("emailLogin");
+      sessionStorage.removeItem("statusLogin");
+      sessionStorage.removeItem("emailLogin");
+      window.location.href = LOGIN_URL;
+    }
 
-        const KEYS = {
-            TEMPAT: 'TEMPAT BENGKEL',
-            PENYELARAS: 'NAMA PENYELARAS PROJEK',
-            KATEGORI: 'KATEGORI',
-            SUBJEK: 'MATA PELAJARAN',
-            NAMA: 'NAMA',
-            URL: 'URL MUAT TURUN',
-            JAWATAN_BENGKEL: 'JAWATAN DALAM BENGKEL KERJA/MESYUARAT',
-            JANTINA: 'JANTINA',
-            GELARAN: 'GELARAN',
-            JAWATAN: 'JAWATAN',
-            GRED: 'GRED JAWATAN'
+    // Auto Logout Selepas 10 Minit (600,000 ms) jika tiada interaksi
+    let masaTamat;
+    function mulaKiraan() {
+      clearTimeout(masaTamat);
+      masaTamat = setTimeout(logKeluar, 600000);
+    }
+
+    // Pantau aktiviti pengguna untuk reset pemasa
+    ['load', 'mousemove', 'mousedown', 'touchstart', 'click', 'keypress', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, mulaKiraan);
+    });
+
+    // ==========================================
+    // DATA & DASHBOARD LOGIC
+    // ==========================================
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoXQgGwwY13gb3KXxvAtnde6k0DttXER6z-VuCjoDr63y4LReEwFxWH3qTiTGXQjlqfpUa2ypHffg2/pub?gid=258196902&single=true&output=csv";
+
+    let rawData = [];
+    let filteredData = [];
+    let headersMap = {};
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let currentSearchTerm = "";
+
+    let chartInstances = {
+      jawatan: null,
+      gelaran: null,
+      jantina: null,
+      negeri: null
+    };
+
+    const colorPalettes = {
+      jawatan: ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#3b82f6', '#14b8a6', '#f59e0b'],
+      gelaran: ['#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899', '#f97316'],
+      jantina: ['#3b82f6', '#ec4899', '#8b5cf6', '#64748b'],
+      negeri: ['#f59e0b', '#ef4444', '#10b981', '#6366f1', '#8b5cf6', '#06b6d4', '#84cc16', '#d946ef', '#14b8a6']
+    };
+
+    window.onload = function () {
+      mulaKiraan();
+      lucide.createIcons();
+      ensureHighchartsLoaded().then(() => {
+        fetchAndParseData();
+      });
+
+      document.getElementById('filter-penyelaras').addEventListener('change', applyFilters);
+      document.getElementById('filter-matapelajaran').addEventListener('change', applyFilters);
+      document.getElementById('filter-tempat').addEventListener('change', applyFilters);
+      document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+      document.getElementById('btn-refresh').addEventListener('click', () => fetchAndParseData(true));
+      document.getElementById('table-search').addEventListener('input', handleTableSearch);
+      document.getElementById('btn-prev-page').addEventListener('click', () => changePage(-1));
+      document.getElementById('btn-next-page').addEventListener('click', () => changePage(1));
+
+      document.getElementById('participant-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'participant-modal') closeParticipantModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeParticipantModal();
+      });
+    };
+
+    function ensureHighchartsLoaded() {
+      return new Promise((resolve) => {
+        if (typeof Highcharts !== 'undefined') {
+          resolve();
+          return;
+        }
+
+        const script1 = document.createElement('script');
+        script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js';
+        script1.onload = () => {
+          const script2 = document.createElement('script');
+          script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-3d.js';
+          script2.onload = () => resolve();
+          script2.onerror = () => resolve();
+          document.head.appendChild(script2);
         };
+        script1.onerror = () => {
+          console.warn('Unable to load Highcharts from primary CDNJS, resolving fallback');
+          resolve();
+        };
+        document.head.appendChild(script1);
+      });
+    }
 
-        const chartColors = [
-            'rgba(59, 130, 246, 0.8)',
-            'rgba(147, 51, 234, 0.8)',
-            'rgba(236, 72, 153, 0.8)',
-            'rgba(16, 185, 129, 0.8)',
-            'rgba(245, 158, 11, 0.8)',
-            'rgba(6, 182, 212, 0.8)',
-            'rgba(244, 63, 94, 0.8)',
-            'rgba(139, 92, 246, 0.8)',
-            'rgba(20, 184, 166, 0.8)',
-            'rgba(234, 88, 12, 0.8)'
-        ];
+    function showStatus(text, isError = false) {
+      const bar = document.getElementById('status-bar');
+      const label = document.getElementById('status-text');
+      bar.classList.remove('hidden');
+      label.innerText = text;
+      if (isError) {
+        bar.className = "rounded-2xl p-4 glass-light border border-red-300 text-red-700 text-sm flex items-center justify-between shadow-sm";
+      } else {
+        bar.className = "rounded-2xl p-4 glass-light border border-amber-300/60 text-amber-900 text-sm flex items-center justify-between shadow-sm";
+      }
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            fetchData();
-            setupEventListeners();
+    function dismissStatus() {
+      document.getElementById('status-bar').classList.add('hidden');
+    }
+
+    function fetchAndParseData(forceRefresh = false) {
+      showStatus("Menyambung ke Google Sheets & memuat turun data...");
+
+      const url = forceRefresh ? `${CSV_URL}&t=${new Date().getTime()}` : CSV_URL;
+
+      Papa.parse(url, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          if (results.data && results.data.length > 0) {
+            processParsedData(results.data, results.meta.fields);
+            dismissStatus();
+          } else {
+            console.warn("CSV return empty data, using fallback simulator dataset.");
+            useMockData();
+          }
+        },
+        error: function (err) {
+          console.warn("Error fetching live CSV (CORS or network):", err);
+          showStatus("Gagal menyambung terus ke CSV kerana had keselamatan pelayan atau CORS. Memuatkan salinan data bengkel simulasi berkualiti...", true);
+          setTimeout(() => {
+            useMockData();
+          }, 800);
+        }
+      });
+    }
+
+    function useMockData() {
+      const mockPenyelaras = ["En. Ahmad Razali", "Pn. Siti Fatimah", "Dr. Zulkifli Harun", "Pn. Noraini Hassan"];
+      const mockMP = ["Matematik Tambahan", "Sains", "Fizik", "Kimia", "Biologi", "Bahasa Melayu", "Sejarah"];
+      const mockTempat = ["Dewan Bestari PKG Bangi", "Bilik Seminar Utama JPN", "Pusat Latihan Guru Nilai", "Auditorium Za'ba Putrajaya"];
+      const mockJawatan = ["Guru Cemerlang", "Ketua Panitia", "Guru Kanan MP", "Penyelaras Bilik", "Peserta Bengkel", "Fasilitator"];
+      const mockGelaran = ["Cikgu", "Ustaz", "Dr.", "Tuan", "Puan", "Encik"];
+      const mockJantina = ["Lelaki", "Perempuan"];
+      const mockNegeri = ["Selangor", "Kuala Lumpur", "Johor", "Perak", "Kedah", "Pulau Pinang", "Pahang", "Negeri Sembilan", "Melaka", "Kelantan", "Terengganu", "Sabah", "Sarawak"];
+
+      const generated = [];
+      const totalCount = 148;
+
+      for (let i = 1; i <= totalCount; i++) {
+        const jantina = mockJantina[Math.floor(Math.random() * mockJantina.length)];
+        const gelaran = jantina === 'Perempuan' ? (Math.random() > 0.4 ? "Puan" : (Math.random() > 0.5 ? "Cikgu" : "Dr.")) : (Math.random() > 0.3 ? "Encik" : (Math.random() > 0.5 ? "Cikgu" : "Dr."));
+        
+        generated.push({
+          "Bil": i,
+          "Nama": `Peserta Bengkel ${i}`,
+          "Gelaran": gelaran,
+          "Jantina": jantina,
+          "JawatanBengkel": mockJawatan[Math.floor(Math.random() * mockJawatan.length)],
+          "MataPelajaran": mockMP[Math.floor(Math.random() * mockMP.length)],
+          "TempatBengkel": mockTempat[Math.floor(Math.random() * mockTempat.length)],
+          "Penyelaras": mockPenyelaras[Math.floor(Math.random() * mockPenyelaras.length)],
+          "Negeri": mockNegeri[Math.floor(Math.random() * mockNegeri.length)],
+          "Gambar": `https://images.unsplash.com/photo-${1534528741775 + i}?auto=format&fit=crop&w=400&q=80`,
+          "Link to merged Doc - DATA 2026": `https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/preview`
         });
+      }
 
-        // ==========================================
-        // FUNGSI LOGOUT
-        // ==========================================
-        function logKeluar() {
-            localStorage.removeItem("statusLogin");
-            localStorage.removeItem("emailLogin");
-            sessionStorage.removeItem("statusLogin");
-            sessionStorage.removeItem("emailLogin");
-            window.location.href = LOGIN_URL;
+      processParsedData(generated, Object.keys(generated[0]));
+      showStatus("Data demonstrasi bengkel berjaya dipaparkan.");
+      setTimeout(dismissStatus, 3500);
+    }
+
+    function formatImageUrl(rawUrl, defaultName, defaultGender) {
+      if (!rawUrl || typeof rawUrl !== 'string') {
+        const genderSeed = defaultGender && defaultGender.toLowerCase().includes('perempuan') ? 'female' : 'male';
+        return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(defaultName || 'user')}&gender=${genderSeed}&backgroundColor=e0e7ff,c7d2fe,ddd6fe`;
+      }
+
+      let url = rawUrl.trim();
+
+      if (url.includes('drive.google.com')) {
+        const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (match1 && match1[1]) return `https://lh3.googleusercontent.com/d/${match1[1]}=w400`;
+
+        const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (match2 && match2[1]) return `https://lh3.googleusercontent.com/d/${match2[1]}=w400`;
+
+        const match3 = url.match(/open\?id=([a-zA-Z0-9_-]+)/);
+        if (match3 && match3[1]) return `https://lh3.googleusercontent.com/d/${match3[1]}=w400`;
+      }
+
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+      const genderSeed = defaultGender && defaultGender.toLowerCase().includes('perempuan') ? 'female' : 'male';
+      return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(defaultName || 'user')}&gender=${genderSeed}&backgroundColor=e0e7ff,c7d2fe,ddd6fe`;
+    }
+
+    function formatDocUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let url = rawUrl.trim();
+      if (!url) return '';
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      return url;
+    }
+
+    function processParsedData(data, fields) {
+      if (!data || data.length === 0) return;
+
+      function findKey(names) {
+        if (!fields) return names[0];
+        for (let target of names) {
+          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
+          if (exact) return exact;
+        }
+        for (let target of names) {
+          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+          if (partial) return partial;
+        }
+        return null;
+      }
+
+      let columnNKey = (fields && fields.length > 13) ? fields[13] : null;
+
+      function colLetterToIndex(col) {
+        let index = 0;
+        for (let i = 0; i < col.length; i++) {
+          index = index * 26 + (col.charCodeAt(i) - 64);
+        }
+        return index - 1;
+      }
+
+      const colBUIndex = colLetterToIndex('BU');
+      let columnBUKey = (fields && fields.length > colBUIndex) ? fields[colBUIndex] : null;
+      let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
+
+      headersMap = {
+        penyelaras: findKey(['Penyelaras', 'Nama Penyelaras', 'Penyelaras Bengkel']),
+        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek', 'MP']),
+        tempat: findKey(['TempatBengkel', 'Tempat Bengkel', 'Tempat', 'Lokasi']),
+        jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel', 'Jawatan', 'Peranan']),
+        gelaran: findKey(['Gelaran', 'Panggilan', 'Title']),
+        jantina: findKey(['Jantina', 'Gender', 'Sex']),
+        negeri: findKey(['Negeri', 'State', 'Zon']),
+        nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
+        noIc: columnBKey || findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC', 'NRIC']),
+        oprLink: columnBUKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026']),
+        gambarColN: columnNKey || findKey(['Gambar', 'Image', 'Photo', 'Profile', 'Picture', 'Pautan Gambar', 'Avatar', 'URL Gambar'])
+      };
+
+      rawData = data.map((row, idx) => {
+        const rowNama = (row[headersMap.nama] || row['Nama'] || row['Nama Penuh'] || `Peserta #${idx + 1}`).trim();
+        const rowJantina = cleanValue(row[headersMap.jantina] || row['Jantina'] || 'Lain-lain');
+        
+        let rawNoIc = '';
+        if (headersMap.noIc && row[headersMap.noIc]) {
+          rawNoIc = row[headersMap.noIc];
+        } else {
+          const rowKeys = Object.keys(row);
+          if (rowKeys.length > 1) rawNoIc = row[rowKeys[1]];
         }
 
-        // Auto Logout Selepas 10 Minit (600,000 ms)
-        let masaTamat;
-        function mulaKiraan() {
-            clearTimeout(masaTamat);
-            masaTamat = setTimeout(logKeluar, 600000);
+        let rawImageVal = '';
+        if (headersMap.gambarColN && row[headersMap.gambarColN]) {
+          rawImageVal = row[headersMap.gambarColN];
+        } else {
+          const rowKeys = Object.keys(row);
+          if (rowKeys.length > 13) rawImageVal = row[rowKeys[13]];
         }
 
-        window.onload = mulaKiraan;
-        document.onmousemove = mulaKiraan;
-        document.onmousedown = mulaKiraan;
-        document.ontouchstart = mulaKiraan;
-        document.onclick = mulaKiraan;
-        document.onkeypress = mulaKiraan;
-        document.onscroll = mulaKiraan;
-
-        // ==========================================
-        // PEMPROSESAN DATA CSV & DASHBOARD
-        // ==========================================
-        function fetchData(isLiveRefresh = false) {
-            const targetUrl = isLiveRefresh ? `${CSV_URL}&t=${new Date().getTime()}` : CSV_URL;
-            
-            if (isLiveRefresh) {
-                document.getElementById('syncIcon').classList.add('animate-spin');
-            }
-
-            Papa.parse(targetUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    let cleanedData = results.data.map(row => {
-                        let newRow = {};
-                        for (let key in row) {
-                            newRow[key.trim()] = row[key].trim();
-                        }
-                        return newRow;
-                    });
-
-                    globalData = cleanedData;
-                    
-                    if (isLiveRefresh) {
-                        applyFilters();
-                    } else {
-                        filteredData = [...globalData];
-                        initApp();
-                    }
-                    
-                    updateTimestamp();
-                    
-                    if (isLiveRefresh) {
-                        setTimeout(() => document.getElementById('syncIcon').classList.remove('animate-spin'), 500);
-                    }
-                },
-                error: function(error) {
-                    console.error("Error parsing CSV:", error);
-                    alert("Ralat memuat turun data. Sila pastikan pautan Google Sheet boleh diakses umum.");
-                    document.getElementById('loader').innerHTML = "<p class='text-red-500 font-bold'>Gagal memuat turun data.</p>";
-                    if (isLiveRefresh) document.getElementById('syncIcon').classList.remove('animate-spin');
-                }
-            });
+        let rawDocVal = '';
+        const rowKeys = Object.keys(row);
+        if (columnBUKey && row[columnBUKey]) {
+          rawDocVal = row[columnBUKey];
+        } else if (headersMap.oprLink && row[headersMap.oprLink]) {
+          rawDocVal = row[headersMap.oprLink];
+        } else if (rowKeys.length > colBUIndex && row[rowKeys[colBUIndex]]) {
+          rawDocVal = row[rowKeys[colBUIndex]];
+        } else {
+          const matchedOprKey = rowKeys.find(k => 
+            k.trim().toLowerCase().includes('merged doc') || 
+            k.trim().toLowerCase().includes('data 2026') || 
+            k.trim().toLowerCase() === 'bu'
+          );
+          if (matchedOprKey) rawDocVal = row[matchedOprKey];
         }
 
-        function updateTimestamp() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('lastUpdateTime').textContent = `Terkini: ${timeString}`;
+        const avatarUrl = formatImageUrl(rawImageVal, rowNama, rowJantina);
+        const cleanOprDoc = formatDocUrl(rawDocVal);
+
+        return {
+          id: idx + 1,
+          nama: rowNama,
+          noIc: cleanValue(rawNoIc),
+          gelaran: cleanValue(row[headersMap.gelaran] || row['Gelaran'] || 'Tiada Gelaran'),
+          jantina: rowJantina,
+          jawatan: cleanValue(row[headersMap.jawatan] || row['JawatanBengkel'] || 'Peserta'),
+          matapelajaran: cleanValue(row[headersMap.matapelajaran] || row['MataPelajaran'] || 'Umum'),
+          tempat: cleanValue(row[headersMap.tempat] || row['TempatBengkel'] || 'Dalam Talian / Pusat'),
+          penyelaras: cleanValue(row[headersMap.penyelaras] || row['Penyelaras'] || 'Penyelaras Utama'),
+          negeri: cleanValue(row[headersMap.negeri] || row['Negeri'] || 'Lain-lain'),
+          oprDoc: cleanOprDoc,
+          gambar: avatarUrl,
+          rawImageVal: rawImageVal,
+          rawRow: row
+        };
+      }).filter(r => r.nama && r.nama !== '');
+
+      filteredData = [...rawData];
+
+      populateDropdown('filter-penyelaras', 'penyelaras', 'Semua Penyelaras');
+      populateDropdown('filter-matapelajaran', 'matapelajaran', 'Semua Mata Pelajaran');
+      populateDropdown('filter-tempat', 'tempat', 'Semua Tempat Bengkel');
+
+      updateHeroStats();
+      renderAllCharts();
+      renderTable();
+    }
+
+    function cleanValue(val) {
+      if (!val) return 'Tidak Dinyatakan';
+      let str = String(val).trim();
+      return str === '' ? 'Tidak Dinyatakan' : str;
+    }
+
+    function populateDropdown(elemId, fieldKey, defaultLabel) {
+      const select = document.getElementById(elemId);
+      const currentSelected = select.value;
+      const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => a.localeCompare(b, 'ms'));
+
+      select.innerHTML = `<option value="">${defaultLabel}</option>`;
+      uniqueValues.forEach(val => {
+        if (!val || val === 'Tidak Dinyatakan') return;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        if (val === currentSelected) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function applyFilters() {
+      const selPenyelaras = document.getElementById('filter-penyelaras').value;
+      const selMP = document.getElementById('filter-matapelajaran').value;
+      const selTempat = document.getElementById('filter-tempat').value;
+
+      filteredData = rawData.filter(row => {
+        const matchP = !selPenyelaras || row.penyelaras === selPenyelaras;
+        const matchMP = !selMP || row.matapelajaran === selMP;
+        const matchT = !selTempat || row.tempat === selTempat;
+        return matchP && matchMP && matchT;
+      });
+
+      currentPage = 1;
+      updateHeroStats();
+      renderAllCharts();
+      renderTable();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-penyelaras').value = '';
+      document.getElementById('filter-matapelajaran').value = '';
+      document.getElementById('filter-tempat').value = '';
+      applyFilters();
+    }
+
+    function updateHeroStats() {
+      const totalCount = filteredData.length;
+      const rawTotal = rawData.length;
+
+      animateValue("total-count-display", totalCount);
+
+      const badge = document.getElementById('filtered-badge');
+      const isFiltered = totalCount !== rawTotal;
+      if (isFiltered) {
+        badge.textContent = `Ditapis: ${totalCount} daripada ${rawTotal}`;
+        badge.className = "text-xs sm:text-sm px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200";
+      } else {
+        badge.textContent = `Semua ${rawTotal} Rekod`;
+        badge.className = "text-xs sm:text-sm px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200";
+      }
+
+      const uniqP = new Set(filteredData.map(d => d.penyelaras)).size;
+      const uniqMP = new Set(filteredData.map(d => d.matapelajaran)).size;
+      const uniqT = new Set(filteredData.map(d => d.tempat)).size;
+
+      document.getElementById('stat-penyelaras-count').textContent = uniqP;
+      document.getElementById('stat-matapelajaran-count').textContent = uniqMP;
+      document.getElementById('stat-tempat-count').textContent = uniqT;
+    }
+
+    function animateValue(id, end) {
+      const obj = document.getElementById(id);
+      const start = parseInt(obj.innerText.replace(/,/g, '')) || 0;
+      if (start === end) return;
+      const duration = 400;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          obj.innerHTML = end;
         }
+      };
+      window.requestAnimationFrame(step);
+    }
 
-        function initApp() {
-            populateFilterOptions();
-            updateDashboard();
-            
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
+    function getAggregatedData(fieldKey) {
+      const map = {};
+      filteredData.forEach(item => {
+        const val = item[fieldKey] || 'Lain-lain';
+        map[val] = (map[val] || 0) + 1;
+      });
+
+      return Object.keys(map)
+        .map(key => ({ name: key, y: map[key] }))
+        .sort((a, b) => b.y - a.y);
+    }
+
+    function renderAllCharts() {
+      render3DPieChart('chart-jawatan', 'Jawatan Bengkel', getAggregatedData('jawatan'), colorPalettes.jawatan, 'jawatan');
+      render3DPieChart('chart-gelaran', 'Gelaran Peserta', getAggregatedData('gelaran'), colorPalettes.gelaran, 'gelaran');
+      render3DPieChart('chart-jantina', 'Pecahan Jantina', getAggregatedData('jantina'), colorPalettes.jantina, 'jantina');
+      render3DPieChart('chart-negeri', 'Taburan Negeri', getAggregatedData('negeri'), colorPalettes.negeri, 'negeri');
+    }
+
+    function render3DPieChart(containerId, titleText, seriesData, colors, instanceKey) {
+      if (typeof Highcharts === 'undefined') {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-xs text-slate-400">
+              Sedang memuatkan modul carta 3D...
+            </div>
+          `;
         }
+        return;
+      }
 
-        function getUniqueValues(data, key) {
-            return [...new Set(data.map(item => item[key]).filter(val => val !== undefined && val !== ''))].sort();
+      const textColor = '#1e293b';
+      const subTextColor = '#64748b';
+      const tooltipBg = 'rgba(255, 255, 255, 0.96)';
+      const tooltipBorder = '#e2e8f0';
+
+      if (seriesData.length === 0) {
+        seriesData = [{ name: 'Tiada Data', y: 1 }];
+      }
+
+      const has3D = Highcharts.Chart.prototype.is3d !== undefined || (Highcharts.getOptions().chart && Highcharts.getOptions().chart.options3d);
+
+      chartInstances[instanceKey] = Highcharts.chart(containerId, {
+        chart: {
+          type: 'pie',
+          backgroundColor: 'transparent',
+          options3d: {
+            enabled: !!has3D,
+            alpha: 45,
+            beta: 0
+          },
+          style: {
+            fontFamily: '"Plus Jakarta Sans", sans-serif'
+          }
+        },
+        colors: colors,
+        title: {
+          text: null
+        },
+        tooltip: {
+          useHTML: true,
+          backgroundColor: tooltipBg,
+          borderColor: tooltipBorder,
+          borderRadius: 12,
+          shadow: true,
+          style: {
+            color: textColor
+          },
+          formatter: function () {
+            return `
+              <div style="padding: 4px 6px;">
+                <span style="font-size:12px; font-weight:600; color:${this.point.color}">●</span>
+                <b style="font-size:13px; color:${textColor};"> ${this.point.name}</b><br/>
+                <span style="font-size:12px; color:${subTextColor}">Bilangan: <b style="color:${textColor};">${this.y}</b> (${this.percentage.toFixed(1)}%)</span>
+              </div>
+            `;
+          }
+        },
+        plotOptions: {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            innerSize: '32%',
+            dataLabels: {
+              enabled: true,
+              format: '<span style="color:' + textColor + '; font-size:11px; font-weight:600;">{point.name}: <b style="color:#0f172a;">{point.percentage:.0f}%</b></span>',
+              distance: 18,
+              connectorColor: 'rgba(0,0,0,0.18)',
+              connectorWidth: 1.2
+            },
+            showInLegend: false
+          }
+        },
+        series: [{
+          type: 'pie',
+          name: titleText,
+          data: seriesData
+        }],
+        credits: {
+          enabled: false
+        },
+        exporting: {
+          enabled: false
         }
+      });
+    }
 
-        function populateSelect(selectId, values) {
-            const select = document.getElementById(selectId);
-            const firstOption = select.options[0];
-            select.innerHTML = '';
-            select.appendChild(firstOption);
-            
-            values.forEach(val => {
-                const option = document.createElement('option');
-                option.value = val;
-                option.textContent = val;
-                select.appendChild(option);
-            });
-        }
+    function handleTableSearch(e) {
+      currentSearchTerm = e.target.value.toLowerCase().trim();
+      currentPage = 1;
+      renderTable();
+    }
 
-        function populateFilterOptions() {
-            populateSelect('filterMataPelajaran', getUniqueValues(globalData, KEYS.SUBJEK));
-            populateSelect('filterTempatBengkel', getUniqueValues(globalData, KEYS.TEMPAT));
-            populateSelect('filterKategori', getUniqueValues(globalData, KEYS.KATEGORI));
-            populateSelect('filterPenyelaras', getUniqueValues(globalData, KEYS.PENYELARAS));
-            
-            let jawatanKey = KEYS.JAWATAN_BENGKEL;
-            if (globalData.length > 0 && !(jawatanKey in globalData[0])) {
-                const keys = Object.keys(globalData[0]);
-                const fallback = keys.find(k => k.toUpperCase().includes('JAWATAN') && (k.toUpperCase().includes('BENGKEL') || k.toUpperCase().includes('MESYUARAT')));
-                if(fallback) jawatanKey = fallback;
-            }
-            populateSelect('filterJawatanBengkel', getUniqueValues(globalData, jawatanKey));
-            document.getElementById('filterJawatanBengkel').dataset.key = jawatanKey;
-        }
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      
+      const searchFiltered = filteredData.filter(item => {
+        if (!currentSearchTerm) return true;
+        return (
+          item.nama.toLowerCase().includes(currentSearchTerm) ||
+          item.gelaran.toLowerCase().includes(currentSearchTerm) ||
+          item.jantina.toLowerCase().includes(currentSearchTerm) ||
+          item.jawatan.toLowerCase().includes(currentSearchTerm) ||
+          item.matapelajaran.toLowerCase().includes(currentSearchTerm) ||
+          item.tempat.toLowerCase().includes(currentSearchTerm) ||
+          item.penyelaras.toLowerCase().includes(currentSearchTerm) ||
+          item.negeri.toLowerCase().includes(currentSearchTerm)
+        );
+      });
 
-        function setupEventListeners() {
-            const filterIds = ['filterMataPelajaran', 'filterTempatBengkel', 'filterKategori', 'filterPenyelaras', 'filterJawatanBengkel'];
-            
-            filterIds.forEach(id => {
-                document.getElementById(id).addEventListener('change', applyFilters);
-            });
+      const totalRows = searchFiltered.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+      if (currentPage > totalPages) currentPage = totalPages;
 
-            document.getElementById('resetFilters').addEventListener('click', () => {
-                filterIds.forEach(id => {
-                    document.getElementById(id).value = '';
-                });
-                applyFilters();
-            });
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const pageData = searchFiltered.slice(startIndex, startIndex + rowsPerPage);
 
-            document.getElementById('btnLiveUpdate').addEventListener('click', () => {
-                fetchData(true);
-            });
-        }
+      if (pageData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="text-center py-8 text-slate-400">
+              Tiada rekod sepadan dengan kriteria carian/penapis.
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = pageData.map((row, index) => {
+          const actualIndex = startIndex + index + 1;
+          return `
+            <tr class="hover:bg-slate-50 transition group">
+              <td class="py-3 px-4 font-mono text-xs text-slate-400">${actualIndex}</td>
+              <td class="py-3 px-4 font-semibold text-slate-900">
+                <button onclick="openParticipantModal(${row.id})" class="text-left font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1.5 transition">
+                  <span>${escapeHtml(row.nama)}</span>
+                  <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition text-indigo-400"></i>
+                </button>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  ${escapeHtml(row.gelaran)}
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium ${row.jantina === 'Lelaki' ? 'text-blue-600' : 'text-pink-600'}">
+                  <span class="w-1.5 h-1.5 rounded-full ${row.jantina === 'Lelaki' ? 'bg-blue-500' : 'bg-pink-500'}"></span>
+                  ${escapeHtml(row.jantina)}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-xs font-medium text-slate-700">${escapeHtml(row.jawatan)}</td>
+              <td class="py-3 px-4 text-xs font-medium text-slate-700">${escapeHtml(row.matapelajaran)}</td>
+              <td class="py-3 px-4 text-xs text-slate-600">${escapeHtml(row.tempat)}</td>
+              <td class="py-3 px-4 text-xs text-slate-600">${escapeHtml(row.penyelaras)}</td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                  ${escapeHtml(row.negeri)}
+                </span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
 
-        function applyFilters() {
-            const fSubjek = document.getElementById('filterMataPelajaran').value;
-            const fTempat = document.getElementById('filterTempatBengkel').value;
-            const fKategori = document.getElementById('filterKategori').value;
-            const fPenyelaras = document.getElementById('filterPenyelaras').value;
-            
-            const jSelect = document.getElementById('filterJawatanBengkel');
-            const fJawatan = jSelect.value;
-            const jawatanKey = jSelect.dataset.key || KEYS.JAWATAN_BENGKEL;
+      lucide.createIcons();
 
-            filteredData = globalData.filter(item => {
-                return (fSubjek === '' || item[KEYS.SUBJEK] === fSubjek) &&
-                       (fTempat === '' || item[KEYS.TEMPAT] === fTempat) &&
-                       (fKategori === '' || item[KEYS.KATEGORI] === fKategori) &&
-                       (fPenyelaras === '' || item[KEYS.PENYELARAS] === fPenyelaras) &&
-                       (fJawatan === '' || item[jawatanKey] === fJawatan);
-            });
+      document.getElementById('table-entries-info').textContent = 
+        `Menunjukkan ${totalRows === 0 ? 0 : startIndex + 1} hingga ${Math.min(startIndex + rowsPerPage, totalRows)} daripada ${totalRows} rekod`;
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('btn-prev-page').disabled = currentPage <= 1;
+      document.getElementById('btn-next-page').disabled = currentPage >= totalPages;
+    }
 
-            updateDashboard();
-        }
+    function changePage(direction) {
+      currentPage += direction;
+      renderTable();
+    }
 
-        function updateDashboard() {
-            document.getElementById('recordCount').textContent = `Menunjukkan ${filteredData.length} rekod`;
+    function openParticipantModal(id) {
+      const participant = rawData.find(p => p.id === id);
+      if (!participant) return;
 
-            renderPieChart('chartJantina', filteredData, KEYS.JANTINA);
-            renderPieChart('chartGelaran', filteredData, KEYS.GELARAN);
-            renderPieChart('chartJawatan', filteredData, KEYS.JAWATAN);
-            renderPieChart('chartGred', filteredData, KEYS.GRED);
+      const avatarEl = document.getElementById('modal-avatar');
+      avatarEl.src = participant.gambar;
+      avatarEl.onerror = function() {
+        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.nama)}&background=6366f1&color=fff&size=200&bold=true`;
+      };
 
-            renderTable(filteredData);
-        }
+      document.getElementById('modal-name').textContent = participant.nama;
+      document.getElementById('modal-title-pill').textContent = participant.gelaran;
+      document.getElementById('modal-role-pill').textContent = participant.jawatan;
+      document.getElementById('modal-gender-badge').textContent = participant.jantina;
+      document.getElementById('modal-ic').innerHTML = `
+        <i data-lucide="id-card" class="w-3.5 h-3.5 text-indigo-500"></i>
+        <span>No. KP: <b>${escapeHtml(participant.noIc)}</b></span>
+      `;
+      document.getElementById('modal-state').innerHTML = `
+        <i data-lucide="map-pin" class="w-4 h-4 text-indigo-500"></i>
+        <span>${escapeHtml(participant.negeri)}</span>
+      `;
 
-        function aggregateData(data, key) {
-            const counts = {};
-            data.forEach(item => {
-                let val = item[key] || 'Tiada Maklumat';
-                val = val.trim();
-                if(val === '') val = 'Tiada Maklumat';
-                counts[val] = (counts[val] || 0) + 1;
-            });
+      document.getElementById('modal-detail-mp').textContent = participant.matapelajaran;
+      document.getElementById('modal-detail-jawatan').textContent = participant.jawatan;
+      document.getElementById('modal-detail-penyelaras').textContent = participant.penyelaras;
+      document.getElementById('modal-detail-tempat').textContent = participant.tempat;
 
-            return { labels: Object.keys(counts), values: Object.values(counts) };
-        }
+      const oprContainer = document.getElementById('modal-opr-container');
+      const docLink = participant.oprDoc;
 
-        function renderPieChart(canvasId, data, key) {
-            let actualKey = key;
-            if(globalData.length > 0 && !(key in globalData[0])) {
-                const keys = Object.keys(globalData[0]);
-                const fallback = keys.find(k => k.toUpperCase().includes(key));
-                if(fallback) actualKey = fallback;
-            }
+      if (docLink && docLink.trim() !== '') {
+        oprContainer.innerHTML = `
+          <a href="${escapeHtml(docLink)}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold shadow-lg shadow-indigo-500/25 transition active:scale-95 text-xs sm:text-sm">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Buka / Muat Turun OPR</span>
+          </a>
+        `;
+      } else {
+        oprContainer.innerHTML = `
+          <button disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-400 border border-slate-200 text-xs sm:text-sm cursor-not-allowed" title="Tiada pautan fail OPR dalam data rekod ini">
+            <i data-lucide="file-x" class="w-4 h-4"></i>
+            <span>Pautan OPR Tiada</span>
+          </button>
+        `;
+      }
 
-            const aggregated = aggregateData(data, actualKey);
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            if (chartInstances[canvasId]) {
-                chartInstances[canvasId].destroy();
-            }
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        container.classList.remove('scale-95');
+        container.classList.add('scale-100');
+      }, 10);
 
-            if (aggregated.values.length === 0) {
-                chartInstances[canvasId] = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Tiada Data'],
-                        datasets: [{ data: [1], backgroundColor: ['#e5e7eb'] }]
-                    },
-                    options: { plugins: { tooltip: { enabled: false }, legend: { display: false } } }
-                });
-                return;
-            }
+      lucide.createIcons();
+    }
 
-            chartInstances[canvasId] = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: aggregated.labels,
-                    datasets: [{
-                        data: aggregated.values,
-                        backgroundColor: chartColors.slice(0, aggregated.labels.length),
-                        borderWidth: 2,
-                        borderColor: '#ffffff',
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '50%',
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                usePointStyle: true,
-                                boxWidth: 8,
-                                font: { family: "'Inter', sans-serif", size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(255,255,255,0.9)',
-                            titleColor: '#1f2937',
-                            bodyColor: '#4b5563',
-                            borderColor: '#e5e7eb',
-                            borderWidth: 1,
-                            padding: 10,
-                            boxPadding: 4,
-                            usePointStyle: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) {
-                                        label += context.parsed;
-                                        const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
-                                        const percentage = ((context.parsed / total) * 100).toFixed(1) + '%';
-                                        label += ` (${percentage})`;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+    function closeParticipantModal() {
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.add('opacity-0');
+      container.classList.remove('scale-100');
+      container.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('dataTableBody');
-            const noDataMsg = document.getElementById('noDataMessage');
-            
-            tbody.innerHTML = '';
-
-            if (data.length === 0) {
-                noDataMsg.classList.remove('hidden');
-                return;
-            } else {
-                noDataMsg.classList.add('hidden');
-            }
-
-            let urlKey = KEYS.URL;
-            if(data.length > 0 && !(urlKey in data[0])) {
-                const keys = Object.keys(data[0]);
-                const fallback = keys.find(k => k.toUpperCase().includes('URL') || k.toUpperCase().includes('MUAT TURUN'));
-                if(fallback) urlKey = fallback;
-            }
-
-            data.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-blue-50 transition-colors duration-150 group';
-                
-                const url = item[urlKey] || '#';
-                let downloadBtn = '-';
-                if (url && url !== '#' && url.trim() !== '') {
-                    downloadBtn = `
-                        <a href="${url}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold text-white transition-all duration-200 bg-gradient-to-r from-blue-500 to-indigo-600 border border-transparent rounded-full shadow-sm hover:from-blue-600 hover:to-indigo-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <i class="fas fa-download mr-1.5"></i> Muat Turun
-                        </a>
-                    `;
-                }
-
-                const nama = item[KEYS.NAMA] || '-';
-                const subjek = item[KEYS.SUBJEK] || '-';
-                const kategori = item[KEYS.KATEGORI] || '-';
-                const tempat = item[KEYS.TEMPAT] || '-';
-                const penyelaras = item[KEYS.PENYELARAS] || '-';
-
-                tr.innerHTML = `
-                    <td class="px-3 py-2 font-medium text-gray-900 w-10">${index + 1}</td>
-                    <td class="px-3 py-2 font-semibold text-gray-800 whitespace-normal min-w-[150px]">${nama}</td>
-                    <td class="px-3 py-2">
-                        <span class="inline-block bg-purple-100 text-purple-800 text-[10px] px-2 py-0.5 rounded border border-purple-200 whitespace-normal">
-                            ${subjek}
-                        </span>
-                    </td>
-                    <td class="px-3 py-2 text-xs whitespace-normal">${kategori}</td>
-                    <td class="px-3 py-2 text-xs whitespace-normal max-w-[150px]">${tempat}</td>
-                    <td class="px-3 py-2 text-xs whitespace-normal">${penyelaras}</td>
-                    <td class="px-3 py-2 text-center">
-                        ${downloadBtn}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    </script>
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
 </body>
 </html>
