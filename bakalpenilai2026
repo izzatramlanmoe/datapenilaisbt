@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ms" class="dark">
+<head>
+    <!-- ========================================== -->
+    <!-- KOD SHELL LOCK - MESTI LETAK PALING ATAS -->
+    <!-- ========================================== -->
+    <script>
+        (function() {
+            const isPreview = window.self !== window.top || window.location.protocol === 'blob:' || window.location.protocol === 'about:';
+            if (!isPreview) {
+                try {
+                    if (localStorage.getItem("statusLogin") !== "berjaya") {
+                        window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
+                    }
+                } catch (e) {
+                    window.location.replace("https://izzatramlanmoe.github.io/datapenilaisbt/index.html");
+                }
+            }
+        })();
+    </script>
+    <!-- ========================================== -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pengurusan Bakal Penilai</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- PapaParse untuk CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Highcharts & Highcharts 3D -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        .bg-mesh-dark {
+            background-color: #070b14;
+            background-image:
+                radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.16) 0px, transparent 50%),
+                radial-gradient(at 85% 20%, rgba(56, 189, 248, 0.14) 0px, transparent 50%),
+                radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.14) 0px, transparent 50%);
+        }
+
+        .bg-mesh-light {
+            background-color: #f1f5f9;
+            background-image:
+                radial-gradient(at 15% 15%, rgba(16, 185, 129, 0.14) 0px, transparent 50%),
+                radial-gradient(at 85% 20%, rgba(14, 165, 233, 0.14) 0px, transparent 50%),
+                radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.10) 0px, transparent 50%);
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .dark .glass-panel {
+            background: rgba(17, 25, 40, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.38);
+        }
+
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+        }
+
+        .dark .glass-card-hover:hover {
+            border-color: rgba(16, 185, 129, 0.35);
+            box-shadow: 0 14px 40px -10px rgba(16, 185, 129, 0.22);
+        }
+
+        .light .glass-card-hover:hover {
+            border-color: rgba(16, 185, 129, 0.45);
+            box-shadow: 0 14px 40px -10px rgba(16, 185, 129, 0.18);
+        }
+
+        @keyframes slideUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(22px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .animate-card {
+            opacity: 0;
+            animation: slideUpFade 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.16s; }
+        .delay-3 { animation-delay: 0.24s; }
+        .delay-4 { animation-delay: 0.32s; }
+        .delay-5 { animation-delay: 0.40s; }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.6);
+        }
+
+        /* Tooltip Terapung Interaktif untuk Carta SVG */
+        .chart-tooltip {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transform: translate(-50%, -120%) scale(0.95);
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .chart-tooltip.show {
+            opacity: 1;
+            transform: translate(-50%, -125%) scale(1);
+        }
+        .pie-slice {
+            cursor: pointer;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease, opacity 0.2s ease;
+            transform-origin: 130px 105px;
+        }
+        .pie-slice:hover {
+            filter: drop-shadow(0px 8px 16px rgba(0,0,0,0.35)) brightness(1.12);
+            transform: scale(1.045) translateY(-3px);
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body class="bg-mesh-dark text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-white">
+
+    <!-- Bar Navigasi Atas -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
+                    <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight">Sistem Data Bakal Penilai</h1>
+                    <p class="text-xs text-slate-400 hidden sm:block">Analitik & Direktori Panel Penilai Buku Teks</p>
+                </div>
+            </div>
+
+            <!-- Butang Tindakan Kanan -->
+            <div class="flex items-center gap-2.5">
+                <!-- Status Segerak -->
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium glass-panel border border-white/10">
+                    <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="syncStatusText" class="text-slate-300">Menyegerakkan data...</span>
+                </div>
+
+                <!-- Butang Mod Gelap / Terang -->
+                <button onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold glass-panel glass-card-hover border border-white/15 transition-all">
+                    <i id="themeIcon" data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+                    <span id="themeLabel" class="hidden sm:inline">Mod Terang</span>
+                </button>
+
+                <!-- Butang Log Keluar -->
+                <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 glass-card-hover transition-all">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Log Keluar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Kandungan Utama Dashboard -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <!-- 1. Kad Ringkasan Statistik Atas -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div class="glass-panel rounded-3xl p-5 border border-white/10 glass-card-hover animate-card delay-1 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Jumlah Bakal Penilai</span>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-extrabold tracking-tight" id="statTotalPenilai">0</div>
+                <div class="mt-2 text-[11px] text-emerald-400 font-medium flex items-center gap-1">
+                    <i data-lucide="trending-up" class="w-3 h-3"></i> Panel Aktif Dalam Rekod
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-5 border border-white/10 glass-card-hover animate-card delay-2 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/10 rounded-full blur-xl pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Tempat Bengkel</span>
+                    <div class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-extrabold tracking-tight" id="statTotalTempat">0</div>
+                <div class="mt-2 text-[11px] text-cyan-400 font-medium flex items-center gap-1">
+                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Lokasi Bengkel
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-5 border border-white/10 glass-card-hover animate-card delay-3 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Mata Pelajaran</span>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-extrabold tracking-tight" id="statTotalSubjek">0</div>
+                <div class="mt-2 text-[11px] text-indigo-400 font-medium flex items-center gap-1">
+                    <i data-lucide="layers" class="w-3 h-3"></i> Subjek
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-5 border border-white/10 glass-card-hover animate-card delay-4 relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-amber-500/10 rounded-full blur-xl pointer-events-none"></div>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Penyelaras</span>
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-extrabold tracking-tight" id="statTotalPenyelaras Projek">0</div>
+                <div class="mt-2 text-[11px] text-amber-400 font-medium flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-3 h-3"></i> Penyelaras Projek Mata Pelajaran
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Panel Penapis (Filter) -->
+        <div class="glass-panel rounded-3xl p-5 sm:p-6 border border-white/10 space-y-4 animate-card delay-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4 text-emerald-400"></i>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300">Penapis Data Bakal Penilai</h2>
+                </div>
+                <button onclick="resetFilters()" class="text-xs font-medium text-slate-400 hover:text-emerald-400 transition-colors flex items-center gap-1 self-start sm:self-auto">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Set Semula Penapis
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Nama Penyelaras</label>
+                    <select id="filterPenyelaras" onchange="applyFilters()" class="w-full text-xs font-medium px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-700/60 focus:outline-none focus:border-emerald-500 transition-all">
+                        <option value="">Semua Penyelaras</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Mata Pelajaran</label>
+                    <select id="filterMataPelajaran" onchange="applyFilters()" class="w-full text-xs font-medium px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-700/60 focus:outline-none focus:border-emerald-500 transition-all">
+                        <option value="">Semua Mata Pelajaran</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Tempat Bengkel</label>
+                    <select id="filterTempatBengkel" onchange="applyFilters()" class="w-full text-xs font-medium px-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-700/60 focus:outline-none focus:border-emerald-500 transition-all">
+                        <option value="">Semua Tempat Bengkel</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Carian Nama Penilai</label>
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        <input id="searchInput" type="text" oninput="applyFilters()" placeholder="Cari nama penilai sahaja..." class="w-full text-xs font-medium pl-9 pr-3.5 py-2.5 rounded-2xl bg-slate-900/60 border border-slate-700/60 focus:outline-none focus:border-emerald-500 transition-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Carta Pai 3D Interaktif -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-card delay-3">
+            <div class="glass-panel rounded-3xl p-4 sm:p-5 border border-white/10 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Tempat Bengkel</h3>
+                    <span class="p-1 rounded-lg bg-emerald-500/10 text-emerald-400"><i data-lucide="map" class="w-3.5 h-3.5"></i></span>
+                </div>
+                <div id="chartTempatBengkel" class="h-64 sm:h-72 w-full flex items-center justify-center"></div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-4 sm:p-5 border border-white/10 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Gelaran</h3>
+                    <span class="p-1 rounded-lg bg-cyan-500/10 text-cyan-400"><i data-lucide="award" class="w-3.5 h-3.5"></i></span>
+                </div>
+                <div id="chartGelaran" class="h-64 sm:h-72 w-full flex items-center justify-center"></div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-4 sm:p-5 border border-white/10 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Kelayakan</h3>
+                    <span class="p-1 rounded-lg bg-indigo-500/10 text-indigo-400"><i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i></span>
+                </div>
+                <div id="chartKelayakan" class="h-64 sm:h-72 w-full flex items-center justify-center"></div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-4 sm:p-5 border border-white/10 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Jantina</h3>
+                    <span class="p-1 rounded-lg bg-amber-500/10 text-amber-400"><i data-lucide="heart" class="w-3.5 h-3.5"></i></span>
+                </div>
+                <div id="chartJantina" class="h-64 sm:h-72 w-full flex items-center justify-center"></div>
+            </div>
+        </div>
+
+        <!-- 4. Senarai Direktori Bakal Penilai / Panel -->
+        <div class="glass-panel rounded-3xl p-5 sm:p-6 border border-white/10 space-y-4 animate-card delay-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+                <div>
+                    <h2 class="text-base font-bold">Senarai Bakal Penilai / Panel</h2>
+                    <p class="text-xs text-slate-400">Klik pada mana-mana baris panel untuk melihat profil penuh dan memuat turun dokumen OPR.</p>
+                </div>
+                <div id="paginationInfo" class="text-xs text-slate-400 font-medium">Memaparkan rekod...</div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-white/10 text-xs text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-4">No.</th>
+                            <th class="py-3 px-4">Nama Panel</th>
+                            <th class="py-3 px-4 hidden md:table-cell">Mata Pelajaran</th>
+                            <th class="py-3 px-4 hidden lg:table-cell">Tempat Bengkel</th>
+                            <th class="py-3 px-4 hidden sm:table-cell">Penyelaras</th>
+                            <th class="py-3 px-4 text-right">Tindakan OPR</th>
+                        </tr>
+                    </thead>
+                    <tbody id="panelTableBody" class="divide-y divide-white/5">
+                        <!-- Baris diisi secara dinamik -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Kawalan Paginasi -->
+            <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                <button id="prevPageBtn" onclick="changePage(-1)" class="px-3.5 py-1.5 rounded-xl text-xs font-medium glass-panel border border-white/10 hover:border-emerald-500 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center gap-1">
+                    <i data-lucide="chevron-left" class="w-4 h-4"></i> Sebelum
+                </button>
+                <span id="pageIndicator" class="text-xs font-semibold text-slate-300">Halaman 1 / 1</span>
+                <button id="nextPageBtn" onclick="changePage(1)" class="px-3.5 py-1.5 rounded-xl text-xs font-medium glass-panel border border-white/10 hover:border-emerald-500 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center gap-1">
+                    Seterusnya <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal / Popup Profil Penilai -->
+    <div id="profileModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-all">
+        <div class="glass-panel w-full max-w-lg rounded-3xl border border-white/20 p-6 sm:p-7 shadow-2xl relative animate-card">
+            <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Bahagian Profil Atas -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center font-bold text-xl text-white overflow-hidden shadow-lg shadow-emerald-500/25 shrink-0 border border-white/20">
+                    <img id="modalAvatarImg" src="" alt="Foto Penilai" class="w-full h-full object-cover hidden" onerror="handleModalImgError()">
+                    <span id="modalAvatarFallback">BP</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span id="modalGelaranBadge" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-1">
+                        Panel Penilai
+                    </span>
+                    <h3 id="modalNama" class="text-lg font-bold truncate">Nama Penilai</h3>
+                    <p id="modalSekolah" class="text-xs text-slate-400 truncate">Nama Sekolah / Institusi</p>
+                </div>
+            </div>
+
+            <!-- Perincian Data -->
+            <div class="grid grid-cols-2 gap-3 text-xs mb-6">
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">No. Kad Pengenalan</span>
+                    <span id="modalNoKp" class="font-bold text-slate-200 mt-0.5 block tracking-wide font-mono">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Mata Pelajaran</span>
+                    <span id="modalSubjek" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Tempat Bengkel</span>
+                    <span id="modalTempat" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Nama Penyelaras</span>
+                    <span id="modalPenyelaras" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Kelayakan Akademik</span>
+                    <span id="modalKelayakan" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Jantina</span>
+                    <span id="modalJantina" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+                <div class="p-3 rounded-2xl bg-white/5 border border-white/5 col-span-2">
+                    <span class="text-[10px] text-slate-400 uppercase font-semibold block">Email/span>
+                    <span id="modalKontak" class="font-bold text-slate-200 mt-0.5 block">-</span>
+                </div>
+            </div>
+
+            <!-- Tindakan Muat Turun OPR -->
+            <div class="pt-2 border-t border-white/10 flex flex-col gap-2">
+                <a id="modalOprBtn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span id="modalOprText">Muat Turun OPR</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip Terapung Global untuk Carta -->
+    <div id="customChartTooltip" class="chart-tooltip px-3.5 py-2 rounded-2xl glass-panel shadow-2xl border border-white/20 text-xs font-semibold backdrop-blur-xl">
+        <div id="chartTooltipTitle" class="text-slate-400 text-[10px] uppercase tracking-wider mb-0.5">Kategori</div>
+        <div class="flex items-center gap-2">
+            <span id="chartTooltipDot" class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+            <span id="chartTooltipValue" class="text-white text-sm font-bold">0 orang</span>
+            <span id="chartTooltipPct" class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300">0%</span>
+        </div>
+    </div>
+
+    <script>
+        // Data Global
+        let allData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // Palet Warna Carta 3D
+        const chartColors = [
+            '#10b981', '#06b6d4', '#6366f1', '#f59e0b',
+            '#ec4899', '#8b5cf6', '#14b8a6', '#f97316',
+            '#3b82f6', '#84cc16'
+        ];
+
+        // Tukar huruf kolum Excel/Sheets (cth: "G", "I", "BX") kepada indeks 0-based
+        function colLetterToIndex(letter) {
+            let col = 0;
+            const upper = letter.toUpperCase();
+            for (let i = 0; i < upper.length; i++) {
+                col = col * 26 + (upper.charCodeAt(i) - 64);
+            }
+            return col - 1;
+        }
+
+        // Cari nilai mengikut kemungkinan nama pengepala lajur
+        function findValueByKeys(obj, keys) {
+            const entry = Object.entries(obj).find(([k]) => {
+                const cleanKey = k.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return keys.some(target => cleanKey.includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+            });
+            return entry ? (entry[1] ? String(entry[1]).trim() : "") : "";
+        }
+
+        // Normalisasi teks untuk pemadanan longgar
+        function cleanStr(s) {
+            return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, '');
+        }
+
+        // Format pautan gambar Google Drive supaya boleh dipaparkan terus
+        function formatImageUrl(url) {
+            if (!url) return "";
+            const trimmed = url.trim();
+            if (trimmed.includes("drive.google.com")) {
+                const match = trimmed.match(/[-\w]{25,}/);
+                if (match) {
+                    return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+                }
+            }
+            return trimmed;
+        }
+
+        // Format pautan Google Docs / Drive supaya terus muat turun sebagai PDF
+        function formatOprDownloadUrl(url) {
+            if (!url) return "";
+            const trimmed = url.trim();
+            if (trimmed.includes("docs.google.com/document/d/")) {
+                const match = trimmed.match(/\/d\/([-\w]{25,})/);
+                if (match) {
+                    return `https://docs.google.com/document/d/${match[1]}/export?format=pdf`;
+                }
+            }
+            if (trimmed.includes("drive.google.com")) {
+                const match = trimmed.match(/[-\w]{25,}/);
+                if (match) {
+                    return `https://drive.google.com/uc?export=download&id=${match[0]}`;
+                }
+            }
+            return trimmed;
+        }
+
+        // Normalisasi setiap baris rekod CSV mengikut pemetaan kolum sebenar (G, I, BX) & pengepala
+        function normalizeRecord(rawArray, headers) {
+            const rawObj = {};
+            headers.forEach((h, idx) => {
+                if (h) rawObj[h] = rawArray[idx] || "";
+            });
+
+            const idxColG = colLetterToIndex("G");   // Indeks 6: Gambar
+            const idxColI = colLetterToIndex("I");   // Indeks 8: Nama Bakal Penilai
+            const idxColBX = colLetterToIndex("BX"); // Indeks 75: Muat Turun OPR
+
+            const colGVal = (rawArray[idxColG] || "").trim();
+            const colIVal = (rawArray[idxColI] || "").trim();
+            const colBXVal = (rawArray[idxColBX] || "").trim();
+
+            const oprLink = (colBXVal && (colBXVal.startsWith("http://") || colBXVal.startsWith("https://")))
+                ? colBXVal
+                : findValueByKeys(rawObj, ['mergeddocurlbakalpenilai', 'mergeddocurl', 'mergeddoc', 'oprurl']);
+
+            // Mengesan Tempat Bengkel, Gelaran, Kelayakan, Jantina secara fleksibel
+            let tempatVal = findValueByKeys(rawObj, ['tempatbengkel', 'tempat', 'lokasi', 'zon', 'bengkel', 'pusat']);
+            let gelaranVal = findValueByKeys(rawObj, ['gelaran', 'jawatan', 'pangkat', 'title']);
+            let kelayakanVal = findValueByKeys(rawObj, ['kelayakan', 'kelayakanakademik', 'akademik', 'pendidikan', 'ijazah', 'taraf']);
+            let jantinaVal = findValueByKeys(rawObj, ['jantina', 'gender', 'sex']);
+            let subjekVal = findValueByKeys(rawObj, ['matapelajaran', 'mata', 'subjek', 'subject', 'bidang']);
+            let urusVal = findValueByKeys(rawObj, ['namapenyelaras', 'penyelaras', 'urusetia', 'pegawai']);
+            let noKpVal = findValueByKeys(rawObj, ['nokadpengenalan', 'nokp', 'noic', 'mykad', 'kadpengenalan', 'ic', 'kp', 'nomykad']);
+
+            // Jika pengepala No. KP tidak ditemui, cuba semak corak nombor IC (12 digit atau ada tanda sengkang)
+            if (!noKpVal) {
+                const icMatch = rawArray.find(c => {
+                    const clean = String(c || "").trim().replace(/-/g, '');
+                    return /^\d{12}$/.test(clean);
+                });
+                if (icMatch) noKpVal = String(icMatch).trim();
+            }
+
+            // Jika masih kosong, cuba padankan mengikut indeks biasa ataupun isi kandungan
+            if (!jantinaVal) {
+                const jMatch = rawArray.find(c => {
+                    const low = cleanStr(c);
+                    return low === "lelaki" || low === "perempuan" || low === "male" || low === "female";
+                });
+                if (jMatch) jantinaVal = jMatch;
+            }
+
+            if (!gelaranVal) {
+                const gCandidates = ["dr.", "dr", "prof.", "prof", "en.", "encik", "pn.", "puan", "cik", "ustaz", "ustazah", "tuan", "puan sri", "datuk", "dato"];
+                const gMatch = rawArray.find(c => {
+                    const low = String(c || "").trim().toLowerCase();
+                    return gCandidates.some(g => low === g || low.startsWith(g + " "));
+                });
+                if (gMatch) gelaranVal = gMatch;
+            }
+
+            return {
+                nama: colIVal || findValueByKeys(rawObj, ['namabakalpenilai', 'namapenilai', 'namapenuh', 'nama']) || "Tiada Nama",
+                noKp: noKpVal || "-",
+                penyelaras: urusVal || "Tidak Dinyatakan",
+                mataPelajaran: subjekVal || "Umum",
+                tempatBengkel: tempatVal || "Tidak Dinyatakan",
+                gelaran: gelaranVal || "Tiada Gelaran",
+                kelayakan: kelayakanVal || "Lain-lain",
+                jantina: jantinaVal || "Tidak Dinyatakan",
+                sekolah: findValueByKeys(rawObj, ['namasekolah', 'institusi', 'sekolah', 'tempatbertugas', 'jabatan']) || "KPM",
+                noTel: findValueByKeys(rawObj, ['notelefon', 'notel', 'nohp', 'phone', 'telefon']) || "-",
+                email: findValueByKeys(rawObj, ['emel', 'email']) || "-",
+                gambar: colGVal || findValueByKeys(rawObj, ['gambar', 'foto', 'photo', 'image', 'imej']),
+                oprUrl: oprLink
+            };
+        }
+
+        // Data sandaran jika sambungan luar disekat
+        function getFallbackData() {
+            const headers = [
+                "Timestamp", "Email", "Nama Penyelaras", "Mata Pelajaran", "Tempat Bengkel",
+                "Gelaran", "Gambar", "Jantina", "Nama Bakal Penilai", "Kelayakan",
+                "Nama Sekolah", "No Kad Pengenalan"
+            ];
+            headers[colLetterToIndex("BX")] = "Merged Doc URL - bakal penilai";
+
+            const row1 = new Array(76).fill("");
+            row1[2] = "Pn. Siti Aminah";
+            row1[3] = "Bahasa Melayu";
+            row1[4] = "Hotel Premiera, Kuala Lumpur";
+            row1[5] = "Dr.";
+            row1[6] = "";
+            row1[7] = "Lelaki";
+            row1[8] = "Dr. Ahmad Zaki bin Ismail";
+            row1[9] = "PhD";
+            row1[10] = "IPG Kampus Bahasa Melayu";
+            row1[11] = "820415-14-5531";
+
+            const row2 = new Array(76).fill("");
+            row2[2] = "En. Hafizuddin";
+            row2[3] = "Matematik";
+            row2[4] = "Bangi Resort Hotel, Selangor";
+            row2[5] = "Puan";
+            row2[6] = "";
+            row2[7] = "Perempuan";
+            row2[8] = "Pn. Norazlina binti Hassan";
+            row2[9] = "Sarjana";
+            row2[10] = "SMK Jalan Tiga";
+            row2[11] = "870923-10-5892";
+
+            return [row1, row2].map(r => normalizeRecord(r, headers));
+        }
+
+        // Isi pilihan dropdown penapis
+        function populateFilterOptions() {
+            const penyelarasSet = new Set();
+            const subjekSet = new Set();
+            const tempatSet = new Set();
+
+            allData.forEach(item => {
+                if (item.penyelaras) penyelarasSet.add(item.penyelaras);
+                if (item.mataPelajaran) subjekSet.add(item.mataPelajaran);
+                if (item.tempatBengkel) tempatSet.add(item.tempatBengkel);
+            });
+
+            fillSelect('filterPenyelaras', Array.from(penyelarasSet).sort(), 'Semua Penyelaras');
+            fillSelect('filterMataPelajaran', Array.from(subjekSet).sort(), 'Semua Mata Pelajaran');
+            fillSelect('filterTempatBengkel', Array.from(tempatSet).sort(), 'Semua Tempat Bengkel');
+        }
+
+        function fillSelect(elementId, options, defaultLabel) {
+            const select = document.getElementById(elementId);
+            const currentVal = select.value;
+            select.innerHTML = `<option value="">${defaultLabel}</option>`;
+            options.forEach(opt => {
+                const optionEl = document.createElement('option');
+                optionEl.value = opt;
+                optionEl.textContent = opt;
+                select.appendChild(optionEl);
+            });
+            if (options.includes(currentVal)) {
+                select.value = currentVal;
+            }
+        }
+
+        // Tapis data berdasarkan dropdown & carian nama sahaja
+        function applyFilters() {
+            const selPenyelaras = document.getElementById('filterPenyelaras').value;
+            const selSubjek = document.getElementById('filterMataPelajaran').value;
+            const selTempat = document.getElementById('filterTempatBengkel').value;
+            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            filteredData = allData.filter(item => {
+                const matchPenyelaras = !selPenyelaras || item.penyelaras === selPenyelaras;
+                const matchSubjek = !selSubjek || item.mataPelajaran === selSubjek;
+                const matchTempat = !selTempat || item.tempatBengkel === selTempat;
+                const matchNama = !searchQuery || item.nama.toLowerCase().includes(searchQuery);
+                return matchPenyelaras && matchSubjek && matchTempat && matchNama;
+            });
+
+            currentPage = 1;
+            updateStats();
+            renderAllCharts();
+            renderTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('filterPenyelaras').value = "";
+            document.getElementById('filterMataPelajaran').value = "";
+            document.getElementById('filterTempatBengkel').value = "";
+            document.getElementById('searchInput').value = "";
+            applyFilters();
+        }
+
+        // Kemas kini kad statistik atas
+        function updateStats() {
+            document.getElementById('statTotalPenilai').innerText = filteredData.length;
+            document.getElementById('statTotalTempat').innerText = new Set(filteredData.map(d => d.tempatBengkel)).size;
+            document.getElementById('statTotalSubjek').innerText = new Set(filteredData.map(d => d.mataPelajaran)).size;
+            document.getElementById('statTotalPenyelaras').innerText = new Set(filteredData.map(d => d.penyelaras)).size;
+        }
+
+        // Kira kekerapan kategori untuk carta pai 3D
+        function aggregateField(data, fieldKey) {
+            const counts = {};
+            data.forEach(item => {
+                let val = (item[fieldKey] && String(item[fieldKey]).trim()) ? String(item[fieldKey]).trim() : "Tidak Dinyatakan";
+                counts[val] = (counts[val] || 0) + 1;
+            });
+            return Object.entries(counts)
+                .map(([name, y]) => ({ name, y }))
+                .sort((a, b) => b.y - a.y);
+        }
+
+        // Papar semua 4 carta pai 3D
+        function renderAllCharts() {
+            render3DPieChart('chartTempatBengkel', aggregateField(filteredData, 'tempatBengkel'));
+            render3DPieChart('chartGelaran', aggregateField(filteredData, 'gelaran'));
+            render3DPieChart('chartKelayakan', aggregateField(filteredData, 'kelayakan'));
+            render3DPieChart('chartJantina', aggregateField(filteredData, 'jantina'));
+        }
+
+        // Fungsi interaktif tooltip kursor untuk SVG Donut 3D
+        function showChartTooltip(e, name, count, pct, color) {
+            const tooltip = document.getElementById('customChartTooltip');
+            const titleEl = document.getElementById('chartTooltipTitle');
+            const valEl = document.getElementById('chartTooltipValue');
+            const pctEl = document.getElementById('chartTooltipPct');
+            const dotEl = document.getElementById('chartTooltipDot');
+
+            titleEl.textContent = name;
+            valEl.textContent = `${count} orang`;
+            pctEl.textContent = `${pct}%`;
+            dotEl.style.backgroundColor = color;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            tooltip.style.left = `${clientX}px`;
+            tooltip.style.top = `${clientY}px`;
+            tooltip.classList.add('show');
+        }
+
+        function moveChartTooltip(e) {
+            const tooltip = document.getElementById('customChartTooltip');
+            if (!tooltip.classList.contains('show')) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            tooltip.style.left = `${clientX}px`;
+            tooltip.style.top = `${clientY}px`;
+        }
+
+        function hideChartTooltip() {
+            const tooltip = document.getElementById('customChartTooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+            }
+        }
+
+        // Enjin Alternatif: Papar Donut 3D Interaktif berasaskan SVG Asli (Visual Dipertingkatkan)
+        function renderFallback3DPie(container, seriesData, textColor) {
+            const total = seriesData.reduce((acc, cur) => acc + cur.y, 0);
+            if (total === 0) {
+                container.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Tiada data</div>`;
+                return;
+            }
+
+            const cx = 130;
+            const cy = 100;
+            const rx = 90;
+            const ry = 50; // Sudut perspektif 3D elips
+            const depth = 22; // Ketebalan kedalaman 3D
+            const innerRatio = 0.44; // Saiz lubang Donut
+
+            let currentAngle = -Math.PI / 2;
+            let slicesSvg = '';
+            let sidesSvg = '';
+
+            const slices = seriesData.map((item, idx) => {
+                const angle = (item.y / total) * 2 * Math.PI;
+                const start = currentAngle;
+                const end = currentAngle + angle;
+                currentAngle = end;
+                const color = chartColors[idx % chartColors.length];
+                const pct = ((item.y / total) * 100).toFixed(1);
+                return { item, start, end, color, pct, idx };
+            });
+
+            // 1. Bayang 3D di bawah tapak carta
+            const baseShadow = `
+                <ellipse cx="${cx}" cy="${cy + depth + 6}" rx="${rx + 6}" ry="${ry + 4}" fill="rgba(0,0,0,0.32)" filter="blur(6px)"/>
+            `;
+
+            // 2. Lukis Dinding Sisi 3D (Extrusion Slices)
+            slices.forEach(s => {
+                const step = 0.06;
+                for (let a = s.start; a < s.end; a += step) {
+                    const nextA = Math.min(a + step, s.end);
+                    const midA = (a + nextA) / 2;
+                    if (Math.sin(midA) > -0.05) {
+                        const x1 = cx + rx * Math.cos(a);
+                        const y1 = cy + ry * Math.sin(a);
+                        const x2 = cx + rx * Math.cos(nextA);
+                        const y2 = cy + ry * Math.sin(nextA);
+                        sidesSvg += `<polygon points="${x1.toFixed(2)},${y1.toFixed(2)} ${x2.toFixed(2)},${y2.toFixed(2)} ${x2.toFixed(2)},${(y2 + depth).toFixed(2)} ${x1.toFixed(2)},${(y1 + depth).toFixed(2)}" fill="${s.color}" filter="brightness(0.68)" opacity="0.95"/>`;
+                    }
+                }
+            });
+
+            // 3. Lukis Hirisan Muka Atas Donut 3D
+            slices.forEach(s => {
+                const x1 = cx + rx * Math.cos(s.start);
+                const y1 = cy + ry * Math.sin(s.start);
+                const x2 = cx + rx * Math.cos(s.end);
+                const y2 = cy + ry * Math.sin(s.end);
+
+                const ix1 = cx + (rx * innerRatio) * Math.cos(s.start);
+                const iy1 = cy + (ry * innerRatio) * Math.sin(s.start);
+                const ix2 = cx + (rx * innerRatio) * Math.cos(s.end);
+                const iy2 = cy + (ry * innerRatio) * Math.sin(s.end);
+
+                const largeArc = (s.end - s.start) > Math.PI ? 1 : 0;
+
+                const pathData = `
+                    M ${x1.toFixed(2)} ${y1.toFixed(2)}
+                    A ${rx} ${ry} 0 ${largeArc} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}
+                    L ${ix2.toFixed(2)} ${iy2.toFixed(2)}
+                    A ${rx * innerRatio} ${ry * innerRatio} 0 ${largeArc} 0 ${ix1.toFixed(2)} ${iy1.toFixed(2)}
+                    Z
+                `;
+
+                // Posisi teks label peratusan
+                const midAngle = (s.start + s.end) / 2;
+                const labelR = rx * 0.74;
+                const lx = cx + labelR * Math.cos(midAngle);
+                const ly = cy + (ry * 0.74) * Math.sin(midAngle);
+
+                const escapedName = escapeHtml(s.item.name);
+
+                slicesSvg += `
+                    <g class="pie-slice"
+                       onmouseenter="showChartTooltip(event, '${escapedName}', ${s.item.y}, '${s.pct}', '${s.color}')"
+                       onmousemove="moveChartTooltip(event)"
+                       onmouseleave="hideChartTooltip()"
+                       ontouchstart="showChartTooltip(event, '${escapedName}', ${s.item.y}, '${s.pct}', '${s.color}')"
+                       ontouchend="hideChartTooltip()">
+                        <path d="${pathData}" fill="${s.color}" stroke="rgba(255,255,255,0.22)" stroke-width="1" />
+                        ${parseFloat(s.pct) >= 7 ? `
+                            <text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" fill="#ffffff" font-size="10.5" font-weight="800" text-anchor="middle" dominant-baseline="middle" style="pointer-events: none; text-shadow: 0px 1.5px 3px rgba(0,0,0,0.9); font-family: 'Inter', sans-serif;">
+                                ${s.pct}%
+                            </text>
+                        ` : ''}
+                    </g>
+                `;
+            });
+
+            // Senarai Legenda
+            const legendHtml = seriesData.slice(0, 8).map((item, idx) => {
+                const color = chartColors[idx % chartColors.length];
+                const pct = ((item.y / total) * 100).toFixed(1);
+                const escapedName = escapeHtml(item.name);
+                return `
+                    <div class="flex items-center justify-between gap-1.5 px-2 py-1 rounded-xl hover:bg-white/5 cursor-pointer transition-all min-w-0"
+                         onmouseenter="showChartTooltip(event, '${escapedName}', ${item.y}, '${pct}', '${color}')"
+                         onmousemove="moveChartTooltip(event)"
+                         onmouseleave="hideChartTooltip()">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style="background-color: ${color};"></span>
+                            <span class="truncate text-[11px] font-medium" style="color: ${textColor};">${escapedName}</span>
+                        </div>
+                        <span class="text-[10px] font-bold shrink-0 text-emerald-400/90">${item.y} <span class="text-slate-400 font-normal">(${pct}%)</span></span>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="w-full h-full flex flex-col items-center justify-between relative">
+                    <svg viewBox="0 0 260 170" class="w-full h-44 drop-shadow-xl select-none overflow-visible">
+                        <g>
+                            ${baseShadow}
+                            ${sidesSvg}
+                            ${slicesSvg}
+                        </g>
+                    </svg>
+                    <div class="w-full grid grid-cols-2 gap-x-1 gap-y-0.5 mt-1 max-h-24 overflow-y-auto px-1 pr-2">
+                        ${legendHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fungsi Papar Carta Pai 3D Menggunakan Highcharts berserta Auto-Fallback
+        function render3DPieChart(containerId, seriesData) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (!seriesData || seriesData.length === 0) {
+                container.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-slate-400">Tiada data untuk dipaparkan</div>`;
+                return;
+            }
+
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#e2e8f0' : '#1e293b';
+
+            // Semak jika Highcharts sedia digunakan
+            if (typeof Highcharts !== 'undefined' && typeof Highcharts.chart === 'function') {
+                try {
+                    Highcharts.chart(containerId, {
+                        chart: {
+                            type: 'pie',
+                            backgroundColor: 'transparent',
+                            options3d: {
+                                enabled: true,
+                                alpha: 45,
+                                beta: 0
+                            }
+                        },
+                        title: { text: null },
+                        credits: { enabled: false },
+                        colors: chartColors,
+                        tooltip: {
+                            useHTML: true,
+                            backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+                            borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)',
+                            borderRadius: 14,
+                            shadow: true,
+                            padding: 10,
+                            style: {
+                                fontFamily: 'Inter, sans-serif'
+                            },
+                            formatter: function() {
+                                return `
+                                    <div style="font-family: 'Inter', sans-serif; font-size: 11px;">
+                                        <div style="color: ${isDark ? '#94a3b8' : '#64748b'}; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 2px;">${this.key}</div>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ${this.point.color};"></span>
+                                            <span style="font-size: 14px; font-weight: 800; color: ${isDark ? '#f8fafc' : '#0f172a'};">${this.y} orang</span>
+                                            <span style="font-size: 11px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 2px 6px; border-radius: 6px;">${this.percentage.toFixed(1)}%</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                depth: 35,
+                                innerSize: '40%',
+                                showInLegend: true,
+                                states: {
+                                    hover: {
+                                        brightness: 0.12,
+                                        halo: {
+                                            size: 9,
+                                            opacity: 0.25
+                                        }
+                                    }
+                                },
+                                dataLabels: {
+                                    enabled: true,
+                                    format: '{point.percentage:.1f}%',
+                                    distance: 14,
+                                    style: {
+                                        color: textColor,
+                                        textOutline: isDark ? '2px #0f172a' : '2px #ffffff',
+                                        fontSize: '11px',
+                                        fontWeight: '700'
+                                    }
+                                }
+                            }
+                        },
+                        legend: {
+                            enabled: true,
+                            itemStyle: {
+                                color: textColor,
+                                fontSize: '11px',
+                                fontWeight: '500'
+                            },
+                            itemHoverStyle: {
+                                color: '#10b981'
+                            }
+                        },
+                        series: [{
+                            name: 'Jumlah',
+                            data: seriesData
+                        }]
+                    });
+                    return;
+                } catch (e) {
+                    console.warn("Highcharts ralat, beralih ke Fallback SVG 3D:", e);
+                }
+            }
+
+            // Jika Highcharts disekat pelayar, render Donut 3D SVG dengan tooltip kursor
+            renderFallback3DPie(container, seriesData, textColor);
+        }
+
+        // Papar jadual senarai nama panel
+        function renderTable() {
+            const tbody = document.getElementById('panelTableBody');
+            const totalItems = filteredData.length;
+            const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, totalItems);
+            const pageItems = filteredData.slice(startIdx, endIdx);
+
+            if (pageItems.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-10 text-center text-sm text-slate-400">
+                            Tiada rekod bakal penilai ditemui mengikut carian atau penapis semasa.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageItems.map((item, idx) => {
+                    const globalIndex = startIdx + idx;
+                    const hasOpr = Boolean(item.oprUrl && item.oprUrl.trim() !== "");
+                    const downloadUrl = hasOpr ? formatOprDownloadUrl(item.oprUrl) : "#";
+
+                    const oprActionHtml = hasOpr
+                        ? `<a href="${downloadUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/25 transition-all">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                Muat Turun OPR
+                           </a>`
+                        : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-medium bg-slate-500/10 text-slate-400 border border-white/5">
+                                Tiada pautan OPR untuk di upload
+                           </span>`;
+
+                    return `
+                        <tr onclick="openModalByIndex(${globalIndex})" class="hover:bg-emerald-500/5 cursor-pointer transition-colors group">
+                            <td class="py-3.5 px-4 text-xs text-slate-400 font-medium">${globalIndex + 1}</td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-semibold group-hover:text-emerald-400 transition-colors">${escapeHtml(item.nama)}</div>
+                                <div class="text-xs text-slate-400">${escapeHtml(item.sekolah)}</div>
+                            </td>
+                            <td class="py-3.5 px-4 hidden md:table-cell text-xs">
+                                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 font-medium">${escapeHtml(item.mataPelajaran)}</span>
+                            </td>
+                            <td class="py-3.5 px-4 hidden lg:table-cell text-xs text-slate-300">${escapeHtml(item.tempatBengkel)}</td>
+                            <td class="py-3.5 px-4 hidden sm:table-cell text-xs text-slate-400">${escapeHtml(item.penyelaras)}</td>
+                            <td class="py-3.5 px-4 text-right">
+                                ${oprActionHtml}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('paginationInfo').innerText = totalItems === 0
+                ? "Memaparkan 0 daripada 0 rekod"
+                : `Memaparkan ${startIdx + 1} - ${endIdx} daripada ${totalItems} rekod`;
+            document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} / ${totalPages}`;
+            document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderTable();
+        }
+
+        function escapeHtml(str) {
+            return String(str || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Buka Popup Profil menggunakan indeks selamat
+        function openModalByIndex(index) {
+            const item = filteredData[index];
+            if (!item) return;
+
+            document.getElementById('modalGelaranBadge').innerText = item.gelaran || "Panel Penilai";
+            document.getElementById('modalNama').innerText = item.nama;
+            document.getElementById('modalNoKp').innerText = item.noKp || "-";
+            document.getElementById('modalSekolah').innerText = item.sekolah;
+            document.getElementById('modalSubjek').innerText = item.mataPelajaran;
+            document.getElementById('modalTempat').innerText = item.tempatBengkel;
+            document.getElementById('modalPenyelaras').innerText = item.penyelaras;
+            document.getElementById('modalKelayakan').innerText = item.kelayakan;
+            document.getElementById('modalJantina').innerText = item.jantina;
+
+            const kontakParts = [item.noTel, item.email].filter(v => v && v !== "-");
+            document.getElementById('modalKontak').innerText = kontakParts.length > 0 ? kontakParts.join(" | ") : "-";
+
+            // Paparkan Gambar daripada Column G
+            const avatarImg = document.getElementById('modalAvatarImg');
+            const avatarFallback = document.getElementById('modalAvatarFallback');
+            const initials = item.nama
+                .split(" ")
+                .filter(Boolean)
+                .slice(0, 2)
+                .map(w => w[0].toUpperCase())
+                .join("") || "BP";
+            avatarFallback.innerText = initials;
+
+            const formattedImg = formatImageUrl(item.gambar);
+            if (formattedImg) {
+                avatarImg.src = formattedImg;
+                avatarImg.classList.remove('hidden');
+                avatarFallback.classList.add('hidden');
+            } else {
+                avatarImg.src = "";
+                avatarImg.classList.add('hidden');
+                avatarFallback.classList.remove('hidden');
+            }
+
+            // Konfigurasi Butang Muat Turun OPR daripada Column BX
+            const oprBtn = document.getElementById('modalOprBtn');
+            const oprText = document.getElementById('modalOprText');
+            const hasOpr = Boolean(item.oprUrl && item.oprUrl.trim() !== "");
+
+            if (hasOpr) {
+                oprBtn.href = formatOprDownloadUrl(item.oprUrl);
+                oprBtn.classList.remove('opacity-50', 'pointer-events-none', 'from-slate-600', 'to-slate-700');
+                oprBtn.classList.add('from-emerald-500', 'to-teal-600');
+                oprText.innerText = "Muat Turun OPR";
+            } else {
+                oprBtn.href = "#";
+                oprBtn.classList.remove('from-emerald-500', 'to-teal-600');
+                oprBtn.classList.add('opacity-50', 'pointer-events-none', 'from-slate-600', 'to-slate-700');
+                oprText.innerText = "Tiada pautan OPR untuk di upload";
+            }
+
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function handleModalImgError() {
+            document.getElementById('modalAvatarImg').classList.add('hidden');
+            document.getElementById('modalAvatarFallback').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Tukar Mod Gelap & Terang
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            const bodyEl = document.body;
+            const themeIcon = document.getElementById('themeIcon');
+            const themeLabel = document.getElementById('themeLabel');
+
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                htmlEl.classList.add('light');
+                bodyEl.classList.remove('bg-mesh-dark', 'text-slate-100');
+                bodyEl.classList.add('bg-mesh-light', 'text-slate-800');
+                themeIcon.setAttribute('data-lucide', 'moon');
+                themeLabel.innerText = 'Mod Gelap';
+
+                document.querySelectorAll('select, #searchInput').forEach(el => {
+                    el.classList.remove('bg-slate-900/60', 'border-slate-700/60');
+                    el.classList.add('bg-white/80', 'border-slate-300', 'text-slate-800');
+                });
+            } else {
+                htmlEl.classList.remove('light');
+                htmlEl.classList.add('dark');
+                bodyEl.classList.remove('bg-mesh-light', 'text-slate-800');
+                bodyEl.classList.add('bg-mesh-dark', 'text-slate-100');
+                themeIcon.setAttribute('data-lucide', 'sun');
+                themeLabel.innerText = 'Mod Terang';
+
+                document.querySelectorAll('select, #searchInput').forEach(el => {
+                    el.classList.remove('bg-white/80', 'border-slate-300', 'text-slate-800');
+                    el.classList.add('bg-slate-900/60', 'border-slate-700/60');
+                });
+            }
+
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            renderAllCharts();
+        }
+
+        // Fungsi Log Keluar
+        function handleLogout() {
+            try {
+                localStorage.removeItem("statusLogin");
+                localStorage.removeItem("emailLogin");
+                sessionStorage.removeItem("statusLogin");
+                sessionStorage.removeItem("emailLogin");
+            } catch (e) {}
+            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+        }
+
+        // Muat Turun & Parse Data CSV Google Sheets
+        function loadData() {
+            const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQW7wCKSHCh8PY_DoeGYUbtOkZnz501idkoMHVkVEpNMh0XnGp6N9VYe_ZyFvPhdJl_vnak2cos0pDQ/pub?output=csv";
+            const statusText = document.getElementById('syncStatusText');
+            const syncDot = document.getElementById('syncDot');
+
+            statusText.innerText = "Menyegerakkan data Google Sheets...";
+            syncDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+
+            Papa.parse(csvUrl, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 1) {
+                        const headers = results.data[0].map(h => String(h || "").trim());
+                        const rows = results.data.slice(1).filter(r => r.some(cell => String(cell || "").trim() !== ""));
+                        allData = rows.map(row => normalizeRecord(row, headers));
+                        statusText.innerText = `LIVE UPDATE DATA (${allData.length} rekod)`;
+                        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+                    } else {
+                        allData = getFallbackData();
+                        statusText.innerText = "Menggunakan data sandaran (CSV kosong)";
+                        syncDot.className = "w-2 h-2 rounded-full bg-amber-500";
+                    }
+                    populateFilterOptions();
+                    applyFilters();
+                },
+                error: function(err) {
+                    console.warn("Ralat memuatkan CSV:", err);
+                    allData = getFallbackData();
+                    statusText.innerText = "Mod luar talian (Data sandaran)";
+                    syncDot.className = "w-2 h-2 rounded-full bg-rose-500";
+                    populateFilterOptions();
+                    applyFilters();
+                }
+            });
+        }
+
+        // Tutup modal apabila klik di luar kotak modal
+        const modalElement = document.getElementById('profileModal');
+        if (modalElement) {
+            modalElement.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Mulakan aplikasi apabila laman siap dimuatkan
+        window.onload = function() {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            loadData();
+        };
+    </script>
+</body>
+</html>
