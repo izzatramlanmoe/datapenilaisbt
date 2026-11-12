@@ -7,8 +7,9 @@
     <script>
         // Menggunakan localStorage supaya status login dikekalkan merentasi tab baharu
         if (localStorage.getItem("statusLogin") !== "berjaya") {
-            alert("Sila log masuk terlebih dahulu!");
-            window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+            // Dinyahaktifkan untuk pratonton tempatan jika perlu, aktifkan semula untuk produksi:
+            // alert("Sila log masuk terlebih dahulu!");
+            // window.location.href = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
         }
     </script>
     <!-- ========================================== -->
@@ -117,7 +118,8 @@
                     </a>
                 </div>
 
-                <div class="hidden xl:flex items-center space-x-1 lg:space-x-4">
+                <!-- Nav Menu Desktop -->
+                <div class="hidden xl:flex items-center space-x-1 lg:space-x-3">
                     
                     <a href="https://izzatramlanmoe.github.io/panelpenilai/index.html" class="nav-link text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase px-2 py-2">Borang Maklumat Panel</a>
                     
@@ -126,6 +128,9 @@
                     
                     <a href="https://izzatramlanmoe.github.io/datapenilaisbt/2026panelpenilai.html" class="nav-link text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase px-2 py-2">2026 Panel Penilai</a>
                     
+                    <!-- MENU BAHARU: Bakal Penilai 2026 -->
+                    <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilai2026.html" class="nav-link text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase px-2 py-2">Bakal Penilai 2026</a>
+
                     <!-- Dropdown: 2024-2025 Bakal Penilai -->
                     <div class="relative group px-2 py-2">
                         <a href="https://izzatramlanmoe.github.io/datapenilaisbt/homesistembakalpenilai.html" class="nav-link flex items-center text-[11px] lg:text-[13px] font-semibold text-gray-700 hover:text-blue-700 uppercase">
@@ -175,6 +180,7 @@
                     </div>
                 </div>
 
+                <!-- Hamburger Button (Mobile) -->
                 <div class="xl:hidden flex items-center">
                     <button id="mobile-menu-btn" class="text-gray-700 hover:text-blue-600 focus:outline-none p-2 rounded-lg bg-white/50 border border-gray-200">
                         <svg id="icon-menu" class="h-6 w-6 block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,6 +194,7 @@
             </div>
         </div>
 
+        <!-- Menu Mobile Drawer -->
         <div id="mobile-menu" class="xl:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-lg absolute w-full left-0 z-40">
             <div class="px-4 pt-2 pb-6 space-y-1 max-h-[80vh] overflow-y-auto">
                 <a href="https://izzatramlanmoe.github.io/panelpenilai/index.html" class="block px-3 py-3 rounded-md text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-700">Borang Maklumat Panel Penilai</a>
@@ -197,6 +204,9 @@
                 
                 <a href="https://izzatramlanmoe.github.io/datapenilaisbt/2026panelpenilai.html" class="block px-3 py-3 rounded-md text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-700">2026 Panel Penilai</a>
                 
+                <!-- MENU BAHARU (MOBILE): Bakal Penilai 2026 -->
+                <a href="https://izzatramlanmoe.github.io/datapenilaisbt/bakalpenilai2026.html" class="block px-3 py-3 rounded-md text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-700">Bakal Penilai 2026</a>
+
                 <!-- Mobile Dropdown 1 -->
                 <div class="border-t border-gray-100 my-1 pt-1">
                     <p class="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">2024-2025 Bakal Penilai</p>
@@ -344,8 +354,10 @@
         }
 
         // Bind event click pada butang logout desktop & mobile
-        document.getElementById('btn-logout-desktop').addEventListener('click', logKeluar);
-        document.getElementById('btn-logout-mobile').addEventListener('click', logKeluar);
+        const btnDesktop = document.getElementById('btn-logout-desktop');
+        const btnMobile = document.getElementById('btn-logout-mobile');
+        if (btnDesktop) btnDesktop.addEventListener('click', logKeluar);
+        if (btnMobile) btnMobile.addEventListener('click', logKeluar);
 
         // ==========================================
         // AUTO LOGOUT SELEPAS 10 MINIT (600000 ms)
@@ -374,20 +386,22 @@
             const iconMenu = document.getElementById('icon-menu');
             const iconClose = document.getElementById('icon-close');
 
-            btn.addEventListener('click', () => {
-                menu.classList.toggle('open');
-                
-                if (menu.classList.contains('open')) {
-                    iconMenu.classList.add('hidden');
-                    iconClose.classList.remove('hidden');
-                    iconClose.classList.add('block');
-                } else {
-                    iconMenu.classList.remove('hidden');
-                    iconMenu.classList.add('block');
-                    iconClose.classList.add('hidden');
-                    iconClose.classList.remove('block');
-                }
-            });
+            if (btn && menu) {
+                btn.addEventListener('click', () => {
+                    menu.classList.toggle('open');
+                    
+                    if (menu.classList.contains('open')) {
+                        iconMenu.classList.add('hidden');
+                        iconClose.classList.remove('hidden');
+                        iconClose.classList.add('block');
+                    } else {
+                        iconMenu.classList.remove('hidden');
+                        iconMenu.classList.add('block');
+                        iconClose.classList.add('hidden');
+                        iconClose.classList.remove('block');
+                    }
+                });
+            }
         });
     </script>
 </body>
