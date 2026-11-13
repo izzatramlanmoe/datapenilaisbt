@@ -224,12 +224,15 @@
       </div>
     </section>
 
-    <!-- SECTION FILTER: Tahun (Single Top) + Program Penerbitan, Penyelaras, Mata Pelajaran, Tempat Bengkel -->
+    <!-- SECTION FILTER: Tahun (Single Top) + Penyelaras, Program Penerbitan, Mata Pelajaran, Tempat Bengkel -->
     <section class="glass-light rounded-3xl p-5 sm:p-6 border glass-card">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div class="flex items-center gap-2 text-slate-900 font-semibold text-base sm:text-lg">
           <i data-lucide="filter" class="w-5 h-5 text-indigo-500"></i>
           <span>Penapis Data Bengkel</span>
+          <span class="hidden sm:inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+            Tapisan Dinamik Aktif
+          </span>
         </div>
         <button id="btn-reset-filters" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition py-1.5 px-3 rounded-xl hover:bg-indigo-50 border border-transparent hover:border-indigo-100">
           <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
@@ -254,7 +257,20 @@
 
       <!-- Baris Penapis Kedua (4 Kolum) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Filter 1: Program Penerbitan -->
+        <!-- Filter 1: Penyelaras (Diletakkan di hadapan supaya mudah mula tapisan mengikut penyelaras) -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-penyelaras" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i> Penyelaras Projek
+          </label>
+          <div class="relative">
+            <select id="filter-penyelaras" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Penyelaras</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 2: Program Penerbitan -->
         <div class="flex flex-col gap-1.5">
           <label for="filter-programpenerbitan" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
             <i data-lucide="layers" class="w-3.5 h-3.5 text-indigo-500"></i> Program Penerbitan
@@ -262,19 +278,6 @@
           <div class="relative">
             <select id="filter-programpenerbitan" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
               <option value="" class="bg-white text-slate-800">Semua Program Penerbitan</option>
-            </select>
-            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
-          </div>
-        </div>
-
-        <!-- Filter 2: Penyelaras -->
-        <div class="flex flex-col gap-1.5">
-          <label for="filter-penyelaras" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <i data-lucide="user-check" class="w-3.5 h-3.5 text-indigo-500"></i> Penyelaras
-          </label>
-          <div class="relative">
-            <select id="filter-penyelaras" class="w-full appearance-none rounded-2xl bg-white border border-slate-200 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
-              <option value="" class="bg-white text-slate-800">Semua Penyelaras</option>
             </select>
             <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
           </div>
@@ -585,6 +588,15 @@
       negeri: ['#f59e0b', '#ef4444', '#10b981', '#6366f1', '#8b5cf6', '#06b6d4', '#84cc16', '#d946ef', '#14b8a6']
     };
 
+    // Konfigurasi senarai penapis untuk sokongan Cascading / Dependent Dropdowns
+    const FILTER_CONFIGS = [
+      { id: 'filter-tahun', key: 'tahun', defaultLabel: 'Semua Tahun', descSort: true },
+      { id: 'filter-penyelaras', key: 'penyelaras', defaultLabel: 'Semua Penyelaras', descSort: false },
+      { id: 'filter-programpenerbitan', key: 'programpenerbitan', defaultLabel: 'Semua Program Penerbitan', descSort: false },
+      { id: 'filter-matapelajaran', key: 'matapelajaran', defaultLabel: 'Semua Mata Pelajaran', descSort: false },
+      { id: 'filter-tempat', key: 'tempat', defaultLabel: 'Semua Tempat Bengkel', descSort: false }
+    ];
+
     window.onload = function () {
       mulaKiraan();
       lucide.createIcons();
@@ -599,12 +611,12 @@
         fetchAndParseData();
       });
 
-      // Event listener penapis termasuk Tahun (Kolum B) dan programpenerbitan
-      document.getElementById('filter-tahun').addEventListener('change', applyFilters);
-      document.getElementById('filter-programpenerbitan').addEventListener('change', applyFilters);
-      document.getElementById('filter-penyelaras').addEventListener('change', applyFilters);
-      document.getElementById('filter-matapelajaran').addEventListener('change', applyFilters);
-      document.getElementById('filter-tempat').addEventListener('change', applyFilters);
+      // Event listener penapis dinamik
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.addEventListener('change', applyFilters);
+      });
+
       document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
       document.getElementById('btn-refresh').addEventListener('click', () => fetchAndParseData(true));
       document.getElementById('table-search').addEventListener('input', handleTableSearch);
@@ -928,17 +940,8 @@
         };
       }).filter(r => r.nama && r.nama !== '');
 
-      filteredData = [...rawData];
-
-      populateDropdown('filter-tahun', 'tahun', 'Semua Tahun', true);
-      populateDropdown('filter-programpenerbitan', 'programpenerbitan', 'Semua Program Penerbitan');
-      populateDropdown('filter-penyelaras', 'penyelaras', 'Semua Penyelaras');
-      populateDropdown('filter-matapelajaran', 'matapelajaran', 'Semua Mata Pelajaran');
-      populateDropdown('filter-tempat', 'tempat', 'Semua Tempat Bengkel');
-
-      updateHeroStats();
-      renderAllCharts();
-      renderTable();
+      // Kemas kini kesemua senarai dropdown dan paparan dashboard
+      applyFilters();
     }
 
     function cleanValue(val) {
@@ -947,39 +950,84 @@
       return str === '' ? 'Tidak Dinyatakan' : str;
     }
 
-    function populateDropdown(elemId, fieldKey, defaultLabel, descSort = false) {
-      const select = document.getElementById(elemId);
-      if (!select) return;
-      const currentSelected = select.value;
-      const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => {
-        return descSort ? b.localeCompare(a, 'ms', { numeric: true }) : a.localeCompare(b, 'ms', { numeric: true });
-      });
+    /**
+     * Kemas kini pilihan dropdown secara dinamik (Cascading / Dependent Filters).
+     * Setiap dropdown akan hanya menunjukkan nilai yang wujud berdasarkan penapis-penapis LAIN yang sedang aktif.
+     */
+    function updateAllDropdownOptions(currentSelections) {
+      FILTER_CONFIGS.forEach(targetCfg => {
+        const select = document.getElementById(targetCfg.id);
+        if (!select) return;
 
-      select.innerHTML = `<option value="">${defaultLabel}</option>`;
-      uniqueValues.forEach(val => {
-        if (!val || val === 'Tidak Dinyatakan') return;
-        const opt = document.createElement('option');
-        opt.value = val;
-        opt.textContent = val;
-        if (val === currentSelected) opt.selected = true;
-        select.appendChild(opt);
+        const currentSelectedVal = currentSelections[targetCfg.key] || '';
+
+        // Tapis rawData menggunakan semua penapis AKTIF KECUALI penapis sasaran ini sendiri
+        // Ini membolehkan pengguna masih dapat melihat & menukar pilihan lain bagi penapis semasa,
+        // sambil memastikan pilihan yang terpapar sentiasa sah dengan pilihan penapis-penapis lain (seperti Penyelaras).
+        const validSubset = rawData.filter(row => {
+          return FILTER_CONFIGS.every(otherCfg => {
+            if (otherCfg.key === targetCfg.key) return true;
+            const selectedOtherVal = currentSelections[otherCfg.key];
+            return !selectedOtherVal || row[otherCfg.key] === selectedOtherVal;
+          });
+        });
+
+        const uniqueValues = [...new Set(validSubset.map(item => item[targetCfg.key]))]
+          .filter(val => val && val !== 'Tidak Dinyatakan')
+          .sort((a, b) => {
+            return targetCfg.descSort
+              ? b.localeCompare(a, 'ms', { numeric: true })
+              : a.localeCompare(b, 'ms', { numeric: true });
+          });
+
+        // Bina semula pilihan <option>
+        select.innerHTML = `<option value="" class="bg-white text-slate-800">${targetCfg.defaultLabel}</option>`;
+        
+        let isStillValid = false;
+        uniqueValues.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          opt.className = "bg-white text-slate-800";
+          if (val === currentSelectedVal) {
+            opt.selected = true;
+            isStillValid = true;
+          }
+          select.appendChild(opt);
+        });
+
+        // Jika pilihan lama tidak lagi wujud selepas penapis lain ditukar, tetapkan semula ke ''
+        if (currentSelectedVal && !isStillValid) {
+          select.value = '';
+          currentSelections[targetCfg.key] = '';
+        }
+
+        // Beri petunjuk visual halus jika penapis sedang aktif ditapis
+        if (select.value !== '') {
+          select.classList.add('border-indigo-400', 'bg-indigo-50/30', 'text-indigo-950');
+        } else {
+          select.classList.remove('border-indigo-400', 'bg-indigo-50/30', 'text-indigo-950');
+        }
       });
     }
 
     function applyFilters() {
-      const selTahun = document.getElementById('filter-tahun').value;
-      const selProgram = document.getElementById('filter-programpenerbitan').value;
-      const selPenyelaras = document.getElementById('filter-penyelaras').value;
-      const selMP = document.getElementById('filter-matapelajaran').value;
-      const selTempat = document.getElementById('filter-tempat').value;
+      // 1. Dapatkan nilai semasa daripada semua dropdown
+      const selections = {};
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        selections[cfg.key] = el ? el.value : '';
+      });
 
+      // 2. Kemas kini senarai pilihan pada setiap dropdown berdasarkan pilihan lain (Cascading)
+      updateAllDropdownOptions(selections);
+
+      // 3. Tapis data utama mengikut pilihan muktamad
       filteredData = rawData.filter(row => {
-        const matchTahun = !selTahun || row.tahun === selTahun;
-        const matchProg = !selProgram || row.programpenerbitan === selProgram;
-        const matchP = !selPenyelaras || row.penyelaras === selPenyelaras;
-        const matchMP = !selMP || row.matapelajaran === selMP;
-        const matchT = !selTempat || row.tempat === selTempat;
-        return matchTahun && matchProg && matchP && matchMP && matchT;
+        return FILTER_CONFIGS.every(cfg => {
+          const selVal = selections[cfg.key];
+          return !selVal || row[cfg.key] === selVal;
+        });
       });
 
       currentPage = 1;
@@ -989,11 +1037,10 @@
     }
 
     function resetFilters() {
-      document.getElementById('filter-tahun').value = '';
-      document.getElementById('filter-programpenerbitan').value = '';
-      document.getElementById('filter-penyelaras').value = '';
-      document.getElementById('filter-matapelajaran').value = '';
-      document.getElementById('filter-tempat').value = '';
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.value = '';
+      });
       applyFilters();
     }
 
