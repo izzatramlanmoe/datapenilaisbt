@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <!-- ========================================== -->
+  <!-- KOD SHELL LOCK - MESRA IFRAME & PREVIEW    -->
+  <!-- ========================================== -->
+  <script>
+    // Semak status login tanpa guna alert() atau pemindahan lokasi kasar yang disekat oleh iframe
+    function semakStatusLogin() {
+      const isLogin = localStorage.getItem("statusLogin") === "berjaya" || sessionStorage.getItem("statusLogin") === "berjaya";
+      return isLogin;
+    }
+  </script>
+  <!-- ========================================== -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analisis Bengkel & Peserta</title>
+  
+  <!-- Konfigurasi Tailwind selamat sebelum/selepas skrip dimuatkan -->
+  <script>
+    function applyTailwindConfig() {
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                display: ['"Outfit"', 'sans-serif'],
+              },
+              colors: {
+                brand: {
+                  50: '#eef2ff',
+                  100: '#e0e7ff',
+                  200: '#c7d2fe',
+                  300: '#a5b4fc',
+                  400: '#818cf8',
+                  500: '#6366f1', /* Indigo / Blue vibe */
+                  600: '#4f46e5',
+                  700: '#4338ca',
+                  800: '#3730a3',
+                  900: '#1e1b4b',
+                }
+              }
+            }
+          }
+        };
+      }
+    }
+  </script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com" onload="applyTailwindConfig()"></script>
+  <!-- Google Fonts Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
+  <!-- Highcharts & Highcharts 3D via reliable CDNJS (Loaded synchronously in order) -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-3d.js"></script>
+
+  <style>
+    /* Glassmorphism Styles V24 (Cool Blue Mode) */
+    .glass-light {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.08);
+    }
+    .glass-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.12);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.35);
+      border-radius: 9999px;
+    }
+
+    /* Highcharts container transparent */
+    .chart-box .highcharts-background {
+      fill: transparent !important;
+    }
+  </style>
+</head>
+
+<body class="font-sans antialiased text-slate-900 bg-slate-50 min-h-screen relative overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+  <!-- DIALOG PERINGATAN LOG MASUK JIKA BELUM LOGIN -->
+  <div id="login-guard-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
+    <div class="glass-light w-full max-w-md rounded-3xl p-6 sm:p-7 border border-white/80 shadow-2xl text-center space-y-4">
+      <div class="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold font-display text-slate-900">Akses Terhad</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">
+          Sesi log masuk tidak dikesan. Sila log masuk melalui portal utama untuk meneruskan.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2.5 pt-2">
+        <button onclick="bukaHalamanLogin()" class="w-full py-2.5 px-4 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs sm:text-sm shadow-md shadow-brand-500/30 transition active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>Pergi ke Portal Log Masuk</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ambient Glow Background (Cool Blobs) -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-[30rem] h-[30rem] bg-brand-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute top-1/3 -right-40 w-[28rem] h-[28rem] bg-cyan-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+    <div class="absolute -bottom-40 left-1/4 w-[32rem] h-[32rem] bg-blue-500/15 rounded-full blur-[120px] pointer-events-none"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Top Navigation / Header -->
+    <header class="glass-light !bg-slate-900/90 !border-slate-800 rounded-[2rem] p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 glass-card shadow-2xl shadow-brand-900/20">
+      <div class="flex items-center gap-3.5">
+        <div class="p-3 bg-gradient-to-tr from-brand-500 to-cyan-400 text-white rounded-2xl shadow-lg shadow-brand-500/25 ring-1 ring-white/20">
+          <i data-lucide="layout-dashboard" class="w-6 h-6 sm:w-7 sm:h-7"></i>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold font-display tracking-tight text-white">
+            Sistem Maklumat Data Panel Penilai 2026
+          </h1>
+          <p class="text-xs sm:text-sm text-brand-100/70 flex items-center gap-2 mt-0.5">
+            <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></span>
+            Live Update Pengisian Data Panel Penilai
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5">
+        <!-- Refresh Button -->
+        <button id="btn-refresh" title="Muat Semula Data" class="px-3.5 py-2.5 rounded-2xl bg-white/10 border border-white/10 hover:bg-white/20 text-white shadow-sm transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm font-medium">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-brand-300"></i>
+          <span>Kemaskini</span>
+        </button>
+
+        <!-- Logout Button -->
+        <button onclick="logKeluar()" title="Log Keluar" class="px-3.5 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white shadow-sm shadow-brand-600/20 transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm font-medium border border-brand-500">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+          <span>Log Keluar</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- STATUS & TOAST BAR -->
+    <div id="status-bar" class="hidden rounded-2xl p-4 glass-light border border-blue-300/60 text-blue-900 text-sm flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-2.5">
+        <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+        <span id="status-text">Memuat turun data Google Sheets...</span>
+      </div>
+      <button onclick="dismissStatus()" class="hover:opacity-75"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <!-- PANEL BESAR: BILANGAN PENUH & RINGKASAN UTAMA (Blue V24 Card) -->
+    <section class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-600 rounded-[2rem] p-6 sm:p-8 border border-white/20 relative overflow-hidden shadow-2xl shadow-brand-500/20 glass-card">
+      <div class="absolute -right-8 -bottom-8 w-60 h-60 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+        <!-- Big Number Hero -->
+        <div class="flex items-center gap-5 sm:gap-6">
+          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-white/20 flex items-center justify-center text-white shadow-xl backdrop-blur-md ring-1 ring-white/30 flex-shrink-0">
+            <i data-lucide="users" class="w-10 h-10 sm:w-11 sm:h-11"></i>
+          </div>
+          <div>
+            <div class="text-xs sm:text-sm font-semibold tracking-wide uppercase text-brand-50/90">
+              Bilangan Keseluruhan Peserta
+            </div>
+            <div class="flex flex-wrap items-baseline gap-3 mt-1">
+              <span id="total-count-display" class="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-white">
+                0
+              </span>
+              <span id="filtered-badge" class="text-xs sm:text-sm px-3 py-1 rounded-full bg-white/20 text-white font-semibold border border-white/30 backdrop-blur-md">
+                Semua Rekod
+              </span>
+            </div>
+            <p id="total-subtitle" class="text-xs sm:text-sm text-brand-100/90 mt-1.5">
+              Jumlah data aktif selepas tapisan penapis
+            </p>
+          </div>
+        </div>
+
+        <!-- Metric Badges Row (4 Items) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:w-auto w-full">
+          <div class="bg-white/10 border border-white/20 rounded-[1.25rem] p-4 text-center shadow-sm backdrop-blur-md">
+            <div class="text-xs text-brand-100/90 font-medium truncate">Penerbitan</div>
+            <div id="stat-penerbitan-count" class="text-xl sm:text-2xl font-bold font-display text-white mt-1">0</div>
+          </div>
+
+          <div class="bg-white/10 border border-white/20 rounded-[1.25rem] p-4 text-center shadow-sm backdrop-blur-md">
+            <div class="text-xs text-brand-100/90 font-medium truncate">Penyelaras</div>
+            <div id="stat-penyelaras-count" class="text-xl sm:text-2xl font-bold font-display text-white mt-1">0</div>
+          </div>
+
+          <div class="bg-white/10 border border-white/20 rounded-[1.25rem] p-4 text-center shadow-sm backdrop-blur-md">
+            <div class="text-xs text-brand-100/90 font-medium truncate">Mata Pelajaran</div>
+            <div id="stat-matapelajaran-count" class="text-xl sm:text-2xl font-bold font-display text-white mt-1">0</div>
+          </div>
+
+          <div class="bg-white/10 border border-white/20 rounded-[1.25rem] p-4 text-center shadow-sm backdrop-blur-md">
+            <div class="text-xs text-brand-100/90 font-medium truncate">Tempat Bengkel</div>
+            <div id="stat-tempat-count" class="text-xl sm:text-2xl font-bold font-display text-white mt-1">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION FILTER: Tahun (Single Top) + Penyelaras, Program Penerbitan, Mata Pelajaran, Tempat Bengkel -->
+    <section class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 glass-card">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div class="flex items-center gap-2 text-slate-900 font-semibold text-base sm:text-lg">
+          <i data-lucide="filter" class="w-5 h-5 text-brand-500"></i>
+          <span>Penapis Data Bengkel</span>
+          <span class="hidden sm:inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-brand-50 text-brand-600 border border-brand-100">
+            Tapisan Dinamik Aktif
+          </span>
+        </div>
+        <button id="btn-reset-filters" class="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1.5 transition py-1.5 px-3 rounded-xl hover:bg-brand-50 border border-transparent hover:border-brand-100">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Tetapkan Semula Penapis</span>
+        </button>
+      </div>
+
+      <!-- Single Filter Row di Bahagian Atas Sekali: TAHUN PENERBITAN -->
+      <div class="mb-4 pb-4 border-b border-slate-200/60">
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-tahun" class="text-xs font-bold uppercase tracking-wider text-brand-600 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-brand-500"></i> Tahun Penerbitan
+          </label>
+          <div class="relative">
+            <select id="filter-tahun" class="w-full appearance-none rounded-2xl bg-brand-50/50 border border-brand-200/90 px-4 py-3 pr-10 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-900">Semua Tahun</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-brand-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Baris Penapis Kedua (4 Kolum) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Filter 1: Penyelaras -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-penyelaras" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand-500"></i> Penyelaras Projek
+          </label>
+          <div class="relative">
+            <select id="filter-penyelaras" class="w-full appearance-none rounded-2xl bg-white/70 border border-white/80 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-900">Semua Penyelaras</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 2: Program Penerbitan -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-programpenerbitan" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-500"></i> Program Penerbitan
+          </label>
+          <div class="relative">
+            <select id="filter-programpenerbitan" class="w-full appearance-none rounded-2xl bg-white/70 border border-white/80 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-900">Semua Program Penerbitan</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 3: Mata Pelajaran -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-matapelajaran" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-500"></i> Mata Pelajaran
+          </label>
+          <div class="relative">
+            <select id="filter-matapelajaran" class="w-full appearance-none rounded-2xl bg-white/70 border border-white/80 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-900">Semua Mata Pelajaran</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- Filter 4: Tempat Bengkel -->
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-tempat" class="text-xs font-medium uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-500"></i> Tempat Bengkel
+          </label>
+          <div class="relative">
+            <select id="filter-tempat" class="w-full appearance-none rounded-2xl bg-white/70 border border-white/80 px-4 py-2.5 pr-10 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-900">Semua Tempat Bengkel</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 PIE CHART 3D -->
+    <section>
+      <div class="flex items-center justify-between mb-4 px-1">
+        <div>
+          <h2 class="text-lg sm:text-xl font-bold font-display text-slate-900 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-brand-500"></i>
+            Analisis Demografi 3D
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500">Carta Pai 3D berasaskan Jawatan Bengkel, Gelaran, Jantina & Negeri</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Chart 1: JawatanBengkel -->
+        <div class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-brand-500 ring-2 ring-brand-500/30"></span>
+              Jawatan Bengkel
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-jawatan" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 2: Gelaran -->
+        <div class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-500 ring-2 ring-cyan-500/30"></span>
+              Gelaran
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-gelaran" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 3: Jantina -->
+        <div class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-400 ring-2 ring-blue-400/30"></span>
+              Jantina
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-jantina" class="w-full h-80 chart-box"></div>
+        </div>
+
+        <!-- Chart 4: Negeri -->
+        <div class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 flex flex-col justify-between glass-card">
+          <div class="flex items-center justify-between border-b border-slate-200/60 pb-3 mb-2">
+            <h3 class="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 ring-2 ring-indigo-400/30"></span>
+              Negeri
+            </h3>
+            <span class="text-xs text-slate-500 font-medium">Carta Pai 3D</span>
+          </div>
+          <div id="chart-negeri" class="w-full h-80 chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION DATA TABLE -->
+    <section class="glass-light rounded-[2rem] p-5 sm:p-6 border border-white/60 glass-card">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold font-display text-slate-900 flex items-center gap-2">
+            <i data-lucide="table" class="w-5 h-5 text-brand-500"></i>
+            Senarai Terperinci Rekod
+          </h3>
+          <p class="text-xs text-slate-500">Jadual interaktif mengikut tapisan semasa</p>
+        </div>
+
+        <div class="relative sm:w-72">
+          <input type="text" id="table-search" placeholder="Cari nama, tahun, penerbitan..." class="w-full rounded-2xl bg-white/70 border border-white/80 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/70 shadow-sm" />
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-white/60 shadow-sm bg-white/40 backdrop-blur-md">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-brand-900/5 text-slate-600 font-semibold uppercase tracking-wider text-[11px] border-b border-brand-900/10">
+            <tr id="table-head-row">
+              <th class="py-3 px-4">Bil</th>
+              <th class="py-3 px-4">Tahun</th>
+              <th class="py-3 px-4">Nama</th>
+              <th class="py-3 px-4">Program Penerbitan</th>
+              <th class="py-3 px-4">Gelaran</th>
+              <th class="py-3 px-4">Jantina</th>
+              <th class="py-3 px-4">Jawatan Bengkel</th>
+              <th class="py-3 px-4">Mata Pelajaran</th>
+              <th class="py-3 px-4">Tempat Bengkel</th>
+              <th class="py-3 px-4">Penyelaras</th>
+              <th class="py-3 px-4">Negeri</th>
+            </tr>
+          </thead>
+          <tbody id="table-body" class="divide-y divide-brand-900/5 text-slate-900 font-normal">
+            <tr>
+              <td colspan="11" class="text-center py-8 text-slate-500">Sedang memuat data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500 mt-4 px-1">
+        <span id="table-entries-info">Menunjukkan 0 rekod</span>
+        <div class="flex gap-2">
+          <button id="btn-prev-page" class="px-3 py-1.5 rounded-xl border border-white/80 bg-white/70 text-slate-900 hover:bg-white transition disabled:opacity-40 font-medium">Sebelum</button>
+          <span id="page-indicator" class="px-3 py-1.5 font-semibold text-slate-900">1 / 1</span>
+          <button id="btn-next-page" class="px-3 py-1.5 rounded-xl border border-white/80 bg-white/70 text-slate-900 hover:bg-white transition disabled:opacity-40 font-medium">Seterusnya</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-4">
+      Sistem Dashboard Analisis Bengkel &copy; 2026. Diperkasakan dengan Glassmorphism & Highcharts 3D.
+    </footer>
+
+  </div>
+
+  <!-- MODAL POPUP DETAIL PESERTA -->
+  <div id="participant-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+    <div id="modal-container" class="glass-light w-full max-w-2xl rounded-[2rem] p-6 sm:p-8 border border-white/80 shadow-2xl transform scale-95 transition-all duration-300 relative max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="closeParticipantModal()" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/60 hover:bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 transition backdrop-blur-sm">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 border-b border-slate-200/60 pb-6">
+        <div class="relative flex-shrink-0">
+          <img id="modal-avatar" src="" alt="Gambar Peserta" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-white shadow-xl ring-2 ring-brand-500/20 bg-slate-100" />
+          <span id="modal-gender-badge" class="absolute -bottom-2 -right-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shadow-md bg-white border border-slate-200 text-slate-800">
+            -
+          </span>
+        </div>
+        <div class="text-center sm:text-left flex-1">
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span id="modal-tahun-pill" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-brand-500 text-white shadow-sm">
+              -
+            </span>
+            <span id="modal-title-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-brand-50 text-brand-700 border border-brand-200">
+              -
+            </span>
+            <span id="modal-role-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-white/60 text-slate-800 border border-slate-200">
+              -
+            </span>
+            <span id="modal-program-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+              -
+            </span>
+          </div>
+          <h2 id="modal-name" class="text-xl sm:text-2xl font-bold font-display text-slate-900 mt-2">
+            Nama Peserta
+          </h2>
+          <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mt-1.5">
+            <p id="modal-ic" class="text-xs sm:text-sm font-mono text-slate-600 bg-white/60 px-2.5 py-0.5 rounded-lg border border-slate-200 flex items-center gap-1.5">
+              <i data-lucide="id-card" class="w-3.5 h-3.5 text-brand-500"></i>
+              <span>-</span>
+            </p>
+            <p id="modal-state" class="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="map-pin" class="w-4 h-4 text-brand-500"></i>
+              <span>-</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6 text-xs sm:text-sm">
+        <div class="p-3.5 rounded-2xl bg-white/50 border border-white/70 backdrop-blur-sm">
+          <div class="text-slate-500 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="layers" class="w-3.5 h-3.5 text-brand-500"></i> Program Penerbitan
+          </div>
+          <div id="modal-detail-programpenerbitan" class="font-semibold text-slate-900 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/50 border border-white/70 backdrop-blur-sm">
+          <div class="text-slate-500 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="book-open" class="w-3.5 h-3.5 text-brand-500"></i> Mata Pelajaran
+          </div>
+          <div id="modal-detail-mp" class="font-semibold text-slate-900 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/50 border border-white/70 backdrop-blur-sm">
+          <div class="text-slate-500 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5 text-brand-500"></i> Jawatan Bengkel
+          </div>
+          <div id="modal-detail-jawatan" class="font-semibold text-slate-900 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/50 border border-white/70 backdrop-blur-sm">
+          <div class="text-slate-500 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="user-check" class="w-3.5 h-3.5 text-brand-500"></i> Penyelaras Bengkel
+          </div>
+          <div id="modal-detail-penyelaras" class="font-semibold text-slate-900 text-sm sm:text-base">-</div>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/50 border border-white/70 backdrop-blur-sm sm:col-span-2">
+          <div class="text-slate-500 font-medium text-[11px] uppercase tracking-wider flex items-center gap-1.5 mb-1">
+            <i data-lucide="navigation" class="w-3.5 h-3.5 text-brand-500"></i> Tempat Bengkel
+          </div>
+          <div id="modal-detail-tempat" class="font-semibold text-slate-900 text-sm sm:text-base">-</div>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="text-xs text-slate-500 text-center sm:text-left">
+          Dokumen OPR: <span id="modal-opr-filename" class="font-semibold text-slate-800">Link to merged Doc - DATA 2026</span>
+        </div>
+        
+        <div id="modal-opr-container" class="w-full sm:w-auto"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ==========================================
+    // PENGURUSAN SHELL & LOG MASUK (IFRAME SAFE)
+    // ==========================================
+    const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+
+    function bukaHalamanLogin() {
+      try {
+        window.open(LOGIN_URL, '_top');
+      } catch (e) {
+        window.location.href = LOGIN_URL;
+      }
+    }
+
+    function logKeluar() {
+      localStorage.removeItem("statusLogin");
+      localStorage.removeItem("emailLogin");
+      sessionStorage.removeItem("statusLogin");
+      sessionStorage.removeItem("emailLogin");
+      document.getElementById('login-guard-modal').classList.remove('hidden');
+    }
+
+    // Auto Logout Selepas 10 Minit (600,000 ms) jika tiada interaksi
+    let masaTamat;
+    function mulaKiraan() {
+      clearTimeout(masaTamat);
+      masaTamat = setTimeout(logKeluar, 600000);
+    }
+
+    // Pantau aktiviti pengguna untuk reset pemasa
+    ['load', 'mousemove', 'mousedown', 'touchstart', 'click', 'keypress', 'scroll'].forEach(evt => {
+      window.addEventListener(evt, mulaKiraan);
+    });
+
+    // ==========================================
+    // DATA & DASHBOARD LOGIC
+    // ==========================================
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoXQgGwwY13gb3KXxvAtnde6k0DttXER6z-VuCjoDr63y4LReEwFxWH3qTiTGXQjlqfpUa2ypHffg2/pub?gid=258196902&single=true&output=csv";
+
+    let rawData = [];
+    let filteredData = [];
+    let headersMap = {};
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let currentSearchTerm = "";
+
+    let chartInstances = {
+      jawatan: null,
+      gelaran: null,
+      jantina: null,
+      negeri: null
+    };
+
+    const colorPalettes = {
+      jawatan: ['#4f46e5', '#3b82f6', '#0ea5e9', '#06b6d4', '#6366f1', '#8b5cf6', '#a855f7'],
+      gelaran: ['#0ea5e9', '#06b6d4', '#4f46e5', '#3b82f6', '#8b5cf6', '#a855f7', '#6366f1'],
+      jantina: ['#4f46e5', '#0ea5e9', '#1e1b4b', '#8b5cf6'],
+      negeri:  ['#1e1b4b', '#3730a3', '#4f46e5', '#6366f1', '#3b82f6', '#0ea5e9', '#06b6d4', '#8b5cf6', '#a855f7']
+    };
+
+    // Konfigurasi senarai penapis untuk sokongan Cascading / Dependent Dropdowns
+    const FILTER_CONFIGS = [
+      { id: 'filter-tahun', key: 'tahun', defaultLabel: 'Semua Tahun', descSort: true },
+      { id: 'filter-penyelaras', key: 'penyelaras', defaultLabel: 'Semua Penyelaras', descSort: false },
+      { id: 'filter-programpenerbitan', key: 'programpenerbitan', defaultLabel: 'Semua Program Penerbitan', descSort: false },
+      { id: 'filter-matapelajaran', key: 'matapelajaran', defaultLabel: 'Semua Mata Pelajaran', descSort: false },
+      { id: 'filter-tempat', key: 'tempat', defaultLabel: 'Semua Tempat Bengkel', descSort: false }
+    ];
+
+    window.onload = function () {
+      mulaKiraan();
+      lucide.createIcons();
+
+      // Semakan login mesra pelayar: Jika belum login, buka modal dan bukannya sekatan terus
+      if (!semakStatusLogin()) {
+        const guard = document.getElementById('login-guard-modal');
+        if (guard) guard.classList.remove('hidden');
+      }
+
+      ensureHighchartsLoaded().then(() => {
+        fetchAndParseData();
+      });
+
+      // Event listener penapis dinamik
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.addEventListener('change', applyFilters);
+      });
+
+      document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+      document.getElementById('btn-refresh').addEventListener('click', () => fetchAndParseData(true));
+      document.getElementById('table-search').addEventListener('input', handleTableSearch);
+      document.getElementById('btn-prev-page').addEventListener('click', () => changePage(-1));
+      document.getElementById('btn-next-page').addEventListener('click', () => changePage(1));
+
+      document.getElementById('participant-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'participant-modal') closeParticipantModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeParticipantModal();
+      });
+    };
+
+    function ensureHighchartsLoaded() {
+      return new Promise((resolve) => {
+        if (typeof Highcharts !== 'undefined' && Highcharts.Chart.prototype.is3d !== undefined) {
+          resolve();
+          return;
+        }
+        
+        // Wait dynamically if scripts with defer haven't executed yet
+        let retries = 0;
+        const interval = setInterval(() => {
+          if (typeof Highcharts !== 'undefined' && Highcharts.Chart.prototype.is3d !== undefined) {
+            clearInterval(interval);
+            resolve();
+          }
+          retries++;
+          if(retries > 20) { // Timeout roughly after 2 seconds
+             clearInterval(interval);
+             console.warn('Highcharts 3D might not be fully loaded.');
+             resolve();
+          }
+        }, 100);
+      });
+    }
+
+    function showStatus(text, isError = false) {
+      const bar = document.getElementById('status-bar');
+      const label = document.getElementById('status-text');
+      bar.classList.remove('hidden');
+      label.innerText = text;
+      if (isError) {
+        bar.className = "rounded-2xl p-4 glass-light border border-red-300 text-red-700 text-sm flex items-center justify-between shadow-sm";
+      } else {
+        bar.className = "rounded-2xl p-4 glass-light border border-blue-300/60 text-blue-900 text-sm flex items-center justify-between shadow-sm";
+      }
+    }
+
+    function dismissStatus() {
+      document.getElementById('status-bar').classList.add('hidden');
+    }
+
+    async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(resource, {
+          ...options,
+          signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+      } catch (error) {
+        clearTimeout(id);
+        throw error;
+      }
+    }
+
+    async function fetchAndParseData(forceRefresh = false) {
+      showStatus("Menyambung ke Google Sheets & memuat turun data...");
+
+      const cacheBuster = forceRefresh ? `&t=${Date.now()}` : '';
+      const directUrl = `${CSV_URL}${cacheBuster}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
+
+      let csvText = null;
+
+      // Cuba sambungan terus dahulu (had masa 7 saat)
+      try {
+        const res = await fetchWithTimeout(directUrl, {}, 7000);
+        if (res.ok) {
+          csvText = await res.text();
+        }
+      } catch (e) {
+        console.warn("Sambungan terus Google Sheets gagal/tamat masa, mencuba laluan sandaran...", e);
+      }
+
+      // Jika sambungan terus gagal (contohnya sekatan CORS), cuba melalui proksi
+      if (!csvText) {
+        try {
+          const proxyRes = await fetchWithTimeout(proxyUrl, {}, 7000);
+          if (proxyRes.ok) {
+            csvText = await proxyRes.text();
+          }
+        } catch (e2) {
+          console.warn("Laluan sandaran turut gagal:", e2);
+        }
+      }
+
+      if (csvText && csvText.trim().length > 0 && !csvText.trim().startsWith('<!DOCTYPE html>')) {
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function (results) {
+            if (results.data && results.data.length > 0) {
+              processParsedData(results.data, results.meta.fields);
+              dismissStatus();
+            } else {
+              useMockData();
+            }
+          },
+          error: function () {
+            useMockData();
+          }
+        });
+      } else {
+        showStatus("Sambungan ke Google Sheets disekat atau tamat masa. Memuatkan data simulasi...", true);
+        setTimeout(() => {
+          useMockData();
+        }, 600);
+      }
+    }
+
+    function useMockData() {
+      const mockYears = ["2024", "2025", "2026"];
+      const mockPrograms = ["Buku Teks Digital SPM", "Modul Pintar SBT 2026", "Koleksi Bank Soalan", "Penerbitan Buku Panduan Guru", "Kit Interaktif STEM"];
+      const mockPenyelaras = ["En. Ahmad Razali", "Pn. Siti Fatimah", "Dr. Zulkifli Harun", "Pn. Noraini Hassan"];
+      const mockMP = ["Matematik Tambahan", "Sains", "Fizik", "Kimia", "Biologi", "Bahasa Melayu", "Sejarah"];
+      const mockTempat = ["Dewan Bestari PKG Bangi", "Bilik Seminar Utama JPN", "Pusat Latihan Guru Nilai", "Auditorium Za'ba Putrajaya"];
+      const mockJawatan = ["Guru Cemerlang", "Ketua Panitia", "Guru Kanan MP", "Penyelaras Bilik", "Peserta Bengkel", "Fasilitator"];
+      const mockGelaran = ["Cikgu", "Ustaz", "Dr.", "Tuan", "Puan", "Encik"];
+      const mockJantina = ["Lelaki", "Perempuan"];
+      const mockNegeri = ["Selangor", "Kuala Lumpur", "Johor", "Perak", "Kedah", "Pulau Pinang", "Pahang", "Negeri Sembilan", "Melaka", "Kelantan", "Terengganu", "Sabah", "Sarawak"];
+
+      const generated = [];
+      const totalCount = 148;
+
+      for (let i = 1; i <= totalCount; i++) {
+        const jantina = mockJantina[Math.floor(Math.random() * mockJantina.length)];
+        const gelaran = jantina === 'Perempuan' ? (Math.random() > 0.4 ? "Puan" : (Math.random() > 0.5 ? "Cikgu" : "Dr.")) : (Math.random() > 0.3 ? "Encik" : (Math.random() > 0.5 ? "Cikgu" : "Dr."));
+        
+        generated.push({
+          "Bil": i,
+          "Tahun": mockYears[Math.floor(Math.random() * mockYears.length)],
+          "ProgramPenerbitan": mockPrograms[Math.floor(Math.random() * mockPrograms.length)],
+          "Nama": `Peserta Bengkel ${i}`,
+          "Gelaran": gelaran,
+          "Jantina": jantina,
+          "JawatanBengkel": mockJawatan[Math.floor(Math.random() * mockJawatan.length)],
+          "MataPelajaran": mockMP[Math.floor(Math.random() * mockMP.length)],
+          "TempatBengkel": mockTempat[Math.floor(Math.random() * mockTempat.length)],
+          "Penyelaras": mockPenyelaras[Math.floor(Math.random() * mockPenyelaras.length)],
+          "Negeri": mockNegeri[Math.floor(Math.random() * mockNegeri.length)],
+          "Gambar": `https://images.unsplash.com/photo-${1534528741775 + (i % 20)}?auto=format&fit=crop&w=400&q=80`,
+          "Link to merged Doc - DATA 2026": `https://docs.google.com/document/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/preview`
+        });
+      }
+
+      processParsedData(generated, Object.keys(generated[0]));
+      showStatus("Data simulasi berjaya dimuatkan.");
+      setTimeout(dismissStatus, 3500);
+    }
+
+    function formatImageUrl(rawUrl, defaultName, defaultGender) {
+      if (!rawUrl || typeof rawUrl !== 'string') {
+        const genderSeed = defaultGender && defaultGender.toLowerCase().includes('perempuan') ? 'female' : 'male';
+        return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(defaultName || 'user')}&gender=${genderSeed}&backgroundColor=c7d2fe,e0e7ff,eef2ff`;
+      }
+
+      let url = rawUrl.trim();
+
+      if (url.includes('drive.google.com')) {
+        const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (match1 && match1[1]) return `https://lh3.googleusercontent.com/d/${match1[1]}=w400`;
+
+        const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (match2 && match2[1]) return `https://lh3.googleusercontent.com/d/${match2[1]}=w400`;
+
+        const match3 = url.match(/open\?id=([a-zA-Z0-9_-]+)/);
+        if (match3 && match3[1]) return `https://lh3.googleusercontent.com/d/${match3[1]}=w400`;
+      }
+
+      if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+      const genderSeed = defaultGender && defaultGender.toLowerCase().includes('perempuan') ? 'female' : 'male';
+      return `https://api.dicebear.com/7.x/micah/svg?seed=${encodeURIComponent(defaultName || 'user')}&gender=${genderSeed}&backgroundColor=c7d2fe,e0e7ff,eef2ff`;
+    }
+
+    function formatDocUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      let url = rawUrl.trim();
+      if (!url) return '';
+      
+      // Ekstrak URL jika sel mengandungi teks tambahan atau formula
+      const urlMatch = url.match(/(https?:\/\/[^\s"'<>]+)/i);
+      if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
+      }
+
+      // Hanya tambah https:// jika ia kelihatan seperti domain/pautan Google yang sah
+      if (/^(docs\.google\.com|drive\.google\.com|www\.)/i.test(url)) {
+        return 'https://' + url;
+      }
+
+      return '';
+    }
+
+    function processParsedData(data, fields) {
+      if (!data || data.length === 0) return;
+
+      function findKey(names) {
+        if (!fields) return names[0];
+        for (let target of names) {
+          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
+          if (exact) return exact;
+        }
+        for (let target of names) {
+          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+          if (partial) return partial;
+        }
+        return null;
+      }
+
+      let columnNKey = (fields && fields.length > 13) ? fields[13] : null;
+
+      function colLetterToIndex(col) {
+        let index = 0;
+        for (let i = 0; i < col.length; i++) {
+          index = index * 26 + (col.charCodeAt(i) - 64);
+        }
+        return index - 1;
+      }
+
+      // Kemaskini rujukan OPR ke Kolum BV
+      const colBVIndex = colLetterToIndex('BV');
+      let columnBVKey = (fields && fields.length > colBVIndex) ? fields[colBVIndex] : null;
+      // Kolum B ialah indeks 1 (A=0, B=1)
+      let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
+
+      headersMap = {
+        tahun: columnBKey || findKey(['Tahun', 'Year', 'Sesi']),
+        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program', 'Penerbitan', 'Nama Program', 'Projek Penerbitan']),
+        penyelaras: findKey(['Penyelaras', 'Nama Penyelaras', 'Penyelaras Bengkel']),
+        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek', 'MP']),
+        tempat: findKey(['TempatBengkel', 'Tempat Bengkel', 'Tempat', 'Lokasi']),
+        jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel', 'Jawatan', 'Peranan']),
+        gelaran: findKey(['Gelaran', 'Panggilan', 'Title']),
+        jantina: findKey(['Jantina', 'Gender', 'Sex']),
+        negeri: findKey(['Negeri', 'State', 'Zon']),
+        nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
+        noIc: findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC', 'NRIC']),
+        oprLink: columnBVKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026']),
+        gambarColN: columnNKey || findKey(['Gambar', 'Image', 'Photo', 'Profile', 'Picture', 'Pautan Gambar', 'Avatar', 'URL Gambar'])
+      };
+
+      rawData = data.map((row, idx) => {
+        const rowKeys = Object.keys(row);
+        const rowNama = (row[headersMap.nama] || row['Nama'] || row['Nama Penuh'] || `Peserta #${idx + 1}`).trim();
+        const rowJantina = cleanValue(row[headersMap.jantina] || row['Jantina'] || 'Lain-lain');
+        
+        // Ambil nilai Tahun terus dari Kolum B (indeks 1) atau header Tahun
+        let rawTahun = '';
+        if (columnBKey && row[columnBKey] !== undefined) {
+          rawTahun = row[columnBKey];
+        } else if (headersMap.tahun && row[headersMap.tahun] !== undefined) {
+          rawTahun = row[headersMap.tahun];
+        } else if (rowKeys.length > 1) {
+          rawTahun = row[rowKeys[1]];
+        }
+
+        let rawNoIc = '';
+        if (headersMap.noIc && row[headersMap.noIc]) {
+          rawNoIc = row[headersMap.noIc];
+        }
+
+        let rawImageVal = '';
+        if (headersMap.gambarColN && row[headersMap.gambarColN]) {
+          rawImageVal = row[headersMap.gambarColN];
+        } else if (rowKeys.length > 13) {
+          rawImageVal = row[rowKeys[13]];
+        }
+
+        let rawDocVal = '';
+        if (columnBVKey && row[columnBVKey]) {
+          rawDocVal = row[columnBVKey];
+        } else if (headersMap.oprLink && row[headersMap.oprLink]) {
+          rawDocVal = row[headersMap.oprLink];
+        } else if (rowKeys.length > colBVIndex && row[rowKeys[colBVIndex]]) {
+          rawDocVal = row[rowKeys[colBVIndex]];
+        } else {
+          const matchedOprKey = rowKeys.find(k => 
+            k.trim().toLowerCase().includes('merged doc') || 
+            k.trim().toLowerCase().includes('data 2026') || 
+            k.trim().toLowerCase() === 'bv'
+          );
+          if (matchedOprKey) rawDocVal = row[matchedOprKey];
+        }
+
+        const avatarUrl = formatImageUrl(rawImageVal, rowNama, rowJantina);
+        const cleanOprDoc = formatDocUrl(rawDocVal);
+
+        return {
+          id: idx + 1,
+          tahun: cleanValue(rawTahun),
+          nama: rowNama,
+          programpenerbitan: cleanValue(row[headersMap.programpenerbitan] || row['ProgramPenerbitan'] || row['Program Penerbitan'] || 'Umum'),
+          noIc: cleanValue(rawNoIc),
+          gelaran: cleanValue(row[headersMap.gelaran] || row['Gelaran'] || 'Tiada Gelaran'),
+          jantina: rowJantina,
+          jawatan: cleanValue(row[headersMap.jawatan] || row['JawatanBengkel'] || 'Peserta'),
+          matapelajaran: cleanValue(row[headersMap.matapelajaran] || row['MataPelajaran'] || 'Umum'),
+          tempat: cleanValue(row[headersMap.tempat] || row['TempatBengkel'] || 'Dalam Talian / Pusat'),
+          penyelaras: cleanValue(row[headersMap.penyelaras] || row['Penyelaras'] || 'Penyelaras Utama'),
+          negeri: cleanValue(row[headersMap.negeri] || row['Negeri'] || 'Lain-lain'),
+          oprDoc: cleanOprDoc,
+          gambar: avatarUrl,
+          rawImageVal: rawImageVal,
+          rawRow: row
+        };
+      }).filter(r => r.nama && r.nama !== '');
+
+      // Kemas kini kesemua senarai dropdown dan paparan dashboard
+      applyFilters();
+    }
+
+    function cleanValue(val) {
+      if (!val) return 'Tidak Dinyatakan';
+      let str = String(val).trim();
+      return str === '' ? 'Tidak Dinyatakan' : str;
+    }
+
+    /**
+     * Kemas kini pilihan dropdown secara dinamik (Cascading / Dependent Filters).
+     * Setiap dropdown akan hanya menunjukkan nilai yang wujud berdasarkan penapis-penapis LAIN yang sedang aktif.
+     */
+    function updateAllDropdownOptions(currentSelections) {
+      FILTER_CONFIGS.forEach(targetCfg => {
+        const select = document.getElementById(targetCfg.id);
+        if (!select) return;
+
+        const currentSelectedVal = currentSelections[targetCfg.key] || '';
+
+        // Tapis rawData menggunakan semua penapis AKTIF KECUALI penapis sasaran ini sendiri
+        const validSubset = rawData.filter(row => {
+          return FILTER_CONFIGS.every(otherCfg => {
+            if (otherCfg.key === targetCfg.key) return true;
+            const selectedOtherVal = currentSelections[otherCfg.key];
+            return !selectedOtherVal || row[otherCfg.key] === selectedOtherVal;
+          });
+        });
+
+        const uniqueValues = [...new Set(validSubset.map(item => item[targetCfg.key]))]
+          .filter(val => val && val !== 'Tidak Dinyatakan')
+          .sort((a, b) => {
+            return targetCfg.descSort
+              ? b.localeCompare(a, 'ms', { numeric: true })
+              : a.localeCompare(b, 'ms', { numeric: true });
+          });
+
+        // Bina semula pilihan <option>
+        select.innerHTML = `<option value="" class="bg-white text-slate-900">${targetCfg.defaultLabel}</option>`;
+        
+        let isStillValid = false;
+        uniqueValues.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val;
+          opt.className = "bg-white text-slate-900";
+          if (val === currentSelectedVal) {
+            opt.selected = true;
+            isStillValid = true;
+          }
+          select.appendChild(opt);
+        });
+
+        // Jika pilihan lama tidak lagi wujud selepas penapis lain ditukar, tetapkan semula ke ''
+        if (currentSelectedVal && !isStillValid) {
+          select.value = '';
+          currentSelections[targetCfg.key] = '';
+        }
+
+        // Beri petunjuk visual halus jika penapis sedang aktif ditapis
+        if (select.value !== '') {
+          select.classList.add('border-brand-400', 'bg-brand-50/70', 'text-brand-900');
+        } else {
+          select.classList.remove('border-brand-400', 'bg-brand-50/70', 'text-brand-900');
+        }
+      });
+    }
+
+    function applyFilters() {
+      // 1. Dapatkan nilai semasa daripada semua dropdown
+      const selections = {};
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        selections[cfg.key] = el ? el.value : '';
+      });
+
+      // 2. Kemas kini senarai pilihan pada setiap dropdown berdasarkan pilihan lain (Cascading)
+      updateAllDropdownOptions(selections);
+
+      // 3. Tapis data utama mengikut pilihan muktamad
+      filteredData = rawData.filter(row => {
+        return FILTER_CONFIGS.every(cfg => {
+          const selVal = selections[cfg.key];
+          return !selVal || row[cfg.key] === selVal;
+        });
+      });
+
+      currentPage = 1;
+      updateHeroStats();
+      renderAllCharts();
+      renderTable();
+    }
+
+    function resetFilters() {
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.value = '';
+      });
+      applyFilters();
+    }
+
+    function updateHeroStats() {
+      const totalCount = filteredData.length;
+      const rawTotal = rawData.length;
+
+      animateValue("total-count-display", totalCount);
+
+      const badge = document.getElementById('filtered-badge');
+      const isFiltered = totalCount !== rawTotal;
+      if (isFiltered) {
+        badge.textContent = `Ditapis: ${totalCount} daripada ${rawTotal}`;
+        badge.className = "text-xs sm:text-sm px-2.5 py-1 rounded-full bg-white/20 text-white font-semibold border border-white/30 backdrop-blur-md";
+      } else {
+        badge.textContent = `Semua ${rawTotal} Rekod`;
+        badge.className = "text-xs sm:text-sm px-2.5 py-1 rounded-full bg-white/20 text-white font-semibold border border-white/30 backdrop-blur-md";
+      }
+
+      const uniqProg = new Set(filteredData.map(d => d.programpenerbitan)).size;
+      const uniqP = new Set(filteredData.map(d => d.penyelaras)).size;
+      const uniqMP = new Set(filteredData.map(d => d.matapelajaran)).size;
+      const uniqT = new Set(filteredData.map(d => d.tempat)).size;
+
+      document.getElementById('stat-penerbitan-count').textContent = uniqProg;
+      document.getElementById('stat-penyelaras-count').textContent = uniqP;
+      document.getElementById('stat-matapelajaran-count').textContent = uniqMP;
+      document.getElementById('stat-tempat-count').textContent = uniqT;
+    }
+
+    function animateValue(id, end) {
+      const obj = document.getElementById(id);
+      const start = parseInt(obj.innerText.replace(/,/g, '')) || 0;
+      if (start === end) return;
+      const duration = 400;
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        } else {
+          obj.innerHTML = end;
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    function getAggregatedData(fieldKey) {
+      const map = {};
+      filteredData.forEach(item => {
+        const val = item[fieldKey] || 'Lain-lain';
+        map[val] = (map[val] || 0) + 1;
+      });
+
+      return Object.keys(map)
+        .map(key => ({ name: key, y: map[key] }))
+        .sort((a, b) => b.y - a.y);
+    }
+
+    function renderAllCharts() {
+      render3DPieChart('chart-jawatan', 'Jawatan Bengkel', getAggregatedData('jawatan'), colorPalettes.jawatan, 'jawatan');
+      render3DPieChart('chart-gelaran', 'Gelaran Peserta', getAggregatedData('gelaran'), colorPalettes.gelaran, 'gelaran');
+      render3DPieChart('chart-jantina', 'Pecahan Jantina', getAggregatedData('jantina'), colorPalettes.jantina, 'jantina');
+      render3DPieChart('chart-negeri', 'Taburan Negeri', getAggregatedData('negeri'), colorPalettes.negeri, 'negeri');
+    }
+
+    function render3DPieChart(containerId, titleText, seriesData, colors, instanceKey) {
+      if (typeof Highcharts === 'undefined') {
+        const container = document.getElementById(containerId);
+        if (container) {
+          container.innerHTML = `
+            <div class="flex items-center justify-center h-full text-xs text-slate-500">
+              Sedang memuatkan modul carta 3D...
+            </div>
+          `;
+        }
+        return;
+      }
+
+      const textColor = '#0f172a';
+      const subTextColor = '#64748b';
+      const tooltipBg = 'rgba(255, 255, 255, 0.96)';
+      const tooltipBorder = '#e2e8f0';
+
+      if (seriesData.length === 0) {
+        seriesData = [{ name: 'Tiada Data', y: 1 }];
+      }
+
+      const has3D = Highcharts.Chart.prototype.is3d !== undefined || (Highcharts.getOptions().chart && Highcharts.getOptions().chart.options3d);
+
+      chartInstances[instanceKey] = Highcharts.chart(containerId, {
+        chart: {
+          type: 'pie',
+          backgroundColor: 'transparent',
+          options3d: {
+            enabled: !!has3D,
+            alpha: 45,
+            beta: 0
+          },
+          style: {
+            fontFamily: '"Plus Jakarta Sans", sans-serif'
+          }
+        },
+        colors: colors,
+        title: {
+          text: null
+        },
+        tooltip: {
+          useHTML: true,
+          backgroundColor: tooltipBg,
+          borderColor: tooltipBorder,
+          borderRadius: 12,
+          shadow: true,
+          style: {
+            color: textColor
+          },
+          formatter: function () {
+            return `
+              <div style="padding: 4px 6px;">
+                <span style="font-size:12px; font-weight:600; color:${this.point.color}">●</span>
+                <b style="font-size:13px; color:${textColor};"> ${this.point.name}</b><br/>
+                <span style="font-size:12px; color:${subTextColor}">Bilangan: <b style="color:${textColor};">${this.y}</b> (${this.percentage.toFixed(1)}%)</span>
+              </div>
+            `;
+          }
+        },
+        plotOptions: {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            depth: 35,
+            innerSize: '32%',
+            dataLabels: {
+              enabled: true,
+              format: '<span style="color:' + textColor + '; font-size:11px; font-weight:600;">{point.name}: <b style="color:#1e1b4b;">{point.percentage:.0f}%</b></span>',
+              distance: 18,
+              connectorColor: 'rgba(30, 27, 75, 0.18)',
+              connectorWidth: 1.2
+            },
+            showInLegend: false
+          }
+        },
+        series: [{
+          type: 'pie',
+          name: titleText,
+          data: seriesData
+        }],
+        credits: {
+          enabled: false
+        },
+        exporting: {
+          enabled: false
+        }
+      });
+    }
+
+    function handleTableSearch(e) {
+      currentSearchTerm = e.target.value.toLowerCase().trim();
+      currentPage = 1;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      
+      const searchFiltered = filteredData.filter(item => {
+        if (!currentSearchTerm) return true;
+        return (
+          item.tahun.toLowerCase().includes(currentSearchTerm) ||
+          item.nama.toLowerCase().includes(currentSearchTerm) ||
+          item.programpenerbitan.toLowerCase().includes(currentSearchTerm) ||
+          item.gelaran.toLowerCase().includes(currentSearchTerm) ||
+          item.jantina.toLowerCase().includes(currentSearchTerm) ||
+          item.jawatan.toLowerCase().includes(currentSearchTerm) ||
+          item.matapelajaran.toLowerCase().includes(currentSearchTerm) ||
+          item.tempat.toLowerCase().includes(currentSearchTerm) ||
+          item.penyelaras.toLowerCase().includes(currentSearchTerm) ||
+          item.negeri.toLowerCase().includes(currentSearchTerm)
+        );
+      });
+
+      const totalRows = searchFiltered.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const pageData = searchFiltered.slice(startIndex, startIndex + rowsPerPage);
+
+      if (pageData.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" class="text-center py-8 text-slate-500">
+              Tiada rekod sepadan dengan kriteria carian/penapis.
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = pageData.map((row, index) => {
+          const actualIndex = startIndex + index + 1;
+          return `
+            <tr class="hover:bg-brand-50/50 transition group">
+              <td class="py-3 px-4 font-mono text-xs text-slate-500">${actualIndex}</td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                  ${escapeHtml(row.tahun)}
+                </span>
+              </td>
+              <td class="py-3 px-4 font-semibold text-slate-900">
+                <button onclick="openParticipantModal(${row.id})" class="text-left font-bold text-brand-600 hover:text-brand-800 hover:underline flex items-center gap-1.5 transition">
+                  <span>${escapeHtml(row.nama)}</span>
+                  <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition text-brand-400"></i>
+                </button>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-800 border border-cyan-200">
+                  ${escapeHtml(row.programpenerbitan)}
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/70 text-slate-800 border border-white/80">
+                  ${escapeHtml(row.gelaran)}
+                </span>
+              </td>
+              <td class="py-3 px-4">
+                <span class="inline-flex items-center gap-1.5 text-xs font-medium ${row.jantina === 'Lelaki' ? 'text-brand-600' : 'text-cyan-600'}">
+                  <span class="w-1.5 h-1.5 rounded-full ${row.jantina === 'Lelaki' ? 'bg-brand-500' : 'bg-cyan-500'}"></span>
+                  ${escapeHtml(row.jantina)}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-xs font-medium text-slate-800">${escapeHtml(row.jawatan)}</td>
+              <td class="py-3 px-4 text-xs font-medium text-slate-800">${escapeHtml(row.matapelajaran)}</td>
+              <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(row.tempat)}</td>
+              <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(row.penyelaras)}</td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200/60">
+                  ${escapeHtml(row.negeri)}
+                </span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      lucide.createIcons();
+
+      document.getElementById('table-entries-info').textContent = 
+        `Menunjukkan ${totalRows === 0 ? 0 : startIndex + 1} hingga ${Math.min(startIndex + rowsPerPage, totalRows)} daripada ${totalRows} rekod`;
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('btn-prev-page').disabled = currentPage <= 1;
+      document.getElementById('btn-next-page').disabled = currentPage >= totalPages;
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+      renderTable();
+    }
+
+    function openParticipantModal(id) {
+      const participant = rawData.find(p => p.id === id);
+      if (!participant) return;
+
+      const avatarEl = document.getElementById('modal-avatar');
+      avatarEl.src = participant.gambar;
+      avatarEl.onerror = function() {
+        this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.nama)}&background=6366f1&color=fff&size=200&bold=true`;
+      };
+
+      document.getElementById('modal-name').textContent = participant.nama;
+      document.getElementById('modal-tahun-pill').textContent = `Tahun ${participant.tahun}`;
+      document.getElementById('modal-title-pill').textContent = participant.gelaran;
+      document.getElementById('modal-role-pill').textContent = participant.jawatan;
+      document.getElementById('modal-program-pill').textContent = participant.programpenerbitan;
+      document.getElementById('modal-gender-badge').textContent = participant.jantina;
+      document.getElementById('modal-ic').innerHTML = `
+        <i data-lucide="id-card" class="w-3.5 h-3.5 text-brand-500"></i>
+        <span>No. KP: <b>${escapeHtml(participant.noIc)}</b></span>
+      `;
+      document.getElementById('modal-state').innerHTML = `
+        <i data-lucide="map-pin" class="w-4 h-4 text-brand-500"></i>
+        <span>${escapeHtml(participant.negeri)}</span>
+      `;
+
+      document.getElementById('modal-detail-programpenerbitan').textContent = participant.programpenerbitan;
+      document.getElementById('modal-detail-mp').textContent = participant.matapelajaran;
+      document.getElementById('modal-detail-jawatan').textContent = participant.jawatan;
+      document.getElementById('modal-detail-penyelaras').textContent = participant.penyelaras;
+      document.getElementById('modal-detail-tempat').textContent = participant.tempat;
+
+      const oprContainer = document.getElementById('modal-opr-container');
+      const docLink = participant.oprDoc;
+
+      if (docLink && docLink.trim() !== '') {
+        oprContainer.innerHTML = `
+          <a href="${escapeHtml(docLink)}" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 to-cyan-500 hover:from-brand-500 hover:to-cyan-400 text-white font-semibold shadow-lg shadow-brand-500/25 transition active:scale-95 text-xs sm:text-sm">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Buka / Muat Turun OPR</span>
+          </a>
+        `;
+      } else {
+        oprContainer.innerHTML = `
+          <button disabled class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-white/70 text-slate-500 border border-white/80 text-xs sm:text-sm cursor-not-allowed" title="Tiada pautan fail OPR dalam data rekod ini">
+            <i data-lucide="file-x" class="w-4 h-4"></i>
+            <span>Pautan OPR Tiada</span>
+          </button>
+        `;
+      }
+
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        container.classList.remove('scale-95');
+        container.classList.add('scale-100');
+      }, 10);
+
+      lucide.createIcons();
+    }
+
+    function closeParticipantModal() {
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.add('opacity-0');
+      container.classList.remove('scale-100');
+      container.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
