@@ -659,32 +659,75 @@
       document.getElementById('status-bar').classList.add('hidden');
     }
 
-    function fetchAndParseData(forceRefresh = false) {
+    async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(resource, {
+          ...options,
+          signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+      } catch (error) {
+        clearTimeout(id);
+        throw error;
+      }
+    }
+
+    async function fetchAndParseData(forceRefresh = false) {
       showStatus("Menyambung ke Google Sheets & memuat turun data...");
 
-      const url = forceRefresh ? `${CSV_URL}&t=${new Date().getTime()}` : CSV_URL;
+      const cacheBuster = forceRefresh ? `&t=${Date.now()}` : '';
+      const directUrl = `${CSV_URL}${cacheBuster}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
 
-      Papa.parse(url, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-          if (results.data && results.data.length > 0) {
-            processParsedData(results.data, results.meta.fields);
-            dismissStatus();
-          } else {
-            console.warn("CSV return empty data, using fallback simulator dataset.");
+      let csvText = null;
+
+      // Cuba sambungan terus dahulu (had masa 7 saat)
+      try {
+        const res = await fetchWithTimeout(directUrl, {}, 7000);
+        if (res.ok) {
+          csvText = await res.text();
+        }
+      } catch (e) {
+        console.warn("Sambungan terus Google Sheets gagal/tamat masa, mencuba laluan sandaran...", e);
+      }
+
+      // Jika sambungan terus gagal (contohnya sekatan CORS), cuba melalui proksi
+      if (!csvText) {
+        try {
+          const proxyRes = await fetchWithTimeout(proxyUrl, {}, 7000);
+          if (proxyRes.ok) {
+            csvText = await proxyRes.text();
+          }
+        } catch (e2) {
+          console.warn("Laluan sandaran turut gagal:", e2);
+        }
+      }
+
+      if (csvText && csvText.trim().length > 0 && !csvText.trim().startsWith('<!DOCTYPE html>')) {
+        Papa.parse(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function (results) {
+            if (results.data && results.data.length > 0) {
+              processParsedData(results.data, results.meta.fields);
+              dismissStatus();
+            } else {
+              useMockData();
+            }
+          },
+          error: function () {
             useMockData();
           }
-        },
-        error: function (err) {
-          console.warn("Error fetching live CSV (CORS or network):", err);
-          showStatus("Gagal menyambung terus ke CSV kerana had keselamatan pelayan atau CORS. Memuatkan salinan data bengkel simulasi...", true);
-          setTimeout(() => {
-            useMockData();
-          }, 800);
-        }
-      });
+        });
+      } else {
+        showStatus("Sambungan ke Google Sheets disekat atau tamat masa. Memuatkan data simulasi...", true);
+        setTimeout(() => {
+          useMockData();
+        }, 600);
+      }
     }
 
     function useMockData() {
@@ -772,7 +815,23 @@
     }
 
     function processParsedData(data, fields) {
-// ... existing code ... -->
+      if (!data || data.length === 0) return;
+
+      function findKey(names) {
+        if (!fields) return names[0];
+        for (let target of names) {
+          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
+          if (exact) return exact;
+        }
+        for (let target of names) {
+          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+          if (partial) return partial;
+        }
+        return null;
+      }
+
+      let columnNKey = (fields && fields.length > 13) ? fields[13] : null;
+
       function colLetterToIndex(col) {
         let index = 0;
         for (let i = 0; i < col.length; i++) {
