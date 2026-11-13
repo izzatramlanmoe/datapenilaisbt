@@ -224,7 +224,7 @@
       </div>
     </section>
 
-    <!-- SECTION FILTER: Program Penerbitan, Penyelaras, Mata Pelajaran, Tempat Bengkel -->
+    <!-- SECTION FILTER: Tahun (Single Top) + Program Penerbitan, Penyelaras, Mata Pelajaran, Tempat Bengkel -->
     <section class="glass-light rounded-3xl p-5 sm:p-6 border glass-card">
       <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div class="flex items-center gap-2 text-slate-900 font-semibold text-base sm:text-lg">
@@ -237,6 +237,22 @@
         </button>
       </div>
 
+      <!-- Single Filter Row di Bahagian Atas Sekali: TAHUN (Kolum B) -->
+      <div class="mb-4 pb-4 border-b border-slate-200/80">
+        <div class="flex flex-col gap-1.5">
+          <label for="filter-tahun" class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Tahun (Kolum B)
+          </label>
+          <div class="relative">
+            <select id="filter-tahun" class="w-full appearance-none rounded-2xl bg-indigo-50/40 border border-indigo-200/90 px-4 py-3 pr-10 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
+              <option value="" class="bg-white text-slate-800">Semua Tahun</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-indigo-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Baris Penapis Kedua (4 Kolum) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Filter 1: Program Penerbitan -->
         <div class="flex flex-col gap-1.5">
@@ -367,7 +383,7 @@
         </div>
 
         <div class="relative sm:w-72">
-          <input type="text" id="table-search" placeholder="Cari nama, penerbitan, negeri..." class="w-full rounded-2xl bg-white border border-slate-200 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 shadow-sm" />
+          <input type="text" id="table-search" placeholder="Cari nama, tahun, penerbitan..." class="w-full rounded-2xl bg-white border border-slate-200 pl-9 pr-4 py-2 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 shadow-sm" />
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
         </div>
       </div>
@@ -377,6 +393,7 @@
           <thead class="bg-slate-100/90 text-slate-600 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200">
             <tr id="table-head-row">
               <th class="py-3 px-4">Bil</th>
+              <th class="py-3 px-4">Tahun</th>
               <th class="py-3 px-4">Nama</th>
               <th class="py-3 px-4">Program Penerbitan</th>
               <th class="py-3 px-4">Gelaran</th>
@@ -390,7 +407,7 @@
           </thead>
           <tbody id="table-body" class="divide-y divide-slate-200/80 text-slate-700 font-normal">
             <tr>
-              <td colspan="10" class="text-center py-8 text-slate-400">Sedang memuat data...</td>
+              <td colspan="11" class="text-center py-8 text-slate-400">Sedang memuat data...</td>
             </tr>
           </tbody>
         </table>
@@ -430,6 +447,9 @@
         </div>
         <div class="text-center sm:text-left flex-1">
           <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span id="modal-tahun-pill" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-indigo-600 text-white shadow-sm">
+              -
+            </span>
             <span id="modal-title-pill" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
               -
             </span>
@@ -579,7 +599,8 @@
         fetchAndParseData();
       });
 
-      // Event listener penapis termasuk programpenerbitan
+      // Event listener penapis termasuk Tahun (Kolum B) dan programpenerbitan
+      document.getElementById('filter-tahun').addEventListener('change', applyFilters);
       document.getElementById('filter-programpenerbitan').addEventListener('change', applyFilters);
       document.getElementById('filter-penyelaras').addEventListener('change', applyFilters);
       document.getElementById('filter-matapelajaran').addEventListener('change', applyFilters);
@@ -667,6 +688,7 @@
     }
 
     function useMockData() {
+      const mockYears = ["2024", "2025", "2026"];
       const mockPrograms = ["Buku Teks Digital SPM", "Modul Pintar SBT 2026", "Koleksi Bank Soalan", "Penerbitan Buku Panduan Guru", "Kit Interaktif STEM"];
       const mockPenyelaras = ["En. Ahmad Razali", "Pn. Siti Fatimah", "Dr. Zulkifli Harun", "Pn. Noraini Hassan"];
       const mockMP = ["Matematik Tambahan", "Sains", "Fizik", "Kimia", "Biologi", "Bahasa Melayu", "Sejarah"];
@@ -685,6 +707,7 @@
         
         generated.push({
           "Bil": i,
+          "Tahun": mockYears[Math.floor(Math.random() * mockYears.length)],
           "ProgramPenerbitan": mockPrograms[Math.floor(Math.random() * mockPrograms.length)],
           "Nama": `Peserta Bengkel ${i}`,
           "Gelaran": gelaran,
@@ -767,9 +790,11 @@
 
       const colBUIndex = colLetterToIndex('BU');
       let columnBUKey = (fields && fields.length > colBUIndex) ? fields[colBUIndex] : null;
+      // Kolum B ialah indeks 1 (A=0, B=1)
       let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
 
       headersMap = {
+        tahun: columnBKey || findKey(['Tahun', 'Year', 'Sesi']),
         programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program', 'Penerbitan', 'Nama Program', 'Projek Penerbitan']),
         penyelaras: findKey(['Penyelaras', 'Nama Penyelaras', 'Penyelaras Bengkel']),
         matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek', 'MP']),
@@ -779,33 +804,39 @@
         jantina: findKey(['Jantina', 'Gender', 'Sex']),
         negeri: findKey(['Negeri', 'State', 'Zon']),
         nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
-        noIc: columnBKey || findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC', 'NRIC']),
+        noIc: findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC', 'NRIC']),
         oprLink: columnBUKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026']),
         gambarColN: columnNKey || findKey(['Gambar', 'Image', 'Photo', 'Profile', 'Picture', 'Pautan Gambar', 'Avatar', 'URL Gambar'])
       };
 
       rawData = data.map((row, idx) => {
+        const rowKeys = Object.keys(row);
         const rowNama = (row[headersMap.nama] || row['Nama'] || row['Nama Penuh'] || `Peserta #${idx + 1}`).trim();
         const rowJantina = cleanValue(row[headersMap.jantina] || row['Jantina'] || 'Lain-lain');
         
+        // Ambil nilai Tahun terus dari Kolum B (indeks 1) atau header Tahun
+        let rawTahun = '';
+        if (columnBKey && row[columnBKey] !== undefined) {
+          rawTahun = row[columnBKey];
+        } else if (headersMap.tahun && row[headersMap.tahun] !== undefined) {
+          rawTahun = row[headersMap.tahun];
+        } else if (rowKeys.length > 1) {
+          rawTahun = row[rowKeys[1]];
+        }
+
         let rawNoIc = '';
         if (headersMap.noIc && row[headersMap.noIc]) {
           rawNoIc = row[headersMap.noIc];
-        } else {
-          const rowKeys = Object.keys(row);
-          if (rowKeys.length > 1) rawNoIc = row[rowKeys[1]];
         }
 
         let rawImageVal = '';
         if (headersMap.gambarColN && row[headersMap.gambarColN]) {
           rawImageVal = row[headersMap.gambarColN];
-        } else {
-          const rowKeys = Object.keys(row);
-          if (rowKeys.length > 13) rawImageVal = row[rowKeys[13]];
+        } else if (rowKeys.length > 13) {
+          rawImageVal = row[rowKeys[13]];
         }
 
         let rawDocVal = '';
-        const rowKeys = Object.keys(row);
         if (columnBUKey && row[columnBUKey]) {
           rawDocVal = row[columnBUKey];
         } else if (headersMap.oprLink && row[headersMap.oprLink]) {
@@ -826,6 +857,7 @@
 
         return {
           id: idx + 1,
+          tahun: cleanValue(rawTahun),
           nama: rowNama,
           programpenerbitan: cleanValue(row[headersMap.programpenerbitan] || row['ProgramPenerbitan'] || row['Program Penerbitan'] || 'Umum'),
           noIc: cleanValue(rawNoIc),
@@ -845,6 +877,7 @@
 
       filteredData = [...rawData];
 
+      populateDropdown('filter-tahun', 'tahun', 'Semua Tahun', true);
       populateDropdown('filter-programpenerbitan', 'programpenerbitan', 'Semua Program Penerbitan');
       populateDropdown('filter-penyelaras', 'penyelaras', 'Semua Penyelaras');
       populateDropdown('filter-matapelajaran', 'matapelajaran', 'Semua Mata Pelajaran');
@@ -856,16 +889,18 @@
     }
 
     function cleanValue(val) {
-      if (!val) return 'Tidak Dinyatakan';
+      if (val === null || val === undefined) return 'Tidak Dinyatakan';
       let str = String(val).trim();
       return str === '' ? 'Tidak Dinyatakan' : str;
     }
 
-    function populateDropdown(elemId, fieldKey, defaultLabel) {
+    function populateDropdown(elemId, fieldKey, defaultLabel, sortDesc = false) {
       const select = document.getElementById(elemId);
       if (!select) return;
       const currentSelected = select.value;
-      const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => a.localeCompare(b, 'ms'));
+      const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => {
+        return sortDesc ? b.localeCompare(a, 'ms', { numeric: true }) : a.localeCompare(b, 'ms', { numeric: true });
+      });
 
       select.innerHTML = `<option value="">${defaultLabel}</option>`;
       uniqueValues.forEach(val => {
@@ -879,17 +914,19 @@
     }
 
     function applyFilters() {
+      const selTahun = document.getElementById('filter-tahun').value;
       const selProgram = document.getElementById('filter-programpenerbitan').value;
       const selPenyelaras = document.getElementById('filter-penyelaras').value;
       const selMP = document.getElementById('filter-matapelajaran').value;
       const selTempat = document.getElementById('filter-tempat').value;
 
       filteredData = rawData.filter(row => {
+        const matchTahun = !selTahun || row.tahun === selTahun;
         const matchProg = !selProgram || row.programpenerbitan === selProgram;
         const matchP = !selPenyelaras || row.penyelaras === selPenyelaras;
         const matchMP = !selMP || row.matapelajaran === selMP;
         const matchT = !selTempat || row.tempat === selTempat;
-        return matchProg && matchP && matchMP && matchT;
+        return matchTahun && matchProg && matchP && matchMP && matchT;
       });
 
       currentPage = 1;
@@ -899,6 +936,7 @@
     }
 
     function resetFilters() {
+      document.getElementById('filter-tahun').value = '';
       document.getElementById('filter-programpenerbitan').value = '';
       document.getElementById('filter-penyelaras').value = '';
       document.getElementById('filter-matapelajaran').value = '';
@@ -1073,6 +1111,7 @@
       const searchFiltered = filteredData.filter(item => {
         if (!currentSearchTerm) return true;
         return (
+          item.tahun.toLowerCase().includes(currentSearchTerm) ||
           item.nama.toLowerCase().includes(currentSearchTerm) ||
           item.programpenerbitan.toLowerCase().includes(currentSearchTerm) ||
           item.gelaran.toLowerCase().includes(currentSearchTerm) ||
@@ -1095,7 +1134,7 @@
       if (pageData.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="10" class="text-center py-8 text-slate-400">
+            <td colspan="11" class="text-center py-8 text-slate-400">
               Tiada rekod sepadan dengan kriteria carian/penapis.
             </td>
           </tr>
@@ -1106,6 +1145,11 @@
           return `
             <tr class="hover:bg-slate-50 transition group">
               <td class="py-3 px-4 font-mono text-xs text-slate-400">${actualIndex}</td>
+              <td class="py-3 px-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                  ${escapeHtml(row.tahun)}
+                </span>
+              </td>
               <td class="py-3 px-4 font-semibold text-slate-900">
                 <button onclick="openParticipantModal(${row.id})" class="text-left font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1.5 transition">
                   <span>${escapeHtml(row.nama)}</span>
@@ -1167,6 +1211,7 @@
       };
 
       document.getElementById('modal-name').textContent = participant.nama;
+      document.getElementById('modal-tahun-pill').textContent = `Tahun ${participant.tahun}`;
       document.getElementById('modal-title-pill').textContent = participant.gelaran;
       document.getElementById('modal-role-pill').textContent = participant.jawatan;
       document.getElementById('modal-program-pill').textContent = participant.programpenerbitan;
