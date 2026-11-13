@@ -237,11 +237,11 @@
         </button>
       </div>
 
-      <!-- Single Filter Row di Bahagian Atas Sekali: TAHUN PENERBITAN -->
+      <!-- Single Filter Row di Bahagian Atas Sekali: TAHUN (Kolum B) -->
       <div class="mb-4 pb-4 border-b border-slate-200/80">
         <div class="flex flex-col gap-1.5">
           <label for="filter-tahun" class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
-            <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Tahun Penerbitan
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-indigo-500"></i> Tahun (Kolum B)
           </label>
           <div class="relative">
             <select id="filter-tahun" class="w-full appearance-none rounded-2xl bg-indigo-50/40 border border-indigo-200/90 px-4 py-3 pr-10 text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/70 transition shadow-sm cursor-pointer">
@@ -425,7 +425,7 @@
 
     <!-- Footer -->
     <footer class="text-center text-xs text-slate-400 py-4">
-      Sistem Panel Penilai &copy; 2026. #teamdatasbt.
+      Sistem Dashboard Analisis Bengkel &copy; 2026. Diperkasakan dengan Glassmorphism & Highcharts 3D.
     </footer>
 
   </div>
@@ -756,30 +756,23 @@
       if (!rawUrl || typeof rawUrl !== 'string') return '';
       let url = rawUrl.trim();
       if (!url) return '';
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
+      
+      // Ekstrak URL jika sel mengandungi teks tambahan atau formula
+      const urlMatch = url.match(/(https?:\/\/[^\s"'<>]+)/i);
+      if (urlMatch && urlMatch[1]) {
+        return urlMatch[1];
       }
-      return url;
+
+      // Hanya tambah https:// jika ia kelihatan seperti domain/pautan Google yang sah
+      if (/^(docs\.google\.com|drive\.google\.com|www\.)/i.test(url)) {
+        return 'https://' + url;
+      }
+
+      return '';
     }
 
     function processParsedData(data, fields) {
-      if (!data || data.length === 0) return;
-
-      function findKey(names) {
-        if (!fields) return names[0];
-        for (let target of names) {
-          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
-          if (exact) return exact;
-        }
-        for (let target of names) {
-          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
-          if (partial) return partial;
-        }
-        return null;
-      }
-
-      let columnNKey = (fields && fields.length > 13) ? fields[13] : null;
-
+// ... existing code ... -->
       function colLetterToIndex(col) {
         let index = 0;
         for (let i = 0; i < col.length; i++) {
@@ -788,8 +781,9 @@
         return index - 1;
       }
 
-      const colBUIndex = colLetterToIndex('BU');
-      let columnBUKey = (fields && fields.length > colBUIndex) ? fields[colBUIndex] : null;
+      // Kemaskini rujukan OPR ke Kolum BV
+      const colBVIndex = colLetterToIndex('BV');
+      let columnBVKey = (fields && fields.length > colBVIndex) ? fields[colBVIndex] : null;
       // Kolum B ialah indeks 1 (A=0, B=1)
       let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
 
@@ -805,7 +799,7 @@
         negeri: findKey(['Negeri', 'State', 'Zon']),
         nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
         noIc: findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC', 'NRIC']),
-        oprLink: columnBUKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026']),
+        oprLink: columnBVKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026']),
         gambarColN: columnNKey || findKey(['Gambar', 'Image', 'Photo', 'Profile', 'Picture', 'Pautan Gambar', 'Avatar', 'URL Gambar'])
       };
 
@@ -837,17 +831,17 @@
         }
 
         let rawDocVal = '';
-        if (columnBUKey && row[columnBUKey]) {
-          rawDocVal = row[columnBUKey];
+        if (columnBVKey && row[columnBVKey]) {
+          rawDocVal = row[columnBVKey];
         } else if (headersMap.oprLink && row[headersMap.oprLink]) {
           rawDocVal = row[headersMap.oprLink];
-        } else if (rowKeys.length > colBUIndex && row[rowKeys[colBUIndex]]) {
-          rawDocVal = row[rowKeys[colBUIndex]];
+        } else if (rowKeys.length > colBVIndex && row[rowKeys[colBVIndex]]) {
+          rawDocVal = row[rowKeys[colBVIndex]];
         } else {
           const matchedOprKey = rowKeys.find(k => 
             k.trim().toLowerCase().includes('merged doc') || 
             k.trim().toLowerCase().includes('data 2026') || 
-            k.trim().toLowerCase() === 'bu'
+            k.trim().toLowerCase() === 'bv'
           );
           if (matchedOprKey) rawDocVal = row[matchedOprKey];
         }
@@ -889,17 +883,17 @@
     }
 
     function cleanValue(val) {
-      if (val === null || val === undefined) return 'Tidak Dinyatakan';
+      if (!val) return 'Tidak Dinyatakan';
       let str = String(val).trim();
       return str === '' ? 'Tidak Dinyatakan' : str;
     }
 
-    function populateDropdown(elemId, fieldKey, defaultLabel, sortDesc = false) {
+    function populateDropdown(elemId, fieldKey, defaultLabel, descSort = false) {
       const select = document.getElementById(elemId);
       if (!select) return;
       const currentSelected = select.value;
       const uniqueValues = [...new Set(rawData.map(item => item[fieldKey]))].sort((a, b) => {
-        return sortDesc ? b.localeCompare(a, 'ms', { numeric: true }) : a.localeCompare(b, 'ms', { numeric: true });
+        return descSort ? b.localeCompare(a, 'ms', { numeric: true }) : a.localeCompare(b, 'ms', { numeric: true });
       });
 
       select.innerHTML = `<option value="">${defaultLabel}</option>`;
@@ -1146,7 +1140,7 @@
             <tr class="hover:bg-slate-50 transition group">
               <td class="py-3 px-4 font-mono text-xs text-slate-400">${actualIndex}</td>
               <td class="py-3 px-4">
-                <span class="inline-block px-2.5 py-0.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                <span class="inline-block px-2 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
                   ${escapeHtml(row.tahun)}
                 </span>
               </td>
