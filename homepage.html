@@ -516,7 +516,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 theme-text-accent" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
               </svg>
-              <span id="user-email-badge">Penyelaras Projek</span>
+              <span id="user-email-badge">Pentadbir SBT</span>
             </div>
           </div>
         </header>
@@ -539,7 +539,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
                   Sistem Data Penilai Buku Teks
                 </h2>
                 <p class="text-white/90 text-sm sm:text-base font-medium leading-relaxed">
-                 Sistem Data Panel Penilai dan Bakal Penilai, Sektor Penghasilan Buku Teks, Bahagian Sumber dan Teknologi Pendidikan, Kementerian Pendidikan Malaysia.
+                  Sila pilih kategori utama di bawah atau gunakan menu pantas di sebelah kiri untuk mengurus maklumat panel, pemantauan langsung dan carian data.
                 </p>
               </div>
 
@@ -614,8 +614,8 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
             </div>
 
             <div class="mt-5 pt-3 border-t glass-divider flex items-center justify-between text-[11px] theme-text-muted font-medium">
-              <span>Klik Untuk Pilih</span>
-              <span class="font-bold theme-text-primary">DATA SBT 2026</span>
+              <span>Auto-logout keselamatan</span>
+              <span class="font-bold theme-text-primary">10 Minit</span>
             </div>
           </div>
 
@@ -624,7 +624,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
         <!-- Tajuk Seksyen Kategori Utama -->
         <div class="flex items-center justify-between mb-4 reveal-item delay-3">
           <h3 class="text-lg font-extrabold theme-text-primary tracking-tight">Kategori Utama Pengurusan Data</h3>
-          <span class="text-xs font-semibold theme-text-muted">Klik untuk membuka tetingkap baharu</span>
+          <span class="text-xs font-semibold theme-text-muted">Pilih modul untuk membuka tetingkap baharu</span>
         </div>
 
         <!-- ========================================== -->
@@ -642,7 +642,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
                 </svg>
               </div>
               <span class="px-3 py-1 rounded-full glass-pill text-[11px] font-bold theme-text-accent uppercase tracking-wider">
-                Tahun 2026
+                Modul 2026
               </span>
             </div>
 
@@ -673,7 +673,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
                 </svg>
               </div>
               <span class="px-3 py-1 rounded-full glass-pill text-[11px] font-bold text-teal-600 dark:text-teal-300 uppercase tracking-wider">
-                Tahun 2024 – 2026
+                2024 – 2026
               </span>
             </div>
 
@@ -792,6 +792,24 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
             }, 220);
           }
         });
+      });
+
+      // Pulihkan keadaan paparan apabila pengguna menekan butang Back (bfcache)
+      function resetViewState() {
+        if (mainView) {
+          mainView.classList.remove('switching');
+        }
+        // Pastikan item Laman Utama kembali aktif apabila kembali ke dashboard
+        navItems.forEach((el) => el.classList.remove('active'));
+        const homeNav = document.querySelector('[data-nav-item][href*="homepage.html"]');
+        if (homeNav) homeNav.classList.add('active');
+      }
+
+      window.addEventListener('pageshow', resetViewState);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          resetViewState();
+        }
       });
 
       // Papar emel pengguna jika wujud dalam localStorage
