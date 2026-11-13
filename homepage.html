@@ -282,11 +282,8 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
 
   /* Transisi Pertukaran Tab / Paparan */
   .view-transition {
+    opacity: 1;
     transition: opacity 0.26s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .view-transition.switching {
-    opacity: 0.25;
-    transform: translateY(10px) scale(0.99);
   }
 </style>
 <script>
@@ -708,6 +705,27 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
 
   <!-- SKRIP INTERAKSI UI & FIREBASE LOGOUT -->
   <script>
+    // Pulihkan paparan serta-merta apabila kembali melalui butang Back (bfcache)
+    function restoreDashboardVisibility() {
+      const mainView = document.getElementById('main-dashboard-view');
+      if (mainView) {
+        mainView.style.opacity = '1';
+        mainView.style.transform = 'none';
+        mainView.classList.remove('switching');
+      }
+      document.querySelectorAll('.reveal-item').forEach((el) => {
+        el.style.opacity = '1';
+      });
+      const navItems = document.querySelectorAll('[data-nav-item]');
+      navItems.forEach((el) => el.classList.remove('active'));
+      const homeNav = document.querySelector('[data-nav-item][href*="homepage.html"]');
+      if (homeNav) homeNav.classList.add('active');
+    }
+
+    // Daftarkan di peringkat global supaya sentiasa tercetus semasa bfcache pageshow
+    window.addEventListener('pageshow', restoreDashboardVisibility);
+    window.addEventListener('focus', restoreDashboardVisibility);
+
     // Fungsi Accordion Submenu dalam Sidebar dengan transisi halus
     function toggleSubmenu(menuId, arrowId) {
       const menu = document.getElementById(menuId);
@@ -720,6 +738,7 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
 
     // Kawalan Mobile Sidebar Drawer & Animasi Klik Navigasi
     document.addEventListener('DOMContentLoaded', () => {
+      restoreDashboardVisibility();
       const sidebar = document.getElementById('sidebar-drawer');
       const backdrop = document.getElementById('sidebar-backdrop');
       const openBtn = document.getElementById('open-sidebar-btn');
@@ -772,43 +791,26 @@ if (localStorage.getItem("statusLogin") !== "berjaya") {
       if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
       if (backdrop) backdrop.addEventListener('click', closeDrawer);
 
-      // Kesan peralihan aktif & fade-out lembut sebelum berpindah halaman (seperti tab switching video)
+      // Kesan peralihan aktif semasa klik menu tanpa memudarkan halaman sebelum navigasi
       const navItems = document.querySelectorAll('[data-nav-item]');
       navItems.forEach((item) => {
-        item.addEventListener('click', function (e) {
+        item.addEventListener('click', function () {
           const targetUrl = this.getAttribute('href');
           if (!targetUrl || targetUrl === '#') return;
 
-          // Kemas kini kelas aktif serta-merta
+          // Kemas kini kelas aktif serta-merta dan pastikan paparan kekal cerah
           navItems.forEach((el) => el.classList.remove('active'));
           this.classList.add('active');
-
-          // Beri sedikit animasi transisi paparan sebelum menavigasi
-          if (!this.hasAttribute('target')) {
-            e.preventDefault();
-            if (mainView) mainView.classList.add('switching');
-            setTimeout(() => {
-              window.location.href = targetUrl;
-            }, 220);
+          if (mainView) {
+            mainView.style.opacity = '1';
+            mainView.classList.remove('switching');
           }
         });
       });
 
-      // Pulihkan keadaan paparan apabila pengguna menekan butang Back (bfcache)
-      function resetViewState() {
-        if (mainView) {
-          mainView.classList.remove('switching');
-        }
-        // Pastikan item Laman Utama kembali aktif apabila kembali ke dashboard
-        navItems.forEach((el) => el.classList.remove('active'));
-        const homeNav = document.querySelector('[data-nav-item][href*="homepage.html"]');
-        if (homeNav) homeNav.classList.add('active');
-      }
-
-      window.addEventListener('pageshow', resetViewState);
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
-          resetViewState();
+          restoreDashboardVisibility();
         }
       });
 
