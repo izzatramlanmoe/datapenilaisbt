@@ -62,7 +62,42 @@
   <!-- Highcharts & Highcharts 3D via reliable CDNJS (Loaded synchronously in order) -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-3d.js"></script>
-/* ==========================================================
+
+  <style>
+    /* Glassmorphism Styles V24 (Cool Blue Mode) */
+    .glass-light {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.08);
+    }
+    .glass-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      border-color: rgba(99, 102, 241, 0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.12);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.35);
+      border-radius: 9999px;
+    }
+
+    /* Highcharts container transparent */
+    .chart-box .highcharts-background {
+      fill: transparent !important;
+    } /* ==========================================================
    TAMPALAN VISUAL V25 - letak SELEPAS blok CSS sedia ada
    (sebelum </style>). Tiada perubahan HTML/JS diperlukan.
    ========================================================== */
@@ -227,41 +262,6 @@ tbody tr td:first-child { padding-left: 1.1rem; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
-  <style>
-    /* Glassmorphism Styles V24 (Cool Blue Mode) */
-    .glass-light {
-      background: rgba(255, 255, 255, 0.65);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.08);
-    }
-    .glass-card {
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .glass-card:hover {
-      border-color: rgba(99, 102, 241, 0.35);
-      transform: translateY(-2px);
-      box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.12);
-    }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.35);
-      border-radius: 9999px;
-    }
-
-    /* Highcharts container transparent */
-    .chart-box .highcharts-background {
-      fill: transparent !important;
-    }
   </style>
 </head>
 
@@ -1533,7 +1533,7 @@ tbody tr td:first-child { padding-left: 1.1rem; }
       const modal = document.getElementById('participant-modal');
       const container = document.getElementById('modal-container');
       modal.classList.add('opacity-0');
-      container.classList.remove('scale-100
+      container.classList.remove('scale-100');
       container.classList.add('scale-95');
       setTimeout(() => {
         modal.classList.add('hidden');
