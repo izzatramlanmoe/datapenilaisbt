@@ -733,55 +733,92 @@
         if (!fields) return names[0];
         // 1. Padanan Tepat (Exact match)
         for (let target of names) {
-          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
+          const exact = fields.find(f => f && f.trim().toLowerCase() === target.toLowerCase());
           if (exact) return exact;
         }
-        // 2. Padanan Separa (Partial match) - Sangat penting untuk Google Sheets (buang invisible chars)
+        // 2. Padanan Separa (Partial match) - Sangat penting untuk Google Sheets
         for (let target of names) {
-          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+          const partial = fields.find(f => f && f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
           if (partial) return partial;
         }
         return null;
       }
 
+      function colLetterToIndex(col) {
+        let index = 0;
+        for (let i = 0; i < col.length; i++) {
+          index = index * 26 + (col.charCodeAt(i) - 64);
+        }
+        return index - 1;
+      }
+
+      // Sandaran fallback index dari kod asal
+      const colBVIndex = colLetterToIndex('BV');
+      let columnBVKey = (fields && fields.length > colBVIndex) ? fields[colBVIndex] : null;
+      let columnBKey = (fields && fields.length > 1) ? fields[1] : null;
+
       headersMap = {
-        tahun: findKey(['Tahun', 'Year']) || (fields && fields.length > 1 ? fields[1] : 'Tahun'),
-        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program']),
-        penyelaras: findKey(['Penyelaras', 'Nama Penyelaras']),
-        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek']),
+        tahun: columnBKey || findKey(['Tahun', 'Year', 'Sesi']),
+        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program', 'Penerbitan']),
+        penyelaras: findKey(['Penyelaras', 'Nama Penyelaras', 'Penyelaras Bengkel']),
+        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek', 'MP']),
         tempat: findKey(['TempatBengkel', 'Tempat Bengkel', 'Tempat', 'Lokasi']),
         jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel', 'Jawatan', 'Peranan']),
-        gelaran: findKey(['Gelaran']),
-        jantina: findKey(['Jantina', 'Gender']),
+        gelaran: findKey(['Gelaran', 'Panggilan', 'Title']),
+        jantina: findKey(['Jantina', 'Gender', 'Sex']),
         negeri: findKey(['Negeri', 'State', 'Zon']),
         nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
-        noIc: findKey(['No IC', 'No. IC', 'No KP', 'IC', 'Kad Pengenalan']),
-        oprLink: findKey(['Link to merged Doc - DATA 2026', 'OPR', 'Link Doc', 'Link OPR'])
+        noIc: findKey(['No IC', 'No. IC', 'No KP', 'No. KP', 'Kad Pengenalan', 'IC']),
+        oprLink: columnBVKey || findKey(['Link to merged Doc - DATA 2026', 'Link to merged Doc', 'OPR', 'Link Doc', 'Link OPR', 'DATA 2026'])
       };
 
       rawData = data.map((row, idx) => {
-        const rowNama = (row[headersMap.nama] || `Peserta #${idx + 1}`).trim();
-        const rowJantina = cleanValue(row[headersMap.jantina]);
+        const rowKeys = Object.keys(row);
         
+        // Helper function for aggressive fallback lookup
+        const getValue = (primaryKey, altKeys) => {
+          if (primaryKey && row[primaryKey] !== undefined) return row[primaryKey];
+          for (let key of altKeys) {
+            if (row[key] !== undefined) return row[key];
+          }
+          return '';
+        };
+
+        const rawNama = getValue(headersMap.nama, ['Nama', 'Nama Penuh']);
+        const rowNama = (rawNama || `Peserta #${idx + 1}`).trim();
+        const rowJantina = cleanValue(getValue(headersMap.jantina, ['Jantina']));
+        
+        let rawTahun = getValue(headersMap.tahun, ['Tahun']);
+        if (!rawTahun && rowKeys.length > 1) rawTahun = row[rowKeys[1]]; // fallback ke kolum 2
+
+        let rawDocVal = getValue(headersMap.oprLink, ['OPR', 'Link to merged Doc - DATA 2026']);
+        if (!rawDocVal && rowKeys.length > colBVIndex) {
+          rawDocVal = row[rowKeys[colBVIndex]];
+        }
+
         return {
           id: idx + 1,
-          tahun: cleanValue(row[headersMap.tahun]),
+          tahun: cleanValue(rawTahun),
           nama: rowNama,
-          programpenerbitan: cleanValue(row[headersMap.programpenerbitan]),
-          noIc: cleanValue(row[headersMap.noIc]),
-          gelaran: cleanValue(row[headersMap.gelaran]),
+          programpenerbitan: cleanValue(getValue(headersMap.programpenerbitan, ['ProgramPenerbitan', 'Program Penerbitan'])),
+          noIc: cleanValue(getValue(headersMap.noIc, ['No IC', 'No. IC'])),
+          gelaran: cleanValue(getValue(headersMap.gelaran, ['Gelaran'])),
           jantina: rowJantina,
-          jawatan: cleanValue(row[headersMap.jawatan]),
-          matapelajaran: cleanValue(row[headersMap.matapelajaran]),
-          tempat: cleanValue(row[headersMap.tempat]),
-          penyelaras: cleanValue(row[headersMap.penyelaras]),
-          negeri: cleanValue(row[headersMap.negeri]),
-          oprDoc: formatDocUrl(row[headersMap.oprLink]),
+          jawatan: cleanValue(getValue(headersMap.jawatan, ['JawatanBengkel', 'Jawatan Bengkel'])),
+          matapelajaran: cleanValue(getValue(headersMap.matapelajaran, ['MataPelajaran', 'Mata Pelajaran'])),
+          tempat: cleanValue(getValue(headersMap.tempat, ['TempatBengkel', 'Tempat Bengkel'])),
+          penyelaras: cleanValue(getValue(headersMap.penyelaras, ['Penyelaras'])),
+          negeri: cleanValue(getValue(headersMap.negeri, ['Negeri'])),
+          oprDoc: formatDocUrl(rawDocVal),
           gambar: formatImageUrl('', rowNama, rowJantina),
         };
-      }).filter(r => r.nama && r.nama !== '' && r.nama !== 'Tiada Maklumat');
+      }).filter(r => r.nama && r.nama !== '' && !r.nama.toLowerCase().includes('tiada maklumat'));
 
-      applyFilters();
+      try {
+        applyFilters();
+      } catch (err) {
+        console.error("Ralat ketika tapisan data:", err);
+      }
     }
 
     function cleanValue(val) { return (!val || String(val).trim() === '') ? 'Tiada Maklumat' : String(val).trim(); }
