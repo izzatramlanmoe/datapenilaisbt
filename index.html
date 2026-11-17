@@ -4,182 +4,395 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halaman Login | Sistem Data Penilai Buku Teks</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+        :root {
+            --lamp-color: #f59e0b;
+            --lamp-glow: rgba(245, 158, 11, 0.35);
+            --lamp-cone: rgba(245, 158, 11, 0.22);
+            --card-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            overflow: hidden;
+            min-height: 100vh;
+            background-color: #0b0d10;
+            background-image: radial-gradient(circle at 50% 30%, #151921 0%, #090a0d 100%);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            transition: background 0.6s ease;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .shape {
-            position: absolute;
-            filter: blur(40px);
-            z-index: -1;
-            opacity: 0.8;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape1 {
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.2);
-            top: -100px;
-            left: -100px;
-            border-radius: 50%;
-        }
-
-        .shape2 {
-            width: 400px;
-            height: 400px;
-            background: rgba(255, 255, 255, 0.15);
-            bottom: -150px;
-            right: -100px;
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            animation-delay: -3s;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-30px) rotate(10deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
-
-        .login-box {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            padding: 40px;
-            border-radius: 20px;
-            width: 450px;
-            max-width: 90%;
-            text-align: center;
-            color: white;
-            animation: slideUpFade 0.8s ease-out forwards;
+        /* Pancaran Cahaya Lampu pada Latar Belakang */
+        .ambient-light {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at 35% 45%, var(--lamp-glow) 0%, transparent 60%);
             opacity: 0;
-            transform: translateY(30px);
+            transition: opacity 0.5s ease;
+            z-index: 0;
         }
 
-        @keyframes slideUpFade {
-            to {
-                opacity: 1;
-                transform: translateY(0);
+        body.lamp-on .ambient-light {
+            opacity: 1;
+        }
+
+        /* Susun Atur Utama */
+        .main-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1040px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        @media (min-width: 860px) {
+            .main-wrapper {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 48px;
+                padding: 40px;
             }
         }
 
-        .login-box h2 {
-            margin-top: 0;
-            margin-bottom: 30px;
+        /* Bahagian Lampu Meja */
+        .lamp-stage {
+            position: relative;
+            width: 280px;
+            height: 310px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            user-select: none;
+            -webkit-user-select: none;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 860px) {
+            .lamp-stage {
+                width: 360px;
+                height: 410px;
+            }
+        }
+
+        .lamp-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        /* Pancaran Cahaya Kon Lampu */
+        .light-beam {
+            opacity: 0;
+            transition: opacity 0.45s ease;
+            pointer-events: none;
+        }
+
+        body.lamp-on .light-beam {
+            opacity: 1;
+        }
+
+        /* Mentol Lampu */
+        .lamp-bulb {
+            fill: url(#bulbOffGradient);
+            transition: fill 0.35s ease, filter 0.35s ease;
+        }
+
+        body.lamp-on .lamp-bulb {
+            fill: url(#bulbOnGradient);
+            filter: drop-shadow(0 0 16px var(--lamp-color)) drop-shadow(0 0 32px var(--lamp-color));
+        }
+
+        .bulb-filament {
+            stroke: #4b5563;
+            transition: stroke 0.35s ease, filter 0.35s ease;
+        }
+
+        body.lamp-on .bulb-filament {
+            stroke: #ffffff;
+            filter: drop-shadow(0 0 5px #ffffff);
+        }
+
+        .shade-inner-glow {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        body.lamp-on .shade-inner-glow {
+            opacity: 1;
+        }
+
+        /* Tali Suis (Pull Cord) - Boleh ditarik dengan tetikus & sentuhan */
+        .pull-cord-group {
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .pull-cord-group.dragging {
+            cursor: grabbing;
+        }
+
+        .cord-line,
+        .cord-knob {
+            transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.3s ease;
+        }
+
+        .pull-cord-group.dragging .cord-line,
+        .pull-cord-group.dragging .cord-knob {
+            transition: none;
+        }
+
+        .pull-cord-group.pulled .cord-line {
+            transform: translate(0px, 118px) scaleY(1.24) translate(0px, -118px);
+        }
+
+        .pull-cord-group.pulled .cord-knob {
+            transform: translateY(24px);
+        }
+
+        .pull-cord-group:hover .cord-knob,
+        .pull-cord-group.dragging .cord-knob {
+            fill: var(--lamp-color);
+        }
+
+        /* Petunjuk Tarik Tali */
+        .pull-hint {
+            position: absolute;
+            top: 215px;
+            left: 158px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            padding: 4px 10px;
+            border-radius: 999px;
+            pointer-events: none;
+            animation: pulseHint 2s infinite ease-in-out;
+            transition: opacity 0.4s ease;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 860px) {
+            .pull-hint {
+                top: 280px;
+                left: 205px;
+            }
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { transform: translateY(0); opacity: 0.55; }
+            50% { transform: translateY(5px); opacity: 1; }
+        }
+
+        /* Kawalan Warna Cahaya */
+        .color-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+        }
+
+        .color-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.18);
+        }
+
+        .color-dot.active {
+            border-color: #ffffff;
+            transform: scale(1.15);
+        }
+
+        /* Kad Log Masuk */
+        .login-card {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(18, 21, 27, 0.88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 36px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        body.lamp-on .login-card {
+            border-color: color-mix(in srgb, var(--lamp-color) 45%, transparent);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85),
+                        0 0 35px -5px var(--lamp-glow);
+        }
+
+        .system-badge {
+            display: inline-block;
+            font-size: 10px;
             font-weight: 600;
-            font-size: 28px;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 5px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+            transition: color 0.4s ease, border-color 0.4s ease;
+        }
+
+        body.lamp-on .system-badge {
+            color: var(--lamp-color);
+            border-color: color-mix(in srgb, var(--lamp-color) 35%, transparent);
+        }
+
+        .system-title {
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 700;
+            line-height: 1.35;
+            letter-spacing: 0.5px;
+            color: #f9fafb;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+        }
+
+        .system-subtitle {
+            font-size: 11px;
+            line-height: 1.55;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .login-heading {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            color: #ffffff;
+        }
+
+        .login-sub {
+            font-size: 13px;
+            color: #9ca3af;
+            margin: 0 0 22px 0;
         }
 
         .input-group {
-            position: relative;
-            margin-bottom: 25px;
+            margin-bottom: 18px;
             text-align: left;
         }
 
-        .input-group input {
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #d1d5db;
+            margin-bottom: 6px;
+        }
+
+        .input-field {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            box-sizing: border-box;
-            color: white;
-            font-size: 16px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
             font-family: inherit;
             outline: none;
             transition: all 0.3s ease;
         }
 
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .input-field::placeholder {
+            color: #6b7280;
         }
 
-        .input-group input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--lamp-color);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--lamp-color) 20%, transparent);
         }
 
-        .login-box button {
+        /* Butang Log Masuk */
+        .btn-submit {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 500;
+            padding: 13px;
+            margin-top: 6px;
+            background: #262b34;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
             font-family: inherit;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .login-box button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            transition: all 0.5s ease;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
         }
 
-        .login-box button:hover {
-            background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
+        body.lamp-on .btn-submit {
+            background: var(--lamp-color);
+            color: #0b0d10;
+            border-color: transparent;
+            box-shadow: 0 8px 24px -4px var(--lamp-glow);
+        }
+
+        .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .login-box button:hover::after {
-            left: 200%;
+            filter: brightness(1.08);
         }
 
-        .login-box button:active {
-            transform: translateY(1px);
+        .btn-submit:active {
+            transform: translateY(0);
         }
 
+        /* Mesej Ralat */
         #mesej-ralat {
-            color: #ff6b6b;
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.4);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-top: -10px;
-            margin-bottom: 20px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            color: #fca5a5;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
             display: none;
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            text-align: center;
         }
 
         @keyframes shake {
@@ -189,53 +402,397 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
+        /* Footer */
         .footer-text {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
+            position: relative;
+            z-index: 2;
+            margin-top: 16px;
+            margin-bottom: 20px;
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 13px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 12px;
             letter-spacing: 1.5px;
             font-weight: 500;
-            z-index: 10;
         }
     </style>
 </head>
-<body>
+<body class="lamp-on">
 
-    <div class="shape shape1"></div>
-    <div class="shape shape2"></div>
+    <!-- Lapisan Cahaya Persekitaran -->
+    <div class="ambient-light"></div>
 
-    <div class="login-box">
-        <h1 style="font-size: clamp(14px, 4.5vw, 21px); font-weight: 700; margin-bottom: 10px; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;">SISTEM DATA PENILAI BUKU TEKS</h1>
-        <div style="font-size: 12px; font-weight: 400; margin-top: 0; margin-bottom: 30px; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.6;">
-            SEKTOR PENGHASILAN BUKU TEKS<br>
-            BAHAGIAN SUMBER DAN TEKNOLOGI PENDIDIKAN<br>
-            KEMENTERIAN PENDIDIKAN
+    <div class="main-wrapper">
+        <!-- Bahagian Kiri: Lampu Meja Interaktif -->
+        <div class="lamp-stage">
+            <svg class="lamp-svg" viewBox="0 0 360 390" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- Gradien Pancaran Cahaya Kon -->
+                    <linearGradient id="beamGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--lamp-color)" stop-opacity="0.65" />
+                        <stop offset="35%" stop-color="var(--lamp-color)" stop-opacity="0.24" />
+                        <stop offset="80%" stop-color="var(--lamp-color)" stop-opacity="0.06" />
+                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0" />
+                    </linearGradient>
+
+                    <!-- Gradien Halo Cahaya Mentol -->
+                    <radialGradient id="bulbHaloGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                        <stop offset="35%" stop-color="var(--lamp-color)" stop-opacity="0.55" />
+                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0" />
+                    </radialGradient>
+
+                    <!-- Gradien Logam Berkilat Tudung Lampu -->
+                    <linearGradient id="shadeGradient" x1="0" y1="0" x2="1" y2="0.4">
+                        <stop offset="0%" stop-color="#111827" />
+                        <stop offset="28%" stop-color="#374151" />
+                        <stop offset="48%" stop-color="#6b7280" />
+                        <stop offset="72%" stop-color="#1f2937" />
+                        <stop offset="100%" stop-color="#090d16" />
+                    </linearGradient>
+
+                    <!-- Gradien Dalam Tudung Bercahaya -->
+                    <radialGradient id="innerShadeGlow" cx="50%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                        <stop offset="45%" stop-color="var(--lamp-color)" stop-opacity="0.85" />
+                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0.2" />
+                    </radialGradient>
+
+                    <!-- Gradien Mentol Padam & Menyala -->
+                    <radialGradient id="bulbOffGradient" cx="38%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#4b5563" stop-opacity="0.65" />
+                        <stop offset="70%" stop-color="#1f2937" stop-opacity="0.85" />
+                        <stop offset="100%" stop-color="#111827" stop-opacity="0.95" />
+                    </radialGradient>
+
+                    <radialGradient id="bulbOnGradient" cx="45%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#ffffff" />
+                        <stop offset="45%" stop-color="var(--lamp-color)" />
+                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0.85" />
+                    </radialGradient>
+
+                    <!-- Gradien Tapak Lampu Logam 3D -->
+                    <linearGradient id="baseGradient" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#111827" />
+                        <stop offset="35%" stop-color="#4b5563" />
+                        <stop offset="55%" stop-color="#6b7280" />
+                        <stop offset="100%" stop-color="#0f172a" />
+                    </linearGradient>
+
+                    <!-- Gradien Lengan Logam -->
+                    <linearGradient id="armMetal" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#374151" />
+                        <stop offset="50%" stop-color="#9ca3af" />
+                        <stop offset="100%" stop-color="#1f2937" />
+                    </linearGradient>
+                </defs>
+
+                <!-- Pancaran Cahaya Kon Sejajar Tepat dari Bukaan Tudung & Mentol -->
+                <g transform="translate(152, 92) rotate(-34)">
+                    <polygon class="light-beam" points="-37,26 37,26 215,430 -185,430" fill="url(#beamGradient)" />
+                    <circle class="light-beam" cx="0" cy="31" r="46" fill="url(#bulbHaloGradient)" />
+                </g>
+
+                <!-- Bayang-bayang Tapak Bertingkat -->
+                <ellipse cx="135" cy="368" rx="86" ry="14" fill="rgba(0,0,0,0.75)" />
+                <ellipse cx="135" cy="365" rx="68" ry="9" fill="rgba(0,0,0,0.5)" />
+
+                <!-- Tapak Lampu Realistik -->
+                <path d="M 70 364 C 70 342, 200 342, 200 364 Z" fill="url(#baseGradient)" stroke="#4b5563" stroke-width="1.2" />
+                <ellipse cx="135" cy="364" rx="65" ry="4" fill="#1f2937" />
+                <rect x="124" y="334" width="22" height="14" rx="4" fill="url(#armMetal)" stroke="#374151" stroke-width="1" />
+                <circle cx="135" cy="336" r="6" fill="#1f2937" stroke="#6b7280" stroke-width="1.5" />
+
+                <!-- Lengan Bawah Lampu (Dua Batang Selari Realistik) -->
+                <line x1="132" y1="336" x2="89" y2="215" stroke="url(#armMetal)" stroke-width="6.5" stroke-linecap="round" />
+                <line x1="139" y1="336" x2="96" y2="215" stroke="#374151" stroke-width="3.5" stroke-linecap="round" />
+                <!-- Spring Tegangan Kecil -->
+                <line x1="126" y1="315" x2="95" y2="232" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="2 2" />
+
+                <!-- Sendi Tengah Mekanikal -->
+                <circle cx="92" cy="215" r="11" fill="#111827" stroke="#6b7280" stroke-width="2" />
+                <circle cx="92" cy="215" r="6" fill="url(#armMetal)" />
+                <circle cx="92" cy="215" r="2.5" fill="#1f2937" />
+
+                <!-- Lengan Atas Lampu -->
+                <line x1="92" y1="215" x2="152" y2="92" stroke="url(#armMetal)" stroke-width="7" stroke-linecap="round" />
+                <line x1="95" y1="217" x2="155" y2="94" stroke="#1f2937" stroke-width="2" stroke-linecap="round" />
+
+                <!-- Sendi Kepala Lampu & Skru Pelaras -->
+                <circle cx="152" cy="92" r="9" fill="#111827" stroke="#6b7280" stroke-width="2" />
+                <circle cx="152" cy="92" r="4" fill="#9ca3af" />
+
+                <!-- Tali Suis Rantai Bebola Realistik (Boleh Ditarik & Kembali ke Asal) -->
+                <g id="pull-cord" class="pull-cord-group">
+                    <!-- Kawasan tarik/klik halimunan lebih luas untuk tetikus & jari -->
+                    <rect x="142" y="102" width="66" height="150" fill="transparent" />
+                    <!-- Tali Rantai Logam Halus -->
+                    <line id="cord-line" class="cord-line" x1="175" y1="112" x2="175" y2="215" stroke="#d1d5db" stroke-width="1.8" stroke-linecap="round" />
+                    <!-- Pemegang / Loceng Tarikan Logam -->
+                    <g id="cord-knob" class="cord-knob">
+                        <rect x="171.5" y="213" width="7" height="14" rx="3.5" fill="url(#armMetal)" stroke="#9ca3af" stroke-width="1.2" />
+                        <circle cx="175" cy="227" r="4" fill="#d1d5db" />
+                    </g>
+                </g>
+
+                <!-- Mentol Kaca Realistik & Tudung Lampu Logam pada Sendi (152, 92) -->
+                <g transform="translate(152, 92) rotate(-34)">
+                    <!-- Bahagian Dalam Tudung Lampu -->
+                    <ellipse cx="0" cy="26" rx="37" ry="7.5" fill="#090d16" />
+                    <ellipse class="shade-inner-glow" cx="0" cy="26" rx="36" ry="7" fill="url(#innerShadeGlow)" />
+
+                    <!-- Leher & Mentol Kaca Berbentuk A19 -->
+                    <rect x="-7" y="12" width="14" height="10" rx="2" fill="#9ca3af" />
+                    <path class="lamp-bulb" d="M -7 19 C -13 24, -15 34, -9 41 C -4 46, 4 46, 9 41 C 15 34, 13 24, 7 19 Z" stroke="rgba(255,255,255,0.35)" stroke-width="0.8" />
+
+                    <!-- Filamen Dalaman Mentol -->
+                    <path class="bulb-filament" d="M -3 21 L -4 31 L -1.5 29 L 0 32 L 1.5 29 L 4 31 L 3 21" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+
+                    <!-- Kilauan Kaca Melengkung pada Mentol -->
+                    <path d="M -8 25 C -10 29, -9 34, -6 37" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4" stroke-linecap="round" />
+
+                    <!-- Soket Atas Tudung & Liang Pengudaraan -->
+                    <rect x="-12" y="-33" width="24" height="15" rx="4" fill="url(#shadeGradient)" stroke="#4b5563" stroke-width="1.2" />
+                    <line x1="-7" y1="-28" x2="-7" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
+                    <line x1="0" y1="-28" x2="0" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
+                    <line x1="7" y1="-28" x2="7" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
+
+                    <!-- Badan Tudung Lampu Logam 3D -->
+                    <path d="M -21 -18 C -21 -27, 21 -27, 21 -18 L 39 26 C 20 31, -20 31, -39 26 Z" fill="url(#shadeGradient)" stroke="#4b5563" stroke-width="1.3" />
+                    <!-- Garisan Kilauan Cahaya pada Tudung -->
+                    <path d="M -11 -19 L -21 23" stroke="rgba(255,255,255,0.22)" stroke-width="3" stroke-linecap="round" />
+                    <!-- Rim Bibir Bawah Tudung -->
+                    <path d="M -39 26 C -20 31.5, 20 31.5, 39 26" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linecap="round" />
+                </g>
+            </svg>
+
+            <div id="pull-hint" class="pull-hint">Tarik / klik tali</div>
+
+            <!-- Pilihan Warna Lampu -->
+            <div class="color-controls" title="Pilih Warna Cahaya Lampu">
+                <span style="font-size: 11px; color: #9ca3af; margin-right: 4px;">Cahaya:</span>
+                <button type="button" class="color-dot active" style="background: #f59e0b;" data-color="#f59e0b" data-glow="rgba(245, 158, 11, 0.35)" aria-label="Kuning Hangat"></button>
+                <button type="button" class="color-dot" style="background: #38bdf8;" data-color="#38bdf8" data-glow="rgba(56, 189, 248, 0.35)" aria-label="Biru Cyan"></button>
+                <button type="button" class="color-dot" style="background: #10b981;" data-color="#10b981" data-glow="rgba(16, 185, 129, 0.35)" aria-label="Hijau Zamrud"></button>
+                <button type="button" class="color-dot" style="background: #f43f5e;" data-color="#f43f5e" data-glow="rgba(244, 63, 94, 0.35)" aria-label="Merah Jambu"></button>
+            </div>
         </div>
-        
-        <h2 style="margin-bottom: 20px; font-size: 24px;">Log Masuk</h2>
-        
-        <div class="input-group">
-            <input type="email" id="email" placeholder="Email (cth: admin@moe.gov.my)" required autocomplete="off">
+
+        <!-- Bahagian Kanan: Kad Log Masuk -->
+        <div class="login-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span class="system-badge" style="margin-bottom: 0;">PORTAL RASMI KPM</span>
+                <button type="button" id="btn-toggle-lamp" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #d1d5db; font-size: 11px; padding: 4px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    <span id="lamp-status-dot" style="width: 7px; height: 7px; border-radius: 50%; background: var(--lamp-color); display: inline-block;"></span>
+                    <span id="lamp-status-text">Lampu: Hidup</span>
+                </button>
+            </div>
+
+            <h1 class="system-title">SISTEM DATA PENILAI BUKU TEKS</h1>
+            <div class="system-subtitle">
+                SEKTOR PENGHASILAN BUKU TEKS<br>
+                BAHAGIAN SUMBER DAN TEKNOLOGI PENDIDIKAN<br>
+                KEMENTERIAN PENDIDIKAN
+            </div>
+
+            <h2 class="login-heading">Log Masuk</h2>
+            <p class="login-sub">Sila masukkan maklumat akaun anda untuk meneruskan</p>
+
+            <div class="input-group">
+                <label for="email" class="input-label">Alamat E-mel</label>
+                <input type="email" id="email" class="input-field" placeholder="cth: admin@moe.gov.my" required autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label for="password" class="input-label">Kata Laluan</label>
+                <input type="password" id="password" class="input-field" placeholder="Masukkan kata laluan" required>
+            </div>
+
+            <p id="mesej-ralat">Email atau Katalaluan salah!</p>
+
+            <button type="button" id="btn-login" class="btn-submit">Log Masuk</button>
         </div>
-        
-        <div class="input-group">
-            <input type="password" id="password" placeholder="Katalaluan" required>
-        </div>
-        
-        <p id="mesej-ralat">Email atau Katalaluan salah!</p>
-        
-        <button id="btn-login">Log Masuk</button>
     </div>
+
+    <div class="footer-text">TEAM DATA.SBT.2026</div>
+
+    <!-- SKRIP INTERAKSI LAMPU & KESAN BUNYI (WEB AUDIO API) -->
+    <script>
+        const bodyEl = document.body;
+        const pullCord = document.getElementById('pull-cord');
+        const pullHint = document.getElementById('pull-hint');
+        const btnToggleLamp = document.getElementById('btn-toggle-lamp');
+        const lampStatusText = document.getElementById('lamp-status-text');
+        const lampStatusDot = document.getElementById('lamp-status-dot');
+        const colorDots = document.querySelectorAll('.color-dot');
+
+        let isLampOn = true;
+        let audioCtx = null;
+
+        // Fungsi Bunyi Suis & Dengung Lampu (Sintesis Web Audio API)
+        function playLampSound(turningOn) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const now = audioCtx.currentTime;
+
+                // Bunyi "Klik" Suis Mekanikal
+                const clickOsc = audioCtx.createOscillator();
+                const clickGain = audioCtx.createGain();
+                clickOsc.type = 'triangle';
+                clickOsc.frequency.setValueAtTime(turningOn ? 900 : 620, now);
+                clickOsc.frequency.exponentialRampToValueAtTime(140, now + 0.04);
+
+                clickGain.gain.setValueAtTime(0.18, now);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+                clickOsc.connect(clickGain);
+                clickGain.connect(audioCtx.destination);
+                clickOsc.start(now);
+                clickOsc.stop(now + 0.05);
+
+                // Bunyi Dengung Lembut Semasa Lampu Dihidupkan
+                if (turningOn) {
+                    const humOsc = audioCtx.createOscillator();
+                    const humGain = audioCtx.createGain();
+                    humOsc.type = 'sine';
+                    humOsc.frequency.setValueAtTime(120, now + 0.03);
+
+                    humGain.gain.setValueAtTime(0.001, now + 0.03);
+                    humGain.gain.linearRampToValueAtTime(0.04, now + 0.08);
+                    humGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
+
+                    humOsc.connect(humGain);
+                    humGain.connect(audioCtx.destination);
+                    humOsc.start(now + 0.03);
+                    humOsc.stop(now + 0.4);
+                }
+            } catch (e) {
+                // Abaikan jika pelayar menyekat audio sebelum interaksi
+            }
+        }
+
+        // Fungsi Hidup / Matikan Lampu
+        function toggleLamp(animateSnap = true) {
+            isLampOn = !isLampOn;
+
+            // Animasi tarik tali jika diklik terus
+            if (animateSnap) {
+                pullCord.classList.add('pulled');
+                setTimeout(() => {
+                    pullCord.classList.remove('pulled');
+                }, 220);
+            }
+
+            // Sembunyikan petunjuk selepas interaksi pertama
+            if (pullHint) {
+                pullHint.style.opacity = '0';
+            }
+
+            // Mainkan kesan bunyi
+            playLampSound(isLampOn);
+
+            // Kemas kini kelas & UI
+            if (isLampOn) {
+                bodyEl.classList.add('lamp-on');
+                lampStatusText.textContent = 'Lampu: Hidup';
+                lampStatusDot.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--lamp-color');
+            } else {
+                bodyEl.classList.remove('lamp-on');
+                lampStatusText.textContent = 'Lampu: Padam';
+                lampStatusDot.style.backgroundColor = '#6b7280';
+            }
+        }
+
+        // ================= INTERAKSI TARIK TALI (DRAG & CLICK) =================
+        const cordLine = document.getElementById('cord-line');
+        const cordKnob = document.getElementById('cord-knob');
+        const BASE_CORD_Y = 215;
+
+        let isDraggingCord = false;
+        let startPointerY = 0;
+        let currentPullDistance = 0;
+        let hasToggledDuringDrag = false;
+        const PULL_THRESHOLD = 26; // Jarak tarikan (px) untuk mencetuskan suis
+
+        pullCord.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            isDraggingCord = true;
+            startPointerY = e.clientY;
+            currentPullDistance = 0;
+            hasToggledDuringDrag = false;
+            pullCord.classList.remove('pulled');
+            pullCord.classList.add('dragging');
+            pullCord.setPointerCapture(e.pointerId);
+        });
+
+        pullCord.addEventListener('pointermove', (e) => {
+            if (!isDraggingCord) return;
+            const deltaY = e.clientY - startPointerY;
+            // Hadkan tarikan ke bawah (0px hingga 55px) sambil hujung atas tali kekal melekat pada lampu
+            currentPullDistance = Math.max(0, Math.min(deltaY, 55));
+            cordLine.setAttribute('y2', BASE_CORD_Y + currentPullDistance);
+            cordKnob.setAttribute('transform', `translate(0, ${currentPullDistance})`);
+
+            // Hidup/matikan lampu sebaik sahaja melepasi jarak tarikan
+            if (currentPullDistance >= PULL_THRESHOLD && !hasToggledDuringDrag) {
+                hasToggledDuringDrag = true;
+                toggleLamp(false);
+            }
+        });
+
+        function releaseCord() {
+            if (!isDraggingCord) return;
+            isDraggingCord = false;
+            pullCord.classList.remove('dragging');
+
+            // Kembalikan tali dan pemegang ke kedudukan asal dengan animasi melantun
+            cordLine.setAttribute('y2', BASE_CORD_Y);
+            cordKnob.removeAttribute('transform');
+
+            // Jika pengguna hanya klik tanpa menarik jauh (< 6px), tetap tukar suis
+            if (currentPullDistance < 6 && !hasToggledDuringDrag) {
+                toggleLamp(true);
+            }
+        }
+
+        pullCord.addEventListener('pointerup', releaseCord);
+        pullCord.addEventListener('pointercancel', releaseCord);
+
+        // Butang suis alternatif pada kad
+        btnToggleLamp.addEventListener('click', () => toggleLamp(true));
+
+        // Penukar Warna Cahaya Lampu
+        colorDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                colorDots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+
+                const color = dot.getAttribute('data-color');
+                const glow = dot.getAttribute('data-glow');
+
+                document.documentElement.style.setProperty('--lamp-color', color);
+                document.documentElement.style.setProperty('--lamp-glow', glow);
+
+                if (!isLampOn) {
+                    toggleLamp(false);
+                } else {
+                    lampStatusDot.style.backgroundColor = color;
+                }
+            });
+        });
+    </script>
 
     <!-- SKRIP FIREBASE INTEGRATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // ⚠️ GANTIKAN DENGAN MAKLUMAT CONFIG FIREBASE PROJECT ANDA ⚠️
+        // Konfigurasi Firebase Project
         const firebaseConfig = {
             apiKey: "AIzaSyDEWm-AHbEMJuNhON6hZk96wqWfn07-Vy0",
             authDomain: "data-penilai-eb50d.firebaseapp.com",
@@ -255,7 +812,6 @@
         // Semak status sesi automatik (Apabila membuka semula laman)
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Pengguna telah dilog masuk
                 localStorage.setItem("statusLogin", "berjaya");
                 localStorage.setItem("emailLogin", user.email);
                 sessionStorage.setItem("statusLogin", "berjaya");
@@ -278,15 +834,14 @@
             btn.style.pointerEvents = 'none';
 
             try {
-                // Pengesahan log masuk melalui Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, emailInput, passInput);
                 const user = userCredential.user;
 
                 btn.innerHTML = "Berjaya!";
-                btn.style.background = "rgba(40, 167, 69, 0.5)";
+                btn.style.background = "#10b981";
+                btn.style.color = "#ffffff";
                 mesejRalat.style.display = "none";
 
-                // Simpan status dalam storage untuk kebolehoperasian sistem legacy
                 localStorage.setItem("statusLogin", "berjaya");
                 localStorage.setItem("emailLogin", user.email);
                 sessionStorage.setItem("statusLogin", "berjaya");
@@ -300,14 +855,13 @@
                 btn.innerHTML = "Log Masuk";
                 btn.style.pointerEvents = 'auto';
 
-                // Pemprosesan mesej ralat mesra pengguna mengikut Firebase Error Code
                 let mesej = "Email atau Katalaluan salah!";
                 if (error.code === 'auth/invalid-email') {
                     mesej = "Format email tidak sah!";
                 } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
                     mesej = "Email atau Katalaluan salah!";
                 } else if (error.code === 'auth/too-many-requests') {
-                    mesej = "Terlalu banyak percubaan gagaI. Sila cuba sebentar lagi.";
+                    mesej = "Terlalu banyak percubaan gagal. Sila cuba sebentar lagi.";
                 }
 
                 tunjukkanRalat(mesej);
@@ -322,7 +876,6 @@
             mesejRalat.style.display = "block";
         }
 
-        // Event listener untuk butang dan kekunci Enter
         btn.addEventListener('click', logMasuk);
 
         document.addEventListener('keypress', function (e) {
@@ -331,7 +884,5 @@
             }
         });
     </script>
-
-    <div class="footer-text">TEAM DATA.SBT.2026</div>
 </body>
 </html>
