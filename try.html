@@ -1,888 +1,937 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman Login | Sistem Data Penilai Buku Teks</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <style>
-        :root {
-            --lamp-color: #f59e0b;
-            --lamp-glow: rgba(245, 158, 11, 0.35);
-            --lamp-cone: rgba(245, 158, 11, 0.22);
-            --card-border: rgba(255, 255, 255, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            background-color: #0b0d10;
-            background-image: radial-gradient(circle at 50% 30%, #151921 0%, #090a0d 100%);
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            transition: background 0.6s ease;
-        }
-
-        /* Pancaran Cahaya Lampu pada Latar Belakang */
-        .ambient-light {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: radial-gradient(circle at 35% 45%, var(--lamp-glow) 0%, transparent 60%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            z-index: 0;
-        }
-
-        body.lamp-on .ambient-light {
-            opacity: 1;
-        }
-
-        /* Susun Atur Utama */
-        .main-wrapper {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 1040px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 32px;
-        }
-
-        @media (min-width: 860px) {
-            .main-wrapper {
-                flex-direction: row;
-                justify-content: space-between;
-                gap: 48px;
-                padding: 40px;
-            }
-        }
-
-        /* Bahagian Lampu Meja */
-        .lamp-stage {
-            position: relative;
-            width: 280px;
-            height: 310px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
-            user-select: none;
-            -webkit-user-select: none;
-            flex-shrink: 0;
-        }
-
-        @media (min-width: 860px) {
-            .lamp-stage {
-                width: 360px;
-                height: 410px;
-            }
-        }
-
-        .lamp-svg {
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-        }
-
-        /* Pancaran Cahaya Kon Lampu */
-        .light-beam {
-            opacity: 0;
-            transition: opacity 0.45s ease;
-            pointer-events: none;
-        }
-
-        body.lamp-on .light-beam {
-            opacity: 1;
-        }
-
-        /* Mentol Lampu */
-        .lamp-bulb {
-            fill: url(#bulbOffGradient);
-            transition: fill 0.35s ease, filter 0.35s ease;
-        }
-
-        body.lamp-on .lamp-bulb {
-            fill: url(#bulbOnGradient);
-            filter: drop-shadow(0 0 16px var(--lamp-color)) drop-shadow(0 0 32px var(--lamp-color));
-        }
-
-        .bulb-filament {
-            stroke: #4b5563;
-            transition: stroke 0.35s ease, filter 0.35s ease;
-        }
-
-        body.lamp-on .bulb-filament {
-            stroke: #ffffff;
-            filter: drop-shadow(0 0 5px #ffffff);
-        }
-
-        .shade-inner-glow {
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        body.lamp-on .shade-inner-glow {
-            opacity: 1;
-        }
-
-        /* Tali Suis (Pull Cord) - Boleh ditarik dengan tetikus & sentuhan */
-        .pull-cord-group {
-            cursor: grab;
-            touch-action: none;
-        }
-
-        .pull-cord-group.dragging {
-            cursor: grabbing;
-        }
-
-        .cord-line,
-        .cord-knob {
-            transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.3s ease;
-        }
-
-        .pull-cord-group.dragging .cord-line,
-        .pull-cord-group.dragging .cord-knob {
-            transition: none;
-        }
-
-        .pull-cord-group.pulled .cord-line {
-            transform: translate(0px, 118px) scaleY(1.24) translate(0px, -118px);
-        }
-
-        .pull-cord-group.pulled .cord-knob {
-            transform: translateY(24px);
-        }
-
-        .pull-cord-group:hover .cord-knob,
-        .pull-cord-group.dragging .cord-knob {
-            fill: var(--lamp-color);
-        }
-
-        /* Petunjuk Tarik Tali */
-        .pull-hint {
-            position: absolute;
-            top: 215px;
-            left: 158px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.65);
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            padding: 4px 10px;
-            border-radius: 999px;
-            pointer-events: none;
-            animation: pulseHint 2s infinite ease-in-out;
-            transition: opacity 0.4s ease;
-            white-space: nowrap;
-        }
-
-        @media (min-width: 860px) {
-            .pull-hint {
-                top: 280px;
-                left: 205px;
-            }
-        }
-
-        @keyframes pulseHint {
-            0%, 100% { transform: translateY(0); opacity: 0.55; }
-            50% { transform: translateY(5px); opacity: 1; }
-        }
-
-        /* Kawalan Warna Cahaya */
-        .color-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-            padding: 6px 14px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 999px;
-        }
-
-        .color-dot {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-
-        .color-dot:hover {
-            transform: scale(1.18);
-        }
-
-        .color-dot.active {
-            border-color: #ffffff;
-            transform: scale(1.15);
-        }
-
-        /* Kad Log Masuk */
-        .login-card {
-            position: relative;
-            width: 100%;
-            max-width: 440px;
-            background: rgba(18, 21, 27, 0.88);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid var(--card-border);
-            border-radius: 22px;
-            padding: 36px 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
-            transition: border-color 0.5s ease, box-shadow 0.5s ease;
-        }
-
-        body.lamp-on .login-card {
-            border-color: color-mix(in srgb, var(--lamp-color) 45%, transparent);
-            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85),
-                        0 0 35px -5px var(--lamp-glow);
-        }
-
-        .system-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #9ca3af;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 5px 12px;
-            border-radius: 999px;
-            margin-bottom: 14px;
-            transition: color 0.4s ease, border-color 0.4s ease;
-        }
-
-        body.lamp-on .system-badge {
-            color: var(--lamp-color);
-            border-color: color-mix(in srgb, var(--lamp-color) 35%, transparent);
-        }
-
-        .system-title {
-            font-size: clamp(16px, 4vw, 20px);
-            font-weight: 700;
-            line-height: 1.35;
-            letter-spacing: 0.5px;
-            color: #f9fafb;
-            margin: 0 0 8px 0;
-            text-transform: uppercase;
-        }
-
-        .system-subtitle {
-            font-size: 11px;
-            line-height: 1.55;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 24px;
-            padding-bottom: 18px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .login-heading {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 0 0 4px 0;
-            color: #ffffff;
-        }
-
-        .login-sub {
-            font-size: 13px;
-            color: #9ca3af;
-            margin: 0 0 22px 0;
-        }
-
-        .input-group {
-            margin-bottom: 18px;
-            text-align: left;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 500;
-            color: #d1d5db;
-            margin-bottom: 6px;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 14px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 12px;
-            color: #ffffff;
-            font-size: 14px;
-            font-family: inherit;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .input-field::placeholder {
-            color: #6b7280;
-        }
-
-        .input-field:focus {
-            background: rgba(255, 255, 255, 0.07);
-            border-color: var(--lamp-color);
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--lamp-color) 20%, transparent);
-        }
-
-        /* Butang Log Masuk */
-        .btn-submit {
-            width: 100%;
-            padding: 13px;
-            margin-top: 6px;
-            background: #262b34;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.35s ease;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-        }
-
-        body.lamp-on .btn-submit {
-            background: var(--lamp-color);
-            color: #0b0d10;
-            border-color: transparent;
-            box-shadow: 0 8px 24px -4px var(--lamp-glow);
-        }
-
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.08);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        /* Mesej Ralat */
-        #mesej-ralat {
-            color: #fca5a5;
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.35);
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
-            text-align: center;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-
-        /* Footer */
-        .footer-text {
-            position: relative;
-            z-index: 2;
-            margin-top: 16px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: rgba(255, 255, 255, 0.45);
-            font-size: 12px;
-            letter-spacing: 1.5px;
-            font-weight: 500;
-        }
-    </style>
-</head>
-<body class="lamp-on">
-
-    <!-- Lapisan Cahaya Persekitaran -->
-    <div class="ambient-light"></div>
-
-    <div class="main-wrapper">
-        <!-- Bahagian Kiri: Lampu Meja Interaktif -->
-        <div class="lamp-stage">
-            <svg class="lamp-svg" viewBox="0 0 360 390" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <!-- Gradien Pancaran Cahaya Kon -->
-                    <linearGradient id="beamGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="var(--lamp-color)" stop-opacity="0.65" />
-                        <stop offset="35%" stop-color="var(--lamp-color)" stop-opacity="0.24" />
-                        <stop offset="80%" stop-color="var(--lamp-color)" stop-opacity="0.06" />
-                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0" />
-                    </linearGradient>
-
-                    <!-- Gradien Halo Cahaya Mentol -->
-                    <radialGradient id="bulbHaloGradient" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-                        <stop offset="35%" stop-color="var(--lamp-color)" stop-opacity="0.55" />
-                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0" />
-                    </radialGradient>
-
-                    <!-- Gradien Logam Berkilat Tudung Lampu -->
-                    <linearGradient id="shadeGradient" x1="0" y1="0" x2="1" y2="0.4">
-                        <stop offset="0%" stop-color="#111827" />
-                        <stop offset="28%" stop-color="#374151" />
-                        <stop offset="48%" stop-color="#6b7280" />
-                        <stop offset="72%" stop-color="#1f2937" />
-                        <stop offset="100%" stop-color="#090d16" />
-                    </linearGradient>
-
-                    <!-- Gradien Dalam Tudung Bercahaya -->
-                    <radialGradient id="innerShadeGlow" cx="50%" cy="35%" r="65%">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
-                        <stop offset="45%" stop-color="var(--lamp-color)" stop-opacity="0.85" />
-                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0.2" />
-                    </radialGradient>
-
-                    <!-- Gradien Mentol Padam & Menyala -->
-                    <radialGradient id="bulbOffGradient" cx="38%" cy="35%" r="65%">
-                        <stop offset="0%" stop-color="#4b5563" stop-opacity="0.65" />
-                        <stop offset="70%" stop-color="#1f2937" stop-opacity="0.85" />
-                        <stop offset="100%" stop-color="#111827" stop-opacity="0.95" />
-                    </radialGradient>
-
-                    <radialGradient id="bulbOnGradient" cx="45%" cy="35%" r="65%">
-                        <stop offset="0%" stop-color="#ffffff" />
-                        <stop offset="45%" stop-color="var(--lamp-color)" />
-                        <stop offset="100%" stop-color="var(--lamp-color)" stop-opacity="0.85" />
-                    </radialGradient>
-
-                    <!-- Gradien Tapak Lampu Logam 3D -->
-                    <linearGradient id="baseGradient" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#111827" />
-                        <stop offset="35%" stop-color="#4b5563" />
-                        <stop offset="55%" stop-color="#6b7280" />
-                        <stop offset="100%" stop-color="#0f172a" />
-                    </linearGradient>
-
-                    <!-- Gradien Lengan Logam -->
-                    <linearGradient id="armMetal" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stop-color="#374151" />
-                        <stop offset="50%" stop-color="#9ca3af" />
-                        <stop offset="100%" stop-color="#1f2937" />
-                    </linearGradient>
-                </defs>
-
-                <!-- Pancaran Cahaya Kon Sejajar Tepat dari Bukaan Tudung & Mentol -->
-                <g transform="translate(152, 92) rotate(-34)">
-                    <polygon class="light-beam" points="-37,26 37,26 215,430 -185,430" fill="url(#beamGradient)" />
-                    <circle class="light-beam" cx="0" cy="31" r="46" fill="url(#bulbHaloGradient)" />
-                </g>
-
-                <!-- Bayang-bayang Tapak Bertingkat -->
-                <ellipse cx="135" cy="368" rx="86" ry="14" fill="rgba(0,0,0,0.75)" />
-                <ellipse cx="135" cy="365" rx="68" ry="9" fill="rgba(0,0,0,0.5)" />
-
-                <!-- Tapak Lampu Realistik -->
-                <path d="M 70 364 C 70 342, 200 342, 200 364 Z" fill="url(#baseGradient)" stroke="#4b5563" stroke-width="1.2" />
-                <ellipse cx="135" cy="364" rx="65" ry="4" fill="#1f2937" />
-                <rect x="124" y="334" width="22" height="14" rx="4" fill="url(#armMetal)" stroke="#374151" stroke-width="1" />
-                <circle cx="135" cy="336" r="6" fill="#1f2937" stroke="#6b7280" stroke-width="1.5" />
-
-                <!-- Lengan Bawah Lampu (Dua Batang Selari Realistik) -->
-                <line x1="132" y1="336" x2="89" y2="215" stroke="url(#armMetal)" stroke-width="6.5" stroke-linecap="round" />
-                <line x1="139" y1="336" x2="96" y2="215" stroke="#374151" stroke-width="3.5" stroke-linecap="round" />
-                <!-- Spring Tegangan Kecil -->
-                <line x1="126" y1="315" x2="95" y2="232" stroke="#6b7280" stroke-width="1.4" stroke-dasharray="2 2" />
-
-                <!-- Sendi Tengah Mekanikal -->
-                <circle cx="92" cy="215" r="11" fill="#111827" stroke="#6b7280" stroke-width="2" />
-                <circle cx="92" cy="215" r="6" fill="url(#armMetal)" />
-                <circle cx="92" cy="215" r="2.5" fill="#1f2937" />
-
-                <!-- Lengan Atas Lampu -->
-                <line x1="92" y1="215" x2="152" y2="92" stroke="url(#armMetal)" stroke-width="7" stroke-linecap="round" />
-                <line x1="95" y1="217" x2="155" y2="94" stroke="#1f2937" stroke-width="2" stroke-linecap="round" />
-
-                <!-- Sendi Kepala Lampu & Skru Pelaras -->
-                <circle cx="152" cy="92" r="9" fill="#111827" stroke="#6b7280" stroke-width="2" />
-                <circle cx="152" cy="92" r="4" fill="#9ca3af" />
-
-                <!-- Tali Suis Rantai Bebola Realistik (Boleh Ditarik & Kembali ke Asal) -->
-                <g id="pull-cord" class="pull-cord-group">
-                    <!-- Kawasan tarik/klik halimunan lebih luas untuk tetikus & jari -->
-                    <rect x="142" y="102" width="66" height="150" fill="transparent" />
-                    <!-- Tali Rantai Logam Halus -->
-                    <line id="cord-line" class="cord-line" x1="175" y1="112" x2="175" y2="215" stroke="#d1d5db" stroke-width="1.8" stroke-linecap="round" />
-                    <!-- Pemegang / Loceng Tarikan Logam -->
-                    <g id="cord-knob" class="cord-knob">
-                        <rect x="171.5" y="213" width="7" height="14" rx="3.5" fill="url(#armMetal)" stroke="#9ca3af" stroke-width="1.2" />
-                        <circle cx="175" cy="227" r="4" fill="#d1d5db" />
-                    </g>
-                </g>
-
-                <!-- Mentol Kaca Realistik & Tudung Lampu Logam pada Sendi (152, 92) -->
-                <g transform="translate(152, 92) rotate(-34)">
-                    <!-- Bahagian Dalam Tudung Lampu -->
-                    <ellipse cx="0" cy="26" rx="37" ry="7.5" fill="#090d16" />
-                    <ellipse class="shade-inner-glow" cx="0" cy="26" rx="36" ry="7" fill="url(#innerShadeGlow)" />
-
-                    <!-- Leher & Mentol Kaca Berbentuk A19 -->
-                    <rect x="-7" y="12" width="14" height="10" rx="2" fill="#9ca3af" />
-                    <path class="lamp-bulb" d="M -7 19 C -13 24, -15 34, -9 41 C -4 46, 4 46, 9 41 C 15 34, 13 24, 7 19 Z" stroke="rgba(255,255,255,0.35)" stroke-width="0.8" />
-
-                    <!-- Filamen Dalaman Mentol -->
-                    <path class="bulb-filament" d="M -3 21 L -4 31 L -1.5 29 L 0 32 L 1.5 29 L 4 31 L 3 21" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
-
-                    <!-- Kilauan Kaca Melengkung pada Mentol -->
-                    <path d="M -8 25 C -10 29, -9 34, -6 37" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4" stroke-linecap="round" />
-
-                    <!-- Soket Atas Tudung & Liang Pengudaraan -->
-                    <rect x="-12" y="-33" width="24" height="15" rx="4" fill="url(#shadeGradient)" stroke="#4b5563" stroke-width="1.2" />
-                    <line x1="-7" y1="-28" x2="-7" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
-                    <line x1="0" y1="-28" x2="0" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
-                    <line x1="7" y1="-28" x2="7" y2="-22" stroke="#090d16" stroke-width="1.5" stroke-linecap="round" />
-
-                    <!-- Badan Tudung Lampu Logam 3D -->
-                    <path d="M -21 -18 C -21 -27, 21 -27, 21 -18 L 39 26 C 20 31, -20 31, -39 26 Z" fill="url(#shadeGradient)" stroke="#4b5563" stroke-width="1.3" />
-                    <!-- Garisan Kilauan Cahaya pada Tudung -->
-                    <path d="M -11 -19 L -21 23" stroke="rgba(255,255,255,0.22)" stroke-width="3" stroke-linecap="round" />
-                    <!-- Rim Bibir Bawah Tudung -->
-                    <path d="M -39 26 C -20 31.5, 20 31.5, 39 26" fill="none" stroke="#9ca3af" stroke-width="1.6" stroke-linecap="round" />
-                </g>
-            </svg>
-
-            <div id="pull-hint" class="pull-hint">Tarik / klik tali</div>
-
-            <!-- Pilihan Warna Lampu -->
-            <div class="color-controls" title="Pilih Warna Cahaya Lampu">
-                <span style="font-size: 11px; color: #9ca3af; margin-right: 4px;">Cahaya:</span>
-                <button type="button" class="color-dot active" style="background: #f59e0b;" data-color="#f59e0b" data-glow="rgba(245, 158, 11, 0.35)" aria-label="Kuning Hangat"></button>
-                <button type="button" class="color-dot" style="background: #38bdf8;" data-color="#38bdf8" data-glow="rgba(56, 189, 248, 0.35)" aria-label="Biru Cyan"></button>
-                <button type="button" class="color-dot" style="background: #10b981;" data-color="#10b981" data-glow="rgba(16, 185, 129, 0.35)" aria-label="Hijau Zamrud"></button>
-                <button type="button" class="color-dot" style="background: #f43f5e;" data-color="#f43f5e" data-glow="rgba(244, 63, 94, 0.35)" aria-label="Merah Jambu"></button>
-            </div>
-        </div>
-
-        <!-- Bahagian Kanan: Kad Log Masuk -->
-        <div class="login-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span class="system-badge" style="margin-bottom: 0;">PORTAL RASMI KPM</span>
-                <button type="button" id="btn-toggle-lamp" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #d1d5db; font-size: 11px; padding: 4px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                    <span id="lamp-status-dot" style="width: 7px; height: 7px; border-radius: 50%; background: var(--lamp-color); display: inline-block;"></span>
-                    <span id="lamp-status-text">Lampu: Hidup</span>
-                </button>
-            </div>
-
-            <h1 class="system-title">SISTEM DATA PENILAI BUKU TEKS</h1>
-            <div class="system-subtitle">
-                SEKTOR PENGHASILAN BUKU TEKS<br>
-                BAHAGIAN SUMBER DAN TEKNOLOGI PENDIDIKAN<br>
-                KEMENTERIAN PENDIDIKAN
-            </div>
-
-            <h2 class="login-heading">Log Masuk</h2>
-            <p class="login-sub">Sila masukkan maklumat akaun anda untuk meneruskan</p>
-
-            <div class="input-group">
-                <label for="email" class="input-label">Alamat E-mel</label>
-                <input type="email" id="email" class="input-field" placeholder="cth: admin@moe.gov.my" required autocomplete="off">
-            </div>
-
-            <div class="input-group">
-                <label for="password" class="input-label">Kata Laluan</label>
-                <input type="password" id="password" class="input-field" placeholder="Masukkan kata laluan" required>
-            </div>
-
-            <p id="mesej-ralat">Email atau Katalaluan salah!</p>
-
-            <button type="button" id="btn-login" class="btn-submit">Log Masuk</button>
-        </div>
-    </div>
-
-    <div class="footer-text">TEAM DATA.SBT.2026</div>
-
-    <!-- SKRIP INTERAKSI LAMPU & KESAN BUNYI (WEB AUDIO API) -->
-    <script>
-        const bodyEl = document.body;
-        const pullCord = document.getElementById('pull-cord');
-        const pullHint = document.getElementById('pull-hint');
-        const btnToggleLamp = document.getElementById('btn-toggle-lamp');
-        const lampStatusText = document.getElementById('lamp-status-text');
-        const lampStatusDot = document.getElementById('lamp-status-dot');
-        const colorDots = document.querySelectorAll('.color-dot');
-
-        let isLampOn = true;
-        let audioCtx = null;
-
-        // Fungsi Bunyi Suis & Dengung Lampu (Sintesis Web Audio API)
-        function playLampSound(turningOn) {
-            try {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  <!-- ========================================== -->
+  <!-- KOD SHELL LOCK - MESRA IFRAME & PREVIEW    -->
+  <!-- ========================================== -->
+  <script>
+    // Semak status login tanpa guna alert()
+    function semakStatusLogin() {
+      const isLogin = localStorage.getItem("statusLogin") === "berjaya" || sessionStorage.getItem("statusLogin") === "berjaya";
+      return isLogin;
+    }
+  </script>
+  <!-- ========================================== -->
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analisis Bengkel</title>
+  
+  <!-- Konfigurasi Tailwind -->
+  <script>
+    function applyTailwindConfig() {
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                display: ['"Outfit"', 'sans-serif'],
+              },
+              colors: {
+                // Soft, sophisticated palette inspired by V22
+                bgapp: '#f4f7f6',
+                sidebar: '#162322', 
+                brand: {
+                  50: '#ecfdf5',
+                  100: '#d1fae5',
+                  200: '#a7f3d0',
+                  300: '#6ee7b7',
+                  400: '#34d399',
+                  500: '#10b981', // Emerald
+                  600: '#059669',
+                  700: '#047857',
+                  800: '#065f46',
+                  900: '#064e3b',
                 }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-
-                const now = audioCtx.currentTime;
-
-                // Bunyi "Klik" Suis Mekanikal
-                const clickOsc = audioCtx.createOscillator();
-                const clickGain = audioCtx.createGain();
-                clickOsc.type = 'triangle';
-                clickOsc.frequency.setValueAtTime(turningOn ? 900 : 620, now);
-                clickOsc.frequency.exponentialRampToValueAtTime(140, now + 0.04);
-
-                clickGain.gain.setValueAtTime(0.18, now);
-                clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
-
-                clickOsc.connect(clickGain);
-                clickGain.connect(audioCtx.destination);
-                clickOsc.start(now);
-                clickOsc.stop(now + 0.05);
-
-                // Bunyi Dengung Lembut Semasa Lampu Dihidupkan
-                if (turningOn) {
-                    const humOsc = audioCtx.createOscillator();
-                    const humGain = audioCtx.createGain();
-                    humOsc.type = 'sine';
-                    humOsc.frequency.setValueAtTime(120, now + 0.03);
-
-                    humGain.gain.setValueAtTime(0.001, now + 0.03);
-                    humGain.gain.linearRampToValueAtTime(0.04, now + 0.08);
-                    humGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.38);
-
-                    humOsc.connect(humGain);
-                    humGain.connect(audioCtx.destination);
-                    humOsc.start(now + 0.03);
-                    humOsc.stop(now + 0.4);
-                }
-            } catch (e) {
-                // Abaikan jika pelayar menyekat audio sebelum interaksi
+              },
+              boxShadow: {
+                'soft': '0 10px 40px -10px rgba(0,0,0,0.04)',
+                'soft-lg': '0 20px 50px -10px rgba(0,0,0,0.08)',
+                'float': '0 30px 60px -12px rgba(0,0,0,0.12)',
+              }
             }
-        }
-
-        // Fungsi Hidup / Matikan Lampu
-        function toggleLamp(animateSnap = true) {
-            isLampOn = !isLampOn;
-
-            // Animasi tarik tali jika diklik terus
-            if (animateSnap) {
-                pullCord.classList.add('pulled');
-                setTimeout(() => {
-                    pullCord.classList.remove('pulled');
-                }, 220);
-            }
-
-            // Sembunyikan petunjuk selepas interaksi pertama
-            if (pullHint) {
-                pullHint.style.opacity = '0';
-            }
-
-            // Mainkan kesan bunyi
-            playLampSound(isLampOn);
-
-            // Kemas kini kelas & UI
-            if (isLampOn) {
-                bodyEl.classList.add('lamp-on');
-                lampStatusText.textContent = 'Lampu: Hidup';
-                lampStatusDot.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--lamp-color');
-            } else {
-                bodyEl.classList.remove('lamp-on');
-                lampStatusText.textContent = 'Lampu: Padam';
-                lampStatusDot.style.backgroundColor = '#6b7280';
-            }
-        }
-
-        // ================= INTERAKSI TARIK TALI (DRAG & CLICK) =================
-        const cordLine = document.getElementById('cord-line');
-        const cordKnob = document.getElementById('cord-knob');
-        const BASE_CORD_Y = 215;
-
-        let isDraggingCord = false;
-        let startPointerY = 0;
-        let currentPullDistance = 0;
-        let hasToggledDuringDrag = false;
-        const PULL_THRESHOLD = 26; // Jarak tarikan (px) untuk mencetuskan suis
-
-        pullCord.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            isDraggingCord = true;
-            startPointerY = e.clientY;
-            currentPullDistance = 0;
-            hasToggledDuringDrag = false;
-            pullCord.classList.remove('pulled');
-            pullCord.classList.add('dragging');
-            pullCord.setPointerCapture(e.pointerId);
-        });
-
-        pullCord.addEventListener('pointermove', (e) => {
-            if (!isDraggingCord) return;
-            const deltaY = e.clientY - startPointerY;
-            // Hadkan tarikan ke bawah (0px hingga 55px) sambil hujung atas tali kekal melekat pada lampu
-            currentPullDistance = Math.max(0, Math.min(deltaY, 55));
-            cordLine.setAttribute('y2', BASE_CORD_Y + currentPullDistance);
-            cordKnob.setAttribute('transform', `translate(0, ${currentPullDistance})`);
-
-            // Hidup/matikan lampu sebaik sahaja melepasi jarak tarikan
-            if (currentPullDistance >= PULL_THRESHOLD && !hasToggledDuringDrag) {
-                hasToggledDuringDrag = true;
-                toggleLamp(false);
-            }
-        });
-
-        function releaseCord() {
-            if (!isDraggingCord) return;
-            isDraggingCord = false;
-            pullCord.classList.remove('dragging');
-
-            // Kembalikan tali dan pemegang ke kedudukan asal dengan animasi melantun
-            cordLine.setAttribute('y2', BASE_CORD_Y);
-            cordKnob.removeAttribute('transform');
-
-            // Jika pengguna hanya klik tanpa menarik jauh (< 6px), tetap tukar suis
-            if (currentPullDistance < 6 && !hasToggledDuringDrag) {
-                toggleLamp(true);
-            }
-        }
-
-        pullCord.addEventListener('pointerup', releaseCord);
-        pullCord.addEventListener('pointercancel', releaseCord);
-
-        // Butang suis alternatif pada kad
-        btnToggleLamp.addEventListener('click', () => toggleLamp(true));
-
-        // Penukar Warna Cahaya Lampu
-        colorDots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                colorDots.forEach(d => d.classList.remove('active'));
-                dot.classList.add('active');
-
-                const color = dot.getAttribute('data-color');
-                const glow = dot.getAttribute('data-glow');
-
-                document.documentElement.style.setProperty('--lamp-color', color);
-                document.documentElement.style.setProperty('--lamp-glow', glow);
-
-                if (!isLampOn) {
-                    toggleLamp(false);
-                } else {
-                    lampStatusDot.style.backgroundColor = color;
-                }
-            });
-        });
-    </script>
-
-    <!-- SKRIP FIREBASE INTEGRATION -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // Konfigurasi Firebase Project
-        const firebaseConfig = {
-            apiKey: "AIzaSyDEWm-AHbEMJuNhON6hZk96wqWfn07-Vy0",
-            authDomain: "data-penilai-eb50d.firebaseapp.com",
-            projectId: "data-penilai-eb50d",
-            storageBucket: "data-penilai-eb50d.firebasestorage.app",
-            messagingSenderId: "1045070075543",
-            appId: "1:1045070075543:web:8916364d9be36a6eb77bd2"
+          }
         };
+      }
+    }
+  </script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com" onload="applyTailwindConfig()"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PapaParse -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- Highcharts -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-3d.js"></script>
 
-        // Inisialisasi Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+  <style>
+    /* Custom Scrollbar for a cleaner look */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(15, 118, 110, 0.2);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(15, 118, 110, 0.4);
+    }
 
-        const btn = document.getElementById('btn-login');
-        const mesejRalat = document.getElementById("mesej-ralat");
+    /* GLASSMORPHISM V22 STYLES */
+    body {
+      background-color: #e4ecea; /* Soft, slightly cool off-white background */
+    }
 
-        // Semak status sesi automatik (Apabila membuka semula laman)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                localStorage.setItem("statusLogin", "berjaya");
-                localStorage.setItem("emailLogin", user.email);
-                sessionStorage.setItem("statusLogin", "berjaya");
-                sessionStorage.setItem("emailLogin", user.email);
-                window.location.href = "homepage.html";
-            }
+    /* Main Floating Container */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
+      border-radius: 2rem; /* Extreme rounded corners like video */
+    }
+
+    /* Standard Cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 15px -3px rgba(0,0,0,0.02);
+      border-radius: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+
+    /* Glassy Inputs */
+    .glass-input {
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+      backdrop-filter: blur(10px);
+    }
+    .glass-input:focus {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: rgba(16, 185, 129, 0.4);
+      outline: none;
+    }
+
+    /* Smooth Table Row Hover */
+    tr.hover\:bg-slate-50 {
+      transition: all 0.2s ease;
+    }
+    tr.hover\:bg-slate-50:hover {
+      background-color: rgba(255, 255, 255, 0.6);
+      transform: scale(1.002);
+    }
+
+    /* Staggered Fade In Up Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up {
+      animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+
+    /* Background Ambient Blobs */
+    @keyframes blob {
+      0% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+      animation: blob 7s infinite;
+    }
+    .animation-delay-2000 { animation-delay: 2s; }
+    .animation-delay-4000 { animation-delay: 4s; }
+
+    .chart-box .highcharts-background {
+      fill: transparent !important;
+    }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+
+<body class="font-sans antialiased text-slate-800 bg-[#e4ecea] h-screen flex overflow-hidden selection:bg-brand-200 selection:text-brand-900 relative">
+
+  <!-- ANIMATED AMBIENT BACKGROUND BLOBS -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-teal-200/60 rounded-full mix-blend-multiply filter blur-[80px] animate-blob"></div>
+    <div class="absolute top-[20%] right-[-5%] w-[400px] h-[400px] bg-emerald-200/50 rounded-full mix-blend-multiply filter blur-[80px] animate-blob animation-delay-2000"></div>
+    <div class="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-cyan-200/40 rounded-full mix-blend-multiply filter blur-[80px] animate-blob animation-delay-4000"></div>
+  </div>
+
+  <!-- DIALOG PERINGATAN LOG MASUK -->
+  <div id="login-guard-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-xl hidden">
+    <div class="glass-panel w-full max-w-md p-8 shadow-2xl text-center space-y-5">
+      <div class="w-20 h-20 rounded-full bg-white/60 text-red-500 flex items-center justify-center mx-auto shadow-sm border border-white">
+        <i data-lucide="lock" class="w-10 h-10"></i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-bold font-display text-slate-900">Akses Terhad</h3>
+        <p class="text-slate-600 mt-2 text-sm">Sesi log masuk tidak dikesan. Sila log masuk melalui portal utama.</p>
+      </div>
+      <button onclick="bukaHalamanLogin()" class="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+        <i data-lucide="log-in" class="w-4 h-4"></i>
+        <span>Portal Log Masuk</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STATUS TOAST -->
+  <div id="status-bar" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 hidden glass-panel !rounded-full px-6 py-3 shadow-soft-lg flex items-center gap-3 text-sm font-semibold text-slate-700 animate-bounce">
+    <i data-lucide="loader-2" class="w-5 h-5 text-emerald-500 animate-spin"></i>
+    <span id="status-text">Memuat turun data...</span>
+  </div>
+
+  <!-- APP LAYOUT WRAPPER (Floating from edges) -->
+  <div class="flex w-full h-full p-4 sm:p-6 gap-6 z-10 relative">
+
+    <!-- FLOATING SIDEBAR (V22 Style) -->
+    <aside class="w-[280px] glass-panel hidden lg:flex flex-col p-6 shadow-xl">
+      <!-- Profile mimicking video top left -->
+      <div class="flex items-center gap-4 mb-8 bg-white/30 rounded-2xl p-3 border border-white/60 shadow-sm hover:bg-white/50 transition cursor-pointer">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Admin" class="w-12 h-12 rounded-full bg-white/50 border border-white p-1">
+        <div>
+          <h4 class="font-bold font-display text-slate-800 text-base">Admin BP</h4>
+          <span class="text-[11px] uppercase tracking-wider text-emerald-600 font-bold">Sesi 2026</span>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 space-y-2 overflow-y-auto no-scrollbar">
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-2 mt-4">Menu Utama</div>
+        <a href="#" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white/60 text-emerald-700 font-bold border border-white shadow-sm transition">
+          <i data-lucide="layout-grid" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-white/40 text-slate-600 hover:text-slate-900 transition font-medium">
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span>Peserta</span>
+        </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-white/40 text-slate-600 hover:text-slate-900 transition font-medium">
+          <i data-lucide="pie-chart" class="w-5 h-5"></i>
+          <span>Analisis</span>
+        </a>
+      </nav>
+
+      <!-- Bottom Profile/Logout -->
+      <div class="pt-4 border-t border-white/50 mt-auto">
+        <button onclick="logKeluar()" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white/40 hover:bg-red-50 text-slate-600 hover:text-red-600 transition font-semibold text-sm border border-transparent hover:border-red-100">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Log Keluar
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto no-scrollbar pb-10 gap-6">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="glass-panel px-6 py-4 flex flex-wrap items-center justify-between gap-4 animate-fade-in-up">
+        <div class="flex items-center gap-4">
+          <button class="lg:hidden w-10 h-10 rounded-xl bg-white/50 flex items-center justify-center text-slate-700 shadow-sm border border-white">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div>
+            <h1 class="text-xl font-bold font-display text-slate-900 tracking-tight">Maklumat Data Panel</h1>
+            <p class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
+            </p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button id="btn-refresh" class="w-10 h-10 rounded-xl bg-white/50 hover:bg-white flex items-center justify-center text-slate-600 transition border border-white shadow-sm" title="Refresh">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+          <div class="relative hidden sm:block">
+            <input type="text" id="table-search" class="w-64 rounded-xl glass-input pl-10 pr-4 py-2 text-sm text-slate-700 placeholder:text-slate-400" placeholder="Cari dalam rekod..." />
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT GRID MAPS TO VIDEO LAYOUT -->
+      
+      <!-- Row 1: Hero Banner & Calendar Block -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in-up delay-100">
+        <!-- Main Hero Banner (Gradient Card like Video) -->
+        <div class="lg:col-span-2 glass-card overflow-hidden relative bg-gradient-to-br from-[#0f766e] to-[#047857] text-white border-white/20 p-8 sm:p-10 shadow-xl flex flex-col justify-between min-h-[240px]">
+          <!-- Abstract overlay shapes -->
+          <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4"></div>
+          <div class="absolute bottom-0 left-10 w-40 h-40 bg-teal-300/20 rounded-full blur-2xl translate-y-1/2"></div>
+          
+          <div class="relative z-10">
+            <span class="inline-block px-3 py-1 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold tracking-widest uppercase mb-4 text-teal-100">
+              Kerja Bersama Lebih Baik
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-display font-bold mb-2">Pangkalan Data Keseluruhan</h2>
+            <p class="text-teal-50/80 text-sm max-w-md">Ringkasan analitik penglibatan peserta panel mengikut pelbagai kategori untuk tahun semasa.</p>
+          </div>
+
+          <div class="relative z-10 mt-8 flex items-end justify-between">
+            <div>
+              <div class="text-[10px] uppercase font-bold tracking-wider text-teal-200 mb-1">Jumlah Peserta</div>
+              <div class="flex items-baseline gap-2">
+                <span id="total-count-display" class="text-5xl sm:text-6xl font-bold font-display tracking-tighter">0</span>
+                <span class="text-teal-100 font-medium">Orang</span>
+              </div>
+            </div>
+            <span id="filtered-badge" class="px-3 py-1.5 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 text-xs font-semibold">
+              Semua Rekod
+            </span>
+          </div>
+        </div>
+
+        <!-- Date / Focus Block -->
+        <div class="glass-card p-6 flex flex-col justify-between relative overflow-hidden bg-white/40">
+           <div class="flex items-center justify-between mb-4">
+             <h3 class="font-bold text-slate-800">Fokus Bulan Ini</h3>
+             <i data-lucide="calendar" class="w-5 h-5 text-emerald-600"></i>
+           </div>
+           <div class="flex-1 flex flex-col items-center justify-center py-6 border-y border-white/60 my-2">
+             <span class="text-sm font-semibold text-emerald-600 uppercase tracking-widest mb-1">November</span>
+             <span class="text-5xl font-display font-bold text-slate-800">2026</span>
+           </div>
+           <div class="text-xs text-center font-medium text-slate-500 mt-2">
+             Kemaskini automatik pangkalan data sedang aktif.
+           </div>
+        </div>
+      </section>
+
+      <!-- Row 2: Statistics (00, 00, 00 style) -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-fade-in-up delay-200">
+        <div class="glass-card p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Penerbitan</div>
+            <div id="stat-penerbitan-count" class="text-3xl sm:text-4xl font-display font-bold text-slate-800">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-white/80 border border-white shadow-sm flex items-center justify-center text-teal-600">
+            <i data-lucide="book" class="w-5 h-5"></i>
+          </div>
+        </div>
+        
+        <div class="glass-card p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Penyelaras</div>
+            <div id="stat-penyelaras-count" class="text-3xl sm:text-4xl font-display font-bold text-slate-800">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-white/80 border border-white shadow-sm flex items-center justify-center text-emerald-600">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Subjek</div>
+            <div id="stat-matapelajaran-count" class="text-3xl sm:text-4xl font-display font-bold text-slate-800">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-white/80 border border-white shadow-sm flex items-center justify-center text-cyan-600">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 sm:p-6 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Lokasi</div>
+            <div id="stat-tempat-count" class="text-3xl sm:text-4xl font-display font-bold text-slate-800">0</div>
+          </div>
+          <div class="w-12 h-12 rounded-full bg-white/80 border border-white shadow-sm flex items-center justify-center text-blue-600">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 3: Filters & Controls -->
+      <section class="glass-card p-6 animate-fade-in-up delay-300">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-4">
+          <h3 class="font-bold text-lg font-display text-slate-900 flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-white shadow-sm border border-white"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-emerald-600"></i></span>
+            Filter Pintar
+          </h3>
+          <button id="btn-reset-filters" class="text-xs font-bold text-slate-500 hover:text-slate-900 bg-white/50 hover:bg-white border border-white/60 px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Set Semula
+          </button>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div class="w-full sm:w-64">
+            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tahun</label>
+            <div class="relative">
+              <select id="filter-tahun" class="w-full appearance-none rounded-xl glass-input px-4 py-2.5 pr-10 text-sm font-semibold text-slate-700 cursor-pointer">
+                <option value="">Semua Tahun</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="relative">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Penyelaras</label>
+              <select id="filter-penyelaras" class="w-full appearance-none rounded-xl glass-input px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 cursor-pointer">
+                <option value="">Semua Penyelaras</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 bottom-2.5 pointer-events-none"></i>
+            </div>
+            <div class="relative">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Program</label>
+              <select id="filter-programpenerbitan" class="w-full appearance-none rounded-xl glass-input px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 cursor-pointer">
+                <option value="">Semua Program</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 bottom-2.5 pointer-events-none"></i>
+            </div>
+            <div class="relative">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Subjek</label>
+              <select id="filter-matapelajaran" class="w-full appearance-none rounded-xl glass-input px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 cursor-pointer">
+                <option value="">Semua Subjek</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 bottom-2.5 pointer-events-none"></i>
+            </div>
+            <div class="relative">
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Lokasi</label>
+              <select id="filter-tempat" class="w-full appearance-none rounded-xl glass-input px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 cursor-pointer">
+                <option value="">Semua Lokasi</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 bottom-2.5 pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Row 4: 3D Charts Grid -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up delay-300">
+        <div class="glass-card p-6 flex flex-col h-full">
+          <h3 class="font-bold text-slate-800 text-sm mb-4">Jawatan Bengkel</h3>
+          <div id="chart-jawatan" class="w-full h-72 chart-box"></div>
+        </div>
+        <div class="glass-card p-6 flex flex-col h-full">
+          <h3 class="font-bold text-slate-800 text-sm mb-4">Gelaran Peserta</h3>
+          <div id="chart-gelaran" class="w-full h-72 chart-box"></div>
+        </div>
+        <div class="glass-card p-6 flex flex-col h-full">
+          <h3 class="font-bold text-slate-800 text-sm mb-4">Pecahan Jantina</h3>
+          <div id="chart-jantina" class="w-full h-72 chart-box"></div>
+        </div>
+        <div class="glass-card p-6 flex flex-col h-full">
+          <h3 class="font-bold text-slate-800 text-sm mb-4">Taburan Negeri</h3>
+          <div id="chart-negeri" class="w-full h-72 chart-box"></div>
+        </div>
+      </section>
+
+      <!-- Row 5: Data Table -->
+      <section class="glass-card p-6 overflow-hidden flex flex-col animate-fade-in-up delay-300">
+        <h3 class="text-lg font-bold font-display text-slate-900 mb-4">Senarai Terperinci</h3>
+        <div class="overflow-x-auto pb-4">
+          <table class="w-full text-left whitespace-nowrap">
+            <thead>
+              <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/60">
+                <th class="py-3 px-4 w-12">No</th>
+                <th class="py-3 px-4">Tahun</th>
+                <th class="py-3 px-4">Nama Peserta</th>
+                <th class="py-3 px-4">Program</th>
+                <th class="py-3 px-4">Jantina</th>
+                <th class="py-3 px-4">Jawatan</th>
+                <th class="py-3 px-4">Negeri</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-white/40 text-sm text-slate-600">
+              <tr>
+                <td colspan="7" class="text-center py-10 text-slate-400">Sedang memuat data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/60">
+          <span id="table-entries-info" class="text-xs text-slate-500 font-semibold bg-white/40 px-3 py-1.5 rounded-lg border border-white">Menunjukkan 0 rekod</span>
+          <div class="flex items-center gap-2">
+            <button id="btn-prev-page" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 text-slate-600 hover:bg-white transition border border-white shadow-sm disabled:opacity-40">
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <span id="page-indicator" class="px-3 py-1 text-sm font-bold text-slate-700">1 / 1</span>
+            <button id="btn-next-page" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/60 text-slate-600 hover:bg-white transition border border-white shadow-sm disabled:opacity-40">
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL DETAIL (Glassmorphism Version) -->
+  <div id="participant-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-xl hidden opacity-0 transition-opacity duration-300">
+    <div id="modal-container" class="glass-panel w-full max-w-xl p-8 transform scale-95 transition-all duration-300 relative max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="closeParticipantModal()" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/50 hover:bg-white flex items-center justify-center text-slate-500 transition border border-white shadow-sm">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <img id="modal-avatar" src="" alt="Avatar" class="w-28 h-28 rounded-3xl object-cover shadow-lg bg-white/80 border-4 border-white flex-shrink-0" />
+        <div class="text-center sm:text-left flex-1">
+          <div class="flex flex-wrap justify-center sm:justify-start gap-2 mb-2 mt-2">
+            <span id="modal-tahun-pill" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-white border border-white/60 text-slate-600 shadow-sm"></span>
+            <span id="modal-role-pill" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-sm"></span>
+          </div>
+          <h2 id="modal-name" class="text-3xl font-bold font-display text-slate-900 leading-tight tracking-tight mt-1">Nama</h2>
+          <p id="modal-ic" class="text-sm text-slate-500 mt-2 font-mono font-medium"></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4 mt-8 pt-6 border-t border-white/60">
+        <div class="bg-white/40 p-4 rounded-2xl border border-white/60">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i data-lucide="layers" class="w-3 h-3"></i> Program</span>
+          <p id="modal-detail-programpenerbitan" class="font-bold text-slate-800 text-sm"></p>
+        </div>
+        <div class="bg-white/40 p-4 rounded-2xl border border-white/60">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i data-lucide="book" class="w-3 h-3"></i> Subjek</span>
+          <p id="modal-detail-mp" class="font-bold text-slate-800 text-sm"></p>
+        </div>
+        <div class="bg-white/40 p-4 rounded-2xl border border-white/60">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i data-lucide="user" class="w-3 h-3"></i> Gelaran & Jantina</span>
+          <p class="font-bold text-slate-800 text-sm">
+            <span id="modal-title-pill"></span> • <span id="modal-gender-badge"></span>
+          </p>
+        </div>
+        <div class="bg-white/40 p-4 rounded-2xl border border-white/60">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i data-lucide="map" class="w-3 h-3"></i> Negeri</span>
+          <p id="modal-state" class="font-bold text-slate-800 text-sm"></p>
+        </div>
+        <div class="sm:col-span-2 bg-white/40 p-4 rounded-2xl border border-white/60">
+          <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><i data-lucide="map-pin" class="w-3 h-3"></i> Penyelaras & Tempat</span>
+          <p class="font-bold text-slate-800 text-sm">
+            <span id="modal-detail-penyelaras"></span> — <span id="modal-detail-tempat"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-white/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm font-semibold text-slate-500">
+          Dokumen Rujukan OPR
+        </div>
+        <div id="modal-opr-container" class="w-full sm:w-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ==========================================
+    // LOG MASUK
+    // ==========================================
+    const LOGIN_URL = "https://izzatramlanmoe.github.io/datapenilaisbt/index.html";
+    function bukaHalamanLogin() { window.location.href = LOGIN_URL; }
+    function logKeluar() {
+      localStorage.removeItem("statusLogin"); sessionStorage.removeItem("statusLogin");
+      document.getElementById('login-guard-modal').classList.remove('hidden');
+    }
+    let masaTamat;
+    function mulaKiraan() {
+      clearTimeout(masaTamat);
+      masaTamat = setTimeout(logKeluar, 600000);
+    }
+    ['load', 'mousemove', 'click', 'keypress'].forEach(evt => window.addEventListener(evt, mulaKiraan));
+
+    // ==========================================
+    // DATA & DASHBOARD LOGIC
+    // ==========================================
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoXQgGwwY13gb3KXxvAtnde6k0DttXER6z-VuCjoDr63y4LReEwFxWH3qTiTGXQjlqfpUa2ypHffg2/pub?gid=258196902&single=true&output=csv";
+
+    let rawData = [];
+    let filteredData = [];
+    let headersMap = {};
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let currentSearchTerm = "";
+
+    let chartInstances = { jawatan: null, gelaran: null, jantina: null, negeri: null };
+
+    // New softer color palettes matching the theme
+    const colorPalettes = {
+      jawatan: ['#162322', '#0f766e', '#14b8a6', '#5eead4', '#94a3b8', '#64748b'],
+      gelaran: ['#0f766e', '#0369a1', '#0284c7', '#38bdf8', '#7dd3fc'],
+      jantina: ['#162322', '#14b8a6', '#94a3b8'],
+      negeri:  ['#1e293b', '#334155', '#475569', '#64748b', '#0f766e', '#14b8a6', '#0284c7', '#38bdf8']
+    };
+
+    const FILTER_CONFIGS = [
+      { id: 'filter-tahun', key: 'tahun', defaultLabel: 'Semua Tahun', descSort: true },
+      { id: 'filter-penyelaras', key: 'penyelaras', defaultLabel: 'Semua Penyelaras', descSort: false },
+      { id: 'filter-programpenerbitan', key: 'programpenerbitan', defaultLabel: 'Semua Program', descSort: false },
+      { id: 'filter-matapelajaran', key: 'matapelajaran', defaultLabel: 'Semua Subjek', descSort: false },
+      { id: 'filter-tempat', key: 'tempat', defaultLabel: 'Semua Lokasi', descSort: false }
+    ];
+
+    window.onload = function () {
+      mulaKiraan();
+      lucide.createIcons();
+      if (!semakStatusLogin()) {
+        const guard = document.getElementById('login-guard-modal');
+        if (guard) guard.classList.remove('hidden');
+      }
+      ensureHighchartsLoaded().then(() => fetchAndParseData());
+      FILTER_CONFIGS.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        if (el) el.addEventListener('change', applyFilters);
+      });
+      document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+      document.getElementById('btn-refresh').addEventListener('click', () => fetchAndParseData(true));
+      document.getElementById('table-search').addEventListener('input', handleTableSearch);
+      document.getElementById('btn-prev-page').addEventListener('click', () => changePage(-1));
+      document.getElementById('btn-next-page').addEventListener('click', () => changePage(1));
+    };
+
+    function ensureHighchartsLoaded() {
+      return new Promise((resolve) => {
+        if (typeof Highcharts !== 'undefined' && Highcharts.Chart.prototype.is3d !== undefined) { resolve(); return; }
+        let retries = 0;
+        const interval = setInterval(() => {
+          if (typeof Highcharts !== 'undefined' && Highcharts.Chart.prototype.is3d !== undefined) { clearInterval(interval); resolve(); }
+          retries++;
+          if(retries > 20) { clearInterval(interval); resolve(); }
+        }, 100);
+      });
+    }
+
+    function showStatus(text, isError = false) {
+      const bar = document.getElementById('status-bar');
+      const label = document.getElementById('status-text');
+      bar.classList.remove('hidden');
+      label.innerText = text;
+      if (isError) bar.querySelector('i').classList.replace('text-brand-500', 'text-red-500');
+    }
+
+    function dismissStatus() { document.getElementById('status-bar').classList.add('hidden'); }
+
+    async function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(resource, { ...options, signal: controller.signal });
+        clearTimeout(id); return response;
+      } catch (error) { clearTimeout(id); throw error; }
+    }
+
+    async function fetchAndParseData(forceRefresh = false) {
+      showStatus("Mengemas kini data...");
+      const cacheBuster = forceRefresh ? `&t=${Date.now()}` : '';
+      const directUrl = `${CSV_URL}${cacheBuster}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
+      let csvText = null;
+
+      try {
+        const res = await fetchWithTimeout(directUrl, {}, 7000);
+        if (res.ok) csvText = await res.text();
+      } catch (e) {}
+
+      if (!csvText) {
+        try {
+          const proxyRes = await fetchWithTimeout(proxyUrl, {}, 7000);
+          if (proxyRes.ok) csvText = await proxyRes.text();
+        } catch (e2) {}
+      }
+
+      if (csvText && csvText.trim().length > 0 && !csvText.trim().startsWith('<!DOCTYPE html>')) {
+        Papa.parse(csvText, {
+          header: true, skipEmptyLines: true,
+          complete: function (results) {
+            if (results.data && results.data.length > 0) {
+              processParsedData(results.data, results.meta.fields);
+              dismissStatus();
+            } else useMockData();
+          },
+          error: function () { useMockData(); }
+        });
+      } else {
+        useMockData();
+      }
+    }
+
+    function useMockData() {
+      const generated = [];
+      for (let i = 1; i <= 148; i++) {
+        generated.push({
+          "Bil": i, "Tahun": "2026", "ProgramPenerbitan": "Buku Digital", "Nama": `Peserta Demo ${i}`,
+          "Gelaran": i%2===0?"Cikgu":"Puan", "Jantina": i%2===0?"Lelaki":"Perempuan",
+          "JawatanBengkel": "Ketua", "MataPelajaran": "Sains", "TempatBengkel": "Dewan A",
+          "Penyelaras": "Dr. Amin", "Negeri": "Selangor"
+        });
+      }
+      processParsedData(generated, Object.keys(generated[0]));
+      dismissStatus();
+    }
+
+    function formatImageUrl(rawUrl, defaultName, defaultGender) {
+      const genderSeed = defaultGender && defaultGender.toLowerCase().includes('perempuan') ? 'female' : 'male';
+      return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(defaultName || 'user')}&backgroundColor=f4f7f6`;
+    }
+
+    function formatDocUrl(rawUrl) {
+      if (!rawUrl || typeof rawUrl !== 'string') return '';
+      const urlMatch = rawUrl.trim().match(/(https?:\/\/[^\s"'<>]+)/i);
+      return urlMatch ? urlMatch[1] : '';
+    }
+
+    function processParsedData(data, fields) {
+      if (!data || data.length === 0) return;
+
+      function findKey(names) {
+        if (!fields) return names[0];
+        for (let target of names) {
+          const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
+          if (exact) return exact;
+        }
+        return null;
+      }
+
+      headersMap = {
+        tahun: findKey(['Tahun']) || fields[1],
+        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan']),
+        penyelaras: findKey(['Penyelaras']),
+        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran']),
+        tempat: findKey(['TempatBengkel', 'Tempat Bengkel']),
+        jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel']),
+        gelaran: findKey(['Gelaran']),
+        jantina: findKey(['Jantina']),
+        negeri: findKey(['Negeri']),
+        nama: findKey(['Nama', 'Nama Penuh']),
+        noIc: findKey(['No IC', 'No. IC']),
+        oprLink: findKey(['Link to merged Doc - DATA 2026', 'OPR'])
+      };
+
+      rawData = data.map((row, idx) => {
+        const rowNama = (row[headersMap.nama] || `Peserta #${idx + 1}`).trim();
+        const rowJantina = cleanValue(row[headersMap.jantina]);
+        
+        return {
+          id: idx + 1,
+          tahun: cleanValue(row[headersMap.tahun]),
+          nama: rowNama,
+          programpenerbitan: cleanValue(row[headersMap.programpenerbitan]),
+          noIc: cleanValue(row[headersMap.noIc]),
+          gelaran: cleanValue(row[headersMap.gelaran]),
+          jantina: rowJantina,
+          jawatan: cleanValue(row[headersMap.jawatan]),
+          matapelajaran: cleanValue(row[headersMap.matapelajaran]),
+          tempat: cleanValue(row[headersMap.tempat]),
+          penyelaras: cleanValue(row[headersMap.penyelaras]),
+          negeri: cleanValue(row[headersMap.negeri]),
+          oprDoc: formatDocUrl(row[headersMap.oprLink]),
+          gambar: formatImageUrl('', rowNama, rowJantina),
+        };
+      }).filter(r => r.nama && r.nama !== '');
+
+      applyFilters();
+    }
+
+    function cleanValue(val) { return (!val || String(val).trim() === '') ? 'Tiada Maklumat' : String(val).trim(); }
+
+    function updateAllDropdownOptions(currentSelections) {
+      FILTER_CONFIGS.forEach(targetCfg => {
+        const select = document.getElementById(targetCfg.id);
+        if (!select) return;
+        const currentSelectedVal = currentSelections[targetCfg.key] || '';
+        const validSubset = rawData.filter(row => FILTER_CONFIGS.every(otherCfg => {
+            if (otherCfg.key === targetCfg.key) return true;
+            return !currentSelections[otherCfg.key] || row[otherCfg.key] === currentSelections[otherCfg.key];
+        }));
+
+        const uniqueValues = [...new Set(validSubset.map(item => item[targetCfg.key]))]
+          .filter(val => val && val !== 'Tiada Maklumat')
+          .sort((a, b) => targetCfg.descSort ? b.localeCompare(a, 'ms', { numeric: true }) : a.localeCompare(b, 'ms', { numeric: true }));
+
+        select.innerHTML = `<option value="">${targetCfg.defaultLabel}</option>`;
+        let isStillValid = false;
+        uniqueValues.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val; opt.textContent = val;
+          if (val === currentSelectedVal) { opt.selected = true; isStillValid = true; }
+          select.appendChild(opt);
         });
 
-        // Fungsi Proses Log Masuk Firebase
-        async function logMasuk() {
-            const emailInput = document.getElementById("email").value.trim();
-            const passInput = document.getElementById("password").value;
-
-            if (!emailInput || !passInput) {
-                tunjukkanRalat("Sila isi Email dan Katalaluan!");
-                return;
-            }
-
-            btn.innerHTML = "Memeriksa...";
-            btn.style.pointerEvents = 'none';
-
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, emailInput, passInput);
-                const user = userCredential.user;
-
-                btn.innerHTML = "Berjaya!";
-                btn.style.background = "#10b981";
-                btn.style.color = "#ffffff";
-                mesejRalat.style.display = "none";
-
-                localStorage.setItem("statusLogin", "berjaya");
-                localStorage.setItem("emailLogin", user.email);
-                sessionStorage.setItem("statusLogin", "berjaya");
-                sessionStorage.setItem("emailLogin", user.email);
-
-                setTimeout(() => {
-                    window.location.href = "homepage.html";
-                }, 500);
-
-            } catch (error) {
-                btn.innerHTML = "Log Masuk";
-                btn.style.pointerEvents = 'auto';
-
-                let mesej = "Email atau Katalaluan salah!";
-                if (error.code === 'auth/invalid-email') {
-                    mesej = "Format email tidak sah!";
-                } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    mesej = "Email atau Katalaluan salah!";
-                } else if (error.code === 'auth/too-many-requests') {
-                    mesej = "Terlalu banyak percubaan gagal. Sila cuba sebentar lagi.";
-                }
-
-                tunjukkanRalat(mesej);
-            }
+        if (currentSelectedVal && !isStillValid) {
+          select.value = ''; currentSelections[targetCfg.key] = '';
         }
+      });
+    }
 
-        function tunjukkanRalat(teks) {
-            mesejRalat.innerText = teks;
-            mesejRalat.style.animation = 'none';
-            mesejRalat.offsetHeight; /* trigger reflow */
-            mesejRalat.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
-            mesejRalat.style.display = "block";
-        }
+    function applyFilters() {
+      const selections = {};
+      FILTER_CONFIGS.forEach(cfg => selections[cfg.key] = document.getElementById(cfg.id)?.value || '');
+      updateAllDropdownOptions(selections);
 
-        btn.addEventListener('click', logMasuk);
+      filteredData = rawData.filter(row => FILTER_CONFIGS.every(cfg => !selections[cfg.key] || row[cfg.key] === selections[cfg.key]));
+      currentPage = 1;
+      updateHeroStats(); renderAllCharts(); renderTable();
+    }
 
-        document.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                logMasuk();
-            }
-        });
-    </script>
+    function resetFilters() {
+      FILTER_CONFIGS.forEach(cfg => { if(document.getElementById(cfg.id)) document.getElementById(cfg.id).value = ''; });
+      applyFilters();
+    }
+
+    function updateHeroStats() {
+      const totalCount = filteredData.length;
+      animateValue("total-count-display", totalCount);
+      document.getElementById('filtered-badge').textContent = totalCount !== rawData.length ? `Ditapis: ${totalCount} / ${rawData.length}` : `Semua ${rawData.length} Rekod`;
+
+      document.getElementById('stat-penerbitan-count').textContent = new Set(filteredData.map(d => d.programpenerbitan)).size;
+      document.getElementById('stat-penyelaras-count').textContent = new Set(filteredData.map(d => d.penyelaras)).size;
+      document.getElementById('stat-matapelajaran-count').textContent = new Set(filteredData.map(d => d.matapelajaran)).size;
+      document.getElementById('stat-tempat-count').textContent = new Set(filteredData.map(d => d.tempat)).size;
+    }
+
+    function animateValue(id, end) {
+      const obj = document.getElementById(id);
+      const start = parseInt(obj.innerText) || 0;
+      if (start === end) return;
+      const duration = 400; let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) window.requestAnimationFrame(step);
+        else obj.innerHTML = end;
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    function getAggregatedData(fieldKey) {
+      const map = {};
+      filteredData.forEach(item => { const val = item[fieldKey] || 'Lain-lain'; map[val] = (map[val] || 0) + 1; });
+      return Object.keys(map).map(key => ({ name: key, y: map[key] })).sort((a, b) => b.y - a.y);
+    }
+
+    function renderAllCharts() {
+      render3DPieChart('chart-jawatan', getAggregatedData('jawatan'), colorPalettes.jawatan, 'jawatan');
+      render3DPieChart('chart-gelaran', getAggregatedData('gelaran'), colorPalettes.gelaran, 'gelaran');
+      render3DPieChart('chart-jantina', getAggregatedData('jantina'), colorPalettes.jantina, 'jantina');
+      render3DPieChart('chart-negeri', getAggregatedData('negeri'), colorPalettes.negeri, 'negeri');
+    }
+
+    function render3DPieChart(containerId, seriesData, colors, instanceKey) {
+      if (typeof Highcharts === 'undefined') return;
+      if (seriesData.length === 0) seriesData = [{ name: 'Tiada Data', y: 1 }];
+
+      chartInstances[instanceKey] = Highcharts.chart(containerId, {
+        chart: { type: 'pie', backgroundColor: 'transparent', options3d: { enabled: true, alpha: 45, beta: 0 }, style: { fontFamily: '"Plus Jakarta Sans", sans-serif' } },
+        colors: colors, title: { text: null },
+        tooltip: {
+          backgroundColor: '#fff', borderColor: '#f1f5f9', borderRadius: 8, shadow: true,
+          formatter: function () { return `<b>${this.point.name}</b><br/>Jumlah: ${this.y} (${this.percentage.toFixed(1)}%)`; }
+        },
+        plotOptions: {
+          pie: { depth: 25, innerSize: '40%', dataLabels: { enabled: true, format: '<b>{point.name}</b><br>{point.percentage:.0f}%', style: { fontWeight: '500', color: '#475569', textOutline: 'none'} } }
+        },
+        series: [{ data: seriesData }], credits: { enabled: false }, exporting: { enabled: false }
+      });
+    }
+
+    function handleTableSearch(e) { currentSearchTerm = e.target.value.toLowerCase().trim(); currentPage = 1; renderTable(); }
+
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      const searchFiltered = filteredData.filter(item => Object.values(item).some(val => String(val).toLowerCase().includes(currentSearchTerm)));
+      
+      const totalRows = searchFiltered.length;
+      const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const pageData = searchFiltered.slice(startIndex, startIndex + rowsPerPage);
+
+      if (pageData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400">Tiada rekod dijumpai.</td></tr>`;
+      } else {
+        tbody.innerHTML = pageData.map((row, i) => `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+            <td class="py-3 px-4 font-mono text-xs text-slate-400">${startIndex + i + 1}</td>
+            <td class="py-3 px-4"><span class="px-2 py-1 rounded bg-slate-100 text-xs font-bold text-slate-600">${escapeHtml(row.tahun)}</span></td>
+            <td class="py-3 px-4">
+              <button onclick="openParticipantModal(${row.id})" class="font-bold text-slate-800 hover:text-brand-600 transition flex items-center gap-2">
+                ${escapeHtml(row.nama)} <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-50"></i>
+              </button>
+            </td>
+            <td class="py-3 px-4 text-xs font-medium text-slate-600">${escapeHtml(row.programpenerbitan)}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(row.jantina)}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(row.jawatan)}</td>
+            <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(row.negeri)}</td>
+          </tr>
+        `).join('');
+      }
+      lucide.createIcons();
+      document.getElementById('table-entries-info').textContent = `Rekod ${totalRows === 0 ? 0 : startIndex + 1} - ${Math.min(startIndex + rowsPerPage, totalRows)} dari ${totalRows}`;
+      document.getElementById('page-indicator').textContent = `${currentPage} / ${totalPages}`;
+      document.getElementById('btn-prev-page').disabled = currentPage <= 1;
+      document.getElementById('btn-next-page').disabled = currentPage >= totalPages;
+    }
+
+    function changePage(dir) { currentPage += dir; renderTable(); }
+
+    function openParticipantModal(id) {
+      const p = rawData.find(x => x.id === id);
+      if (!p) return;
+
+      document.getElementById('modal-avatar').src = p.gambar;
+      document.getElementById('modal-name').textContent = p.nama;
+      document.getElementById('modal-tahun-pill').textContent = p.tahun;
+      document.getElementById('modal-role-pill').textContent = p.jawatan;
+      document.getElementById('modal-title-pill').textContent = p.gelaran;
+      document.getElementById('modal-gender-badge').textContent = p.jantina;
+      document.getElementById('modal-ic').textContent = p.noIc !== 'Tiada Maklumat' ? `ID: ${p.noIc}` : '';
+      document.getElementById('modal-state').textContent = p.negeri;
+      
+      document.getElementById('modal-detail-programpenerbitan').textContent = p.programpenerbitan;
+      document.getElementById('modal-detail-mp').textContent = p.matapelajaran;
+      document.getElementById('modal-detail-penyelaras').textContent = p.penyelaras;
+      document.getElementById('modal-detail-tempat').textContent = p.tempat;
+
+      const oprCont = document.getElementById('modal-opr-container');
+      if (p.oprDoc) {
+        oprCont.innerHTML = `<a href="${p.oprDoc}" target="_blank" class="px-5 py-2.5 rounded-full bg-sidebar text-white text-sm font-medium hover:bg-slate-800 transition shadow-md inline-flex items-center gap-2">Buka Fail OPR <i data-lucide="external-link" class="w-4 h-4"></i></a>`;
+      } else {
+        oprCont.innerHTML = `<span class="px-5 py-2.5 rounded-full bg-slate-100 text-slate-400 text-sm font-medium">Tiada Fail OPR</span>`;
+      }
+
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.remove('hidden');
+      setTimeout(() => { modal.classList.remove('opacity-0'); container.classList.remove('scale-95'); }, 10);
+      lucide.createIcons();
+    }
+
+    function closeParticipantModal() {
+      const modal = document.getElementById('participant-modal');
+      const container = document.getElementById('modal-container');
+      modal.classList.add('opacity-0'); container.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    function escapeHtml(t) { return String(t||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m])); }
+  </script>
 </body>
 </html>
