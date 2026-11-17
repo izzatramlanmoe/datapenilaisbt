@@ -237,10 +237,6 @@
           <i data-lucide="pie-chart" class="w-5 h-5"></i>
           <span>Analisis</span>
         </button>
-        <button onclick="bukaHalamanUtama()" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl hover:bg-white/40 text-slate-600 hover:text-slate-900 transition font-medium">
-          <i data-lucide="home" class="w-5 h-5"></i>
-          <span>Halaman Utama</span>
-        </button>
       </nav>
 
       <!-- Bottom Profile/Logout -->
@@ -269,6 +265,12 @@
         </div>
         
         <div class="flex items-center gap-3">
+          <!-- Butang Halaman Utama dialihkan ke Header -->
+          <button onclick="bukaHalamanUtama()" class="flex px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20 transition items-center gap-2 text-sm font-semibold border border-emerald-500">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Halaman Utama</span>
+          </button>
+
           <button id="btn-refresh" class="w-10 h-10 rounded-xl bg-white/50 hover:bg-white flex items-center justify-center text-slate-600 transition border border-white shadow-sm" title="Refresh">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
           </button>
@@ -729,26 +731,32 @@
 
       function findKey(names) {
         if (!fields) return names[0];
+        // 1. Padanan Tepat (Exact match)
         for (let target of names) {
           const exact = fields.find(f => f.trim().toLowerCase() === target.toLowerCase());
           if (exact) return exact;
+        }
+        // 2. Padanan Separa (Partial match) - Sangat penting untuk Google Sheets (buang invisible chars)
+        for (let target of names) {
+          const partial = fields.find(f => f.toLowerCase().replace(/[^a-z0-9]/g, '').includes(target.toLowerCase().replace(/[^a-z0-9]/g, '')));
+          if (partial) return partial;
         }
         return null;
       }
 
       headersMap = {
-        tahun: findKey(['Tahun']) || fields[1],
-        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan']),
-        penyelaras: findKey(['Penyelaras']),
-        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran']),
-        tempat: findKey(['TempatBengkel', 'Tempat Bengkel']),
-        jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel']),
+        tahun: findKey(['Tahun', 'Year']) || (fields && fields.length > 1 ? fields[1] : 'Tahun'),
+        programpenerbitan: findKey(['ProgramPenerbitan', 'Program Penerbitan', 'Program']),
+        penyelaras: findKey(['Penyelaras', 'Nama Penyelaras']),
+        matapelajaran: findKey(['MataPelajaran', 'Mata Pelajaran', 'Subjek']),
+        tempat: findKey(['TempatBengkel', 'Tempat Bengkel', 'Tempat', 'Lokasi']),
+        jawatan: findKey(['JawatanBengkel', 'Jawatan Bengkel', 'Jawatan', 'Peranan']),
         gelaran: findKey(['Gelaran']),
-        jantina: findKey(['Jantina']),
-        negeri: findKey(['Negeri']),
-        nama: findKey(['Nama', 'Nama Penuh']),
-        noIc: findKey(['No IC', 'No. IC']),
-        oprLink: findKey(['Link to merged Doc - DATA 2026', 'OPR'])
+        jantina: findKey(['Jantina', 'Gender']),
+        negeri: findKey(['Negeri', 'State', 'Zon']),
+        nama: findKey(['Nama', 'Nama Penuh', 'Name', 'Peserta']),
+        noIc: findKey(['No IC', 'No. IC', 'No KP', 'IC', 'Kad Pengenalan']),
+        oprLink: findKey(['Link to merged Doc - DATA 2026', 'OPR', 'Link Doc', 'Link OPR'])
       };
 
       rawData = data.map((row, idx) => {
@@ -771,7 +779,7 @@
           oprDoc: formatDocUrl(row[headersMap.oprLink]),
           gambar: formatImageUrl('', rowNama, rowJantina),
         };
-      }).filter(r => r.nama && r.nama !== '');
+      }).filter(r => r.nama && r.nama !== '' && r.nama !== 'Tiada Maklumat');
 
       applyFilters();
     }
