@@ -97,171 +97,173 @@
     /* Highcharts container transparent */
     .chart-box .highcharts-background {
       fill: transparent !important;
-    } /* ==========================================================
-   TAMPALAN VISUAL V25 - letak SELEPAS blok CSS sedia ada
-   (sebelum </style>). Tiada perubahan HTML/JS diperlukan.
-   ========================================================== */
+    }
 
-/* 1. Latar bergerak lembut + corak titik halus */
-body {
-  background:
-    radial-gradient(circle at 1px 1px, rgba(99,102,241,.10) 1px, transparent 0) 0 0 / 26px 26px,
-    linear-gradient(120deg, #f8fafc, #eef2ff, #ecfeff, #f8fafc);
-  background-size: 26px 26px, 300% 300%;
-  animation: bgShift 22s ease infinite;
-}
-@keyframes bgShift {
-  0%,100% { background-position: 0 0, 0% 50%; }
-  50%     { background-position: 0 0, 100% 50%; }
-}
+    /* ==========================================================
+       TAMPALAN VISUAL V25 - letak SELEPAS blok CSS sedia ada
+       (sebelum </style>). Tiada perubahan HTML/JS diperlukan.
+       ========================================================== */
 
-/* 2. Animasi masuk berperingkat untuk setiap bahagian */
-header, main > *, section, footer {
-  animation: fadeUp .7s cubic-bezier(.2,.8,.2,1) both;
-}
-section:nth-of-type(1) { animation-delay: .05s; }
-section:nth-of-type(2) { animation-delay: .15s; }
-section:nth-of-type(3) { animation-delay: .25s; }
-section:nth-of-type(4) { animation-delay: .35s; }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px) scale(.985); }
-  to   { opacity: 1; transform: none; }
-}
+    /* 1. Latar bergerak lembut + corak titik halus */
+    body {
+      background:
+        radial-gradient(circle at 1px 1px, rgba(99,102,241,.10) 1px, transparent 0) 0 0 / 26px 26px,
+        linear-gradient(120deg, #f8fafc, #eef2ff, #ecfeff, #f8fafc);
+      background-size: 26px 26px, 300% 300%;
+      animation: bgShift 22s ease infinite;
+    }
+    @keyframes bgShift {
+      0%,100% { background-position: 0 0, 0% 50%; }
+      50%     { background-position: 0 0, 100% 50%; }
+    }
 
-/* 3. Header: garis kilau gradien di bawah */
-header.glass-light {
-  position: relative;
-  overflow: hidden;
-}
-header.glass-light::after {
-  content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
-  background: linear-gradient(90deg, #6366f1, #06b6d4, #a855f7, #6366f1);
-  background-size: 300% 100%;
-  animation: flowLine 6s linear infinite;
-}
-@keyframes flowLine { to { background-position: 300% 0; } }
+    /* 2. Animasi masuk berperingkat untuk setiap bahagian */
+    header, main > *, section, footer {
+      animation: fadeUp .7s cubic-bezier(.2,.8,.2,1) both;
+    }
+    section:nth-of-type(1) { animation-delay: .05s; }
+    section:nth-of-type(2) { animation-delay: .15s; }
+    section:nth-of-type(3) { animation-delay: .25s; }
+    section:nth-of-type(4) { animation-delay: .35s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px) scale(.985); }
+      to   { opacity: 1; transform: none; }
+    }
 
-/* 4. Kad hero: kilauan bergerak + ikon terapung + denyut nombor */
-section.bg-gradient-to-br {
-  background-size: 200% 200%;
-  animation: fadeUp .7s both, heroFlow 12s ease-in-out infinite;
-}
-@keyframes heroFlow {
-  0%,100% { background-position: 0% 50%; }
-  50%     { background-position: 100% 50%; }
-}
-section.bg-gradient-to-br::before {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%);
-  transform: translateX(-100%);
-  animation: shine 6s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes shine { 55%,100% { transform: translateX(100%); } }
+    /* 3. Header: garis kilau gradien di bawah */
+    header.glass-light {
+      position: relative;
+      overflow: hidden;
+    }
+    header.glass-light::after {
+      content: "";
+      position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+      background: linear-gradient(90deg, #6366f1, #06b6d4, #a855f7, #6366f1);
+      background-size: 300% 100%;
+      animation: flowLine 6s linear infinite;
+    }
+    @keyframes flowLine { to { background-position: 300% 0; } }
 
-section.bg-gradient-to-br .w-20 {
-  animation: floaty 4s ease-in-out infinite;
-}
-@keyframes floaty {
-  0%,100% { transform: translateY(0) rotate(0); }
-  50%     { transform: translateY(-8px) rotate(-3deg); }
-}
-#total-count-display {
-  text-shadow: 0 6px 30px rgba(0,0,0,.25);
-}
+    /* 4. Kad hero: kilauan bergerak + ikon terapung + denyut nombor */
+    section.bg-gradient-to-br {
+      background-size: 200% 200%;
+      animation: fadeUp .7s both, heroFlow 12s ease-in-out infinite;
+    }
+    @keyframes heroFlow {
+      0%,100% { background-position: 0% 50%; }
+      50%     { background-position: 100% 50%; }
+    }
+    section.bg-gradient-to-br::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.18) 50%, transparent 65%);
+      transform: translateX(-100%);
+      animation: shine 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes shine { 55%,100% { transform: translateX(100%); } }
 
-/* 5. Kad kaca: garis aksen atas + kilau hover lebih jelas */
-.glass-light.glass-card { position: relative; }
-.glass-light.glass-card:not(header)::before {
-  content: "";
-  position: absolute; top: 0; left: 8%; right: 8%; height: 3px;
-  border-radius: 0 0 9999px 9999px;
-  background: linear-gradient(90deg, #6366f1, #06b6d4);
-  opacity: 0;
-  transition: opacity .3s ease, left .3s ease, right .3s ease;
-}
-.glass-light.glass-card:not(header):hover::before {
-  opacity: 1; left: 2%; right: 2%;
-}
-.glass-card:hover {
-  box-shadow: 0 24px 50px -12px rgba(99,102,241,.25), 0 0 0 1px rgba(99,102,241,.12);
-}
+    section.bg-gradient-to-br .w-20 {
+      animation: floaty 4s ease-in-out infinite;
+    }
+    @keyframes floaty {
+      0%,100% { transform: translateY(0) rotate(0); }
+      50%     { transform: translateY(-8px) rotate(-3deg); }
+    }
+    #total-count-display {
+      text-shadow: 0 6px 30px rgba(0,0,0,.25);
+    }
 
-/* 6. Lencana metrik: timbul semasa hover */
-section.bg-gradient-to-br .grid > div {
-  transition: transform .25s ease, background .25s ease;
-}
-section.bg-gradient-to-br .grid > div:hover {
-  transform: translateY(-4px) scale(1.04);
-  background: rgba(255,255,255,.22);
-}
+    /* 5. Kad kaca: garis aksen atas + kilau hover lebih jelas */
+    .glass-light.glass-card { position: relative; }
+    .glass-light.glass-card:not(header)::before {
+      content: "";
+      position: absolute; top: 0; left: 8%; right: 8%; height: 3px;
+      border-radius: 0 0 9999px 9999px;
+      background: linear-gradient(90deg, #6366f1, #06b6d4);
+      opacity: 0;
+      transition: opacity .3s ease, left .3s ease, right .3s ease;
+    }
+    .glass-light.glass-card:not(header):hover::before {
+      opacity: 1; left: 2%; right: 2%;
+    }
+    .glass-card:hover {
+      box-shadow: 0 24px 50px -12px rgba(99,102,241,.25), 0 0 0 1px rgba(99,102,241,.12);
+    }
 
-/* 7. Dropdown & carian: fokus bercahaya */
-select, #table-search {
-  transition: box-shadow .25s ease, transform .2s ease, border-color .25s ease;
-}
-select:hover, #table-search:hover { transform: translateY(-1px); border-color: #a5b4fc; }
-select:focus, #table-search:focus {
-  box-shadow: 0 0 0 4px rgba(99,102,241,.18), 0 8px 20px -8px rgba(99,102,241,.35);
-}
+    /* 6. Lencana metrik: timbul semasa hover */
+    section.bg-gradient-to-br .grid > div {
+      transition: transform .25s ease, background .25s ease;
+    }
+    section.bg-gradient-to-br .grid > div:hover {
+      transform: translateY(-4px) scale(1.04);
+      background: rgba(255,255,255,.22);
+    }
 
-/* 8. Butang: kesan kilat semasa hover */
-button { position: relative; overflow: hidden; }
-button:not(:disabled)::after {
-  content: "";
-  position: absolute; inset: 0;
-  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
-  transform: translateX(-120%);
-  transition: transform .6s ease;
-  pointer-events: none;
-}
-button:not(:disabled):hover::after { transform: translateX(120%); }
-#btn-refresh:hover i { animation: spin .8s linear; }
-@keyframes spin { to { transform: rotate(360deg); } }
+    /* 7. Dropdown & carian: fokus bercahaya */
+    select, #table-search {
+      transition: box-shadow .25s ease, transform .2s ease, border-color .25s ease;
+    }
+    select:hover, #table-search:hover { transform: translateY(-1px); border-color: #a5b4fc; }
+    select:focus, #table-search:focus {
+      box-shadow: 0 0 0 4px rgba(99,102,241,.18), 0 8px 20px -8px rgba(99,102,241,.35);
+    }
 
-/* 9. Jadual: kepala melekat, jalur selang-seli, garis aksen baris */
-thead th {
-  background: linear-gradient(180deg, rgba(99,102,241,.14), rgba(99,102,241,.06));
-  position: sticky; top: 0;
-  backdrop-filter: blur(8px);
-}
-tbody tr { transition: background .2s ease, box-shadow .2s ease, transform .2s ease; }
-tbody tr:nth-child(even) { background: rgba(99,102,241,.035); }
-tbody tr:hover {
-  background: linear-gradient(90deg, rgba(99,102,241,.14), rgba(6,182,212,.08)) !important;
-  box-shadow: inset 4px 0 0 #6366f1;
-}
-tbody tr td:first-child { padding-left: 1.1rem; }
+    /* 8. Butang: kesan kilat semasa hover */
+    button { position: relative; overflow: hidden; }
+    button:not(:disabled)::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+      transform: translateX(-120%);
+      transition: transform .6s ease;
+      pointer-events: none;
+    }
+    button:not(:disabled):hover::after { transform: translateX(120%); }
+    #btn-refresh:hover i { animation: spin .8s linear; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-/* 10. Carta: kad naik sedikit + kepala berkilau */
-#chart-jawatan, #chart-gelaran, #chart-jantina, #chart-negeri {
-  filter: drop-shadow(0 12px 18px rgba(79,70,229,.18));
-  transition: filter .3s ease, transform .3s ease;
-}
-#chart-jawatan:hover, #chart-gelaran:hover, #chart-jantina:hover, #chart-negeri:hover {
-  filter: drop-shadow(0 18px 26px rgba(79,70,229,.30));
-  transform: scale(1.015);
-}
+    /* 9. Jadual: kepala melekat, jalur selang-seli, garis aksen baris */
+    thead th {
+      background: linear-gradient(180deg, rgba(99,102,241,.14), rgba(99,102,241,.06));
+      position: sticky; top: 0;
+      backdrop-filter: blur(8px);
+    }
+    tbody tr { transition: background .2s ease, box-shadow .2s ease, transform .2s ease; }
+    tbody tr:nth-child(even) { background: rgba(99,102,241,.035); }
+    tbody tr:hover {
+      background: linear-gradient(90deg, rgba(99,102,241,.14), rgba(6,182,212,.08)) !important;
+      box-shadow: inset 4px 0 0 #6366f1;
+    }
+    tbody tr td:first-child { padding-left: 1.1rem; }
 
-/* 11. Modal peserta: avatar bercincin berdenyut */
-#modal-avatar { animation: ringPulse 2.6s ease-in-out infinite; }
-@keyframes ringPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.45), 0 12px 28px rgba(0,0,0,.15); }
-  50%     { box-shadow: 0 0 0 12px rgba(99,102,241,0), 0 12px 28px rgba(0,0,0,.15); }
-}
-#modal-container { box-shadow: 0 40px 80px -20px rgba(30,27,75,.45); }
+    /* 10. Carta: kad naik sedikit + kepala berkilau */
+    #chart-jawatan, #chart-gelaran, #chart-jantina, #chart-negeri {
+      filter: drop-shadow(0 12px 18px rgba(79,70,229,.18));
+      transition: filter .3s ease, transform .3s ease;
+    }
+    #chart-jawatan:hover, #chart-gelaran:hover, #chart-jantina:hover, #chart-negeri:hover {
+      filter: drop-shadow(0 18px 26px rgba(79,70,229,.30));
+      transform: scale(1.015);
+    }
 
-/* 12. Bar skrol bergradien */
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #6366f1, #06b6d4);
-}
+    /* 11. Modal peserta: avatar bercincin berdenyut */
+    #modal-avatar { animation: ringPulse 2.6s ease-in-out infinite; }
+    @keyframes ringPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.45), 0 12px 28px rgba(0,0,0,.15); }
+      50%     { box-shadow: 0 0 0 12px rgba(99,102,241,0), 0 12px 28px rgba(0,0,0,.15); }
+    }
+    #modal-container { box-shadow: 0 40px 80px -20px rgba(30,27,75,.45); }
 
-/* 13. Hormati pengguna yang mahu kurang animasi */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-}
+    /* 12. Bar skrol bergradien */
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #6366f1, #06b6d4);
+    }
+
+    /* 13. Hormati pengguna yang mahu kurang animasi */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
   </style>
 </head>
 
