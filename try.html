@@ -262,6 +262,7 @@
                             <div class="flex gap-3 w-full max-w-sm">
                                 <button type="button" id="btnTangkap" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md">TANGKAP</button>
                                 <button type="button" id="btnSemula" class="hidden flex-1 bg-amber-500 hover:bg-amber-400 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md">AMBIL SEMULA</button>
+                                <button type="button" id="btnSahkanGambar" class="hidden flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md">MUAT NAIK</button>
                             </div>
                         </div>
 
@@ -820,6 +821,7 @@
         const kameraPreview = document.getElementById('kameraPreview');
         const btnTangkap = document.getElementById('btnTangkap');
         const btnSemula = document.getElementById('btnSemula');
+        const btnSahkanGambar = document.getElementById('btnSahkanGambar');
         const kameraLoading = document.getElementById('kameraLoading');
         
         let streamKamera = null;
@@ -840,6 +842,7 @@
             kameraPreview.classList.add('hidden');
             btnTangkap.classList.remove('hidden');
             btnSemula.classList.add('hidden');
+            btnSahkanGambar.classList.add('hidden');
             capturedGambarBase64 = null;
             fileError.classList.add('hidden');
 
@@ -889,12 +892,23 @@
             kameraPreview.classList.remove('hidden');
             btnTangkap.classList.add('hidden');
             btnSemula.classList.remove('hidden');
+            btnSahkanGambar.classList.remove('hidden');
             
             tutupKamera();
             document.getElementById('sec-gambar').classList.remove('box-error');
         });
 
         btnSemula.addEventListener('click', bukaKamera);
+
+        // Fungsi Pengesahan Gambar Kamera
+        btnSahkanGambar.addEventListener('click', () => {
+            if(capturedGambarBase64) {
+                showModal('Gambar Disahkan', 'Gambar anda telah dikepilkan. Sila lengkapkan borang di bawah dan tekan butang "HANTAR MAKLUMAT" pada akhir borang untuk memuat naik semuanya ke dalam spreadsheet.', 'success');
+                document.getElementById('sec-gambar').classList.add('input-success');
+                document.getElementById('sec-gambar').classList.remove('border-indigo-500');
+                document.getElementById('sec-gambar').classList.add('border-emerald-500');
+            }
+        });
 
         dropdownPenerbitan.addEventListener('change', function() {
             const penerbitanTerpilih = this.value;
